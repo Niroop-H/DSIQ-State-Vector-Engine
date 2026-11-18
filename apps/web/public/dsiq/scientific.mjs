@@ -8,9 +8,9 @@ export class ScientificDSIQ extends DSIQ {
   apply(g){if(this.invalid)throw Error('State invalidated');super.apply(g);if(this.measured&&this.mode!=='dag'){this.invalid=true;throw Error('Resource boundary after measurement: coherent replay of a collapsed history is not supported')}}
   amplitude(bits){if(this.invalid)throw Error('State invalidated');return super.amplitude(bits)}
   sample(random=Math.random){this.requireDAG();return super.sample(random)}
-  *replay(bits,slice){if(this.measured||this.invalid)throw Error('Replay after measurement is unsupported');return yield* super.replay(bits,slice)}
+  *replay(bits,slice,maxVisits){if(this.measured||this.invalid)throw Error('Replay after measurement is unsupported');return yield* super.replay(bits,slice,maxVisits)}
   // Contract <this|P|other>, where P is a string ordered q[n-1]...q[0].
-  overlap(other=this,pauli='I'.repeat(this.n),memoBudget=this.maxNodes){this.requireDAG();other.requireDAG();if(other.n!==this.n||typeof pauli!=='string'||pauli.length!==this.n||!/^[IXYZ]+$/.test(pauli)||!Number.isSafeInteger(memoBudget)||memoBudget<0)throw Error('Invalid contraction arguments');const memo=new Map();
+  overlap(other=this,pauli='I'.repeat(this.n),memoBudget=this.maxNodes){this.requireDAG();other.requireDAG();if(other.n!==this.n||typeof pauli!=='string'||pauli.length!==this.n||!/^[IXYZ]*$/.test(pauli)||!Number.isSafeInteger(memoBudget)||memoBudget<0)throw Error('Invalid contraction arguments');const memo=new Map();
     const edge=(a,b)=>zero(a[1])||zero(b[1])?Z:mul(mul(conj(a[1]),b[1]),walk(a[0],b[0]));
     const walk=(a,b)=>{if(!a&&!b)return O;const key=a+':'+b;if(memo.has(key))return memo.get(key);const x=this.nodes.get(a),y=other.nodes.get(b);if(!x||!y||x.q!==y.q)throw Error('Invalid DAG levels');const p=pauli[this.n-1-x.q];let v;if(p==='I')v=add(edge(x.a,y.a),edge(x.b,y.b));else if(p==='Z')v=add(edge(x.a,y.a),mul([-1,0],edge(x.b,y.b)));else if(p==='X')v=add(edge(x.a,y.b),edge(x.b,y.a));else v=add(mul([0,-1],edge(x.a,y.b)),mul(I,edge(x.b,y.a)));if(memo.size<memoBudget)memo.set(key,v);return v};
     const v=edge(this.root,other.root);if(!v.every(Number.isFinite))throw Error('Nonfinite contraction');return v;

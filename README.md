@@ -1,11 +1,10 @@
-# DSIQ State Vector Engine
+# DSIQ State Vector Engine — MAH Quantum
 
-MAH Quantum — confidential research and development. Experimental, not a validated production simulator or a claim of novel patentable mathematics.
+**Confidential experimental research v0.4 — NOT CERTIFIED.** The user-defined Diamond-105 release gate remains closed: 58 passed, 19 partial, 1 failed, 18 blocked, 9 not run in local testing. Individual scope and prior attempts: [report](docs/DIAMOND-REPORT.md) and [raw evidence](diamond-results.json).
 
-DSIQ is an independently authored JavaScript numerical kernel, not a wrapper around a third-party simulator. Its primary representation is a weighted binary amplitude DAG, with on-demand coherent path replay when the DAG node budget is exhausted. It supports the unitary OpenQASM subset documented in the workbench, full-register amplitude queries, and computational-basis sampling in DAG mode. Replay does not sample yet. There is no guaranteed polynomial-time solution to arbitrary circuits, hard process-RAM cap, or complete 2^n array export. Float64 rounding, cancellation and underflow remain possible.
+DSIQ is an independently authored kernel using adaptive rational phase products, coherent phase-decorated product terms, weighted amplitude DAGs, scaled path replay and an explicit adjoint-Pauli observable-only evaluator. It uses no third-party quantum simulator for execution. Standard mathematical methods are not claimed as new inventions. The 4 MiB hard RAM cap and efficient arbitrary-circuit 50–100 qubit execution are not established. The depth-100 random non-Clifford uncomputation fails within tested budgets. Structured 1,024-qubit tests and a 1,200-qubit forced-replay query are not universal performance guarantees.
 
-## Run the experimental workbench
+## Run locally
+Node.js 22+: `node tests/dsiq.test.mjs`, `node tests/coherent.test.mjs`, `node tests/phase-product.test.mjs`, `node tests/observable.test.mjs`, `node tests/worker.test.mjs`. `node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json` intentionally exits nonzero until 105/105 pass. External reference/hardware/peer validation must be performed separately. The standalone browser workbench can be served with `python -m http.server 8000 --directory apps/web/public` and opened at `http://localhost:8000/dsiq/`. The standalone UI has no quantum simulator library dependency. The full inherited workbench integration is delivered separately; its production build and browser visual behavior remain unverified here.
 
-From the repository root, run `python -m http.server 8000 --directory apps/web/public` and open `http://localhost:8000/dsiq/` (or serve it with any local static HTTP server). No quantum simulator library or npm install is needed for this module. Run `node tests/dsiq.test.mjs` with Node.js 22+ for numerical checks.
-
-The complete inherited MAH Quantum project is packaged separately as an integrated ZIP; only the DSIQ module, validation and integration instructions are being committed in this first change. Keep this repository private pending review of IP and licensing. The browser-hosted module is inspectable by clients; do not publish it before an appropriate disclosure and deployment decision.
+See [mathematical architecture](docs/DSIQ.md). Keep this repository private pending intellectual-property and deployment review. Browser-hosted source is inspectable by users; do not publish it before disclosure decisions.

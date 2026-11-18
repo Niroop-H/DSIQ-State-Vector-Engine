@@ -12,7 +12,12 @@ jobs:
         with:
           node-version: '22'
       - name: Regression
-        run: node tests/dsiq.test.mjs
+        run: |
+          node tests/dsiq.test.mjs
+          node tests/coherent.test.mjs
+          node tests/phase-product.test.mjs
+          node tests/observable.test.mjs
+          node tests/worker.test.mjs
       - name: Diamond 105 (must fail closed)
         run: node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
       - name: Preserve evidence even for rejected builds
