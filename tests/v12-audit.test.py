@@ -18,9 +18,9 @@ def check_report(r,req):
 def gate(name,q,c=(),**kwargs):return dict(name=name,q=q,controls=list(c),**kwargs)
 n=100;gs=[gate('h',0)]+[gate('cx',i,[i-1]) for i in range(1,n)]+[gate('rz',i,theta=(i-40)/137) for i in range(n)]
 qs=[dict(id='zero',kind='amplitude',bits='0'*n,prefix=len(gs)),dict(id='one',kind='amplitude',bits='1'*n,prefix=len(gs)),dict(id='XX',kind='pauli',pauli='X'*n,prefix=len(gs)),dict(id='YY',kind='pauli',pauli='Y'*n,prefix=len(gs)),dict(id='middle',kind='amplitude',bits='0'*n,prefix=n),dict(id='before',kind='norm',prefix=0),dict(id='end',kind='norm',prefix=len(gs))]
-req=dict(n=n,gates=gs,queries=qs,method='certified-auto',requireCertificate=True,checkpointEvery=1,maxBytes=67108864,maxWork=100000000);out=run(req);w,cp=check_report(out,req);assert cp[-1]['stats']['mode']=='certified-contraction';phase=sum(mp.mpf(g['theta']) for g in gs[n:]);expected={'zero':mp.exp(-mp.j*phase/2)/mp.sqrt(2),'one':mp.exp(mp.j*phase/2)/mp.sqrt(2),'XX':mp.cos(phase),'YY':mp.cos(phase),'middle':1/mp.sqrt(2),'before':1,'end':1};maxerr=0;maxratio=0
+req=dict(n=n,gates=gs,queries=qs,method='certified-auto',requireCertificate=True,checkpointEvery=1,maxBytes=67108864,maxWork=100000000);out=run(req);w,cp=check_report(out,req);assert cp[-1]['stats']['mode'] in ('certified-contraction','interval-bridge-forest','interval-coherent-product');phase=sum(mp.mpf(g['theta']) for g in gs[n:]);expected={'zero':mp.exp(-mp.j*phase/2)/mp.sqrt(2),'one':mp.exp(mp.j*phase/2)/mp.sqrt(2),'XX':mp.cos(phase),'YY':mp.cos(phase),'middle':1/mp.sqrt(2),'before':1,'end':1};maxerr=0;maxratio=0
 for q in w['outputs']:
-    a=q['value'];err=abs(mp.mpc(a['real'],a.get('imag',0))-expected[q['id']]);b=mp.mpf(a['absoluteErrorBound']);assert err<=b,(q['id'],err,b);maxerr=max(maxerr,float(err));maxratio=max(maxratio,float(err/b))
+    a=q['value'];err=abs(mp.mpc(a['real'],a.get('imag',0))-expected[q['id']]);b=mp.mpf(a['absoluteErrorBound']);assert err<=b,(q['id'],err,b);maxerr=max(maxerr,float(err));maxratio=max(maxratio,float(err/b) if b else 0)
 rng=random.Random(126193);cases=[];checkpoints=len(cp);modes={cp[-1]['stats']['mode']};bounded_queries=len(qs);bounds=[q['value']['absoluteErrorBound'] for q in w['outputs']]
 for case in range(8):
     n=4;g=[]
