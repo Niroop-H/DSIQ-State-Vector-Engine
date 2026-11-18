@@ -11,6 +11,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install test-only numerical reference dependencies
+        run: python -m pip install -r tests/reference-requirements.txt
       - name: Regression
         run: |
           node tests/dsiq.test.mjs
@@ -23,6 +28,8 @@ jobs:
           node tests/factor.test.mjs
           node tests/native.test.mjs
           node tests/batch.test.mjs
+          node tests/ladder.test.mjs
+          node tests/parallel.test.mjs
       - name: Diamond 105 (must fail closed)
         run: node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
       - name: Preserve evidence even for rejected builds

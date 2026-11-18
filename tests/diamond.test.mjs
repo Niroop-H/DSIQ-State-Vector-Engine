@@ -7,6 +7,7 @@ import {parse,rng} from '../apps/web/public/dsiq/worker.mjs';
 import {extended} from './diamond-additions.mjs';
 import {further} from './v05-additions.mjs';
 import {advanced} from './advanced-v05.test.mjs';
+import {v06} from './v06-additions.mjs';
 const results=JSON.parse(readFileSync(new URL('../docs/diamond-105.json',import.meta.url))).map(r=>({...r,status:'NOT_RUN',evidence:'No qualifying executed test yet'}));
 const mark=(id,status,evidence)=>Object.assign(results[id-1],{status,evidence});
 const test=(id,scope,fn,status='PASS')=>{const start=performance.now();const r0=results[id-1],attempts=r0.attempts??=[];try{const r=fn();mark(id,status,scope+(r===undefined?'':'; '+JSON.stringify(r)))}catch(e){mark(id,'FAIL',scope+'; '+e.message)}r0.ms=performance.now()-start;attempts.push({status:r0.status,evidence:r0.evidence,ms:r0.ms});r0.attempts=attempts;console.log(id,r0.status,r0.evidence)};
@@ -84,4 +85,5 @@ test(63,'arbitrary logical permutation of 6-qubit random circuits, all amplitude
 extended(test);
 further(test);
 advanced(test);
-const counts=Object.fromEntries(['PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN'].map(s=>[s,results.filter(r=>r.status===s).length]));const report={engine:'DSIQ v0.5 research',runtime:process.version,platform:process.platform,arch:process.arch,processMaxRssKiB:process.resourceUsage().maxRSS,counts,releaseEligible:counts.PASS===105,results};writeFileSync(process.argv[2]||'diamond-results.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({counts,maxRssKiB:report.processMaxRssKiB,releaseEligible:report.releaseEligible}));if(!report.releaseEligible)process.exitCode=1;
+v06(test);
+const counts=Object.fromEntries(['PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN'].map(s=>[s,results.filter(r=>r.status===s).length]));const report={engine:'DSIQ v0.6 research',runtime:process.version,platform:process.platform,arch:process.arch,processMaxRssKiB:process.resourceUsage().maxRSS,counts,releaseEligible:counts.PASS===105,results};writeFileSync(process.argv[2]||'diamond-results.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({counts,maxRssKiB:report.processMaxRssKiB,releaseEligible:report.releaseEligible}));if(!report.releaseEligible)process.exitCode=1;
