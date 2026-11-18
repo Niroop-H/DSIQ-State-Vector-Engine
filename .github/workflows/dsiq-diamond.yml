@@ -18,6 +18,11 @@ jobs:
           node tests/phase-product.test.mjs
           node tests/observable.test.mjs
           node tests/worker.test.mjs
+          node tests/affine.test.mjs
+          node tests/affine-phase.test.mjs
+          node tests/factor.test.mjs
+          node tests/native.test.mjs
+          node tests/batch.test.mjs
       - name: Diamond 105 (must fail closed)
         run: node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
       - name: Preserve evidence even for rejected builds

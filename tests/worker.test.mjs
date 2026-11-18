@@ -6,3 +6,7 @@ r=await run('OPENQASM 2.0; qreg q[2]; h q[0]; cx q[0],q[1];',{pauli:'XX'});asser
 r=await run('OPENQASM 2.0; qreg q[2]; creg c[1]; h q[0]; cx q[0],q[1]; measure q[0] -> c[0]; if(c==1) x q[1]; reset q[0];');assert.equal(r.mode,'trajectory-dag');assert.deepEqual(r.counts,{'00':16});assert.equal(r.shotsCompleted,16);assert.equal(r.measurementEvents.length,2);
 r=await run('OPENQASM 2.0; qreg q[2]; h q[0]; cx q[0],q[1];',{pauli:'XX',observableOnly:true});assert.equal(r.mode,'adjoint-pauli');assert.equal(r.amplitude,null);assert.equal(r.shotsCompleted,0);assert.ok(Math.abs(r.science.pauliExpectation-1)<1e-13);
 r=await run('OPENQASM 2.0; qreg q[5]; h q[0]; cx q[0],q[1];',{maxNodes:6,bits:'00011'});assert.equal(r.mode,'replay');assert.ok(Math.abs(r.amplitude.real-Math.SQRT1_2)<1e-13);assert.equal(r.shotsCompleted,0);console.log('worker: phase, DAG, trajectory, observable-only, forced replay passed');
+
+r=await run('OPENQASM 2.0; qreg q[100]; h q; cx q[0],q[99];',{pauli:'X'.repeat(100)});assert.equal(r.mode,'affine-clifford');assert.equal(r.science.pauliExpectation,1);
+r=await run('OPENQASM 2.0; qreg q[100]; h q; t q[99];',{pauli:'X'.repeat(100)});assert.equal(r.mode,'affine-phase');assert.ok(Math.abs(r.science.pauliExpectation-Math.SQRT1_2)<1e-13);
+r=await run('OPENQASM 2.0; qreg q[100]; ry(.3) q; cx q[0],q[1];',{precision:'fp32'});assert.equal(r.mode,'factor-statevector');assert.match(r.precision,/Float32/);assert.ok(Math.abs(r.science.norm-1)<1e-5);console.log('worker: additional affine, affine-phase and FP32 paths passed');

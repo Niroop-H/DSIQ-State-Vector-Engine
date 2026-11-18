@@ -5,6 +5,8 @@ import {ScientificDSIQ as D} from '../apps/web/public/dsiq/scientific.mjs';
 import {PlannedDSIQ} from '../apps/web/public/dsiq/planner.mjs';
 import {parse,rng} from '../apps/web/public/dsiq/worker.mjs';
 import {extended} from './diamond-additions.mjs';
+import {further} from './v05-additions.mjs';
+import {advanced} from './advanced-v05.test.mjs';
 const results=JSON.parse(readFileSync(new URL('../docs/diamond-105.json',import.meta.url))).map(r=>({...r,status:'NOT_RUN',evidence:'No qualifying executed test yet'}));
 const mark=(id,status,evidence)=>Object.assign(results[id-1],{status,evidence});
 const test=(id,scope,fn,status='PASS')=>{const start=performance.now();const r0=results[id-1],attempts=r0.attempts??=[];try{const r=fn();mark(id,status,scope+(r===undefined?'':'; '+JSON.stringify(r)))}catch(e){mark(id,'FAIL',scope+'; '+e.message)}r0.ms=performance.now()-start;attempts.push({status:r0.status,evidence:r0.evidence,ms:r0.ms});r0.attempts=attempts;console.log(id,r0.status,r0.evidence)};
@@ -80,4 +82,6 @@ test(70,'seeded 100-layer non-Clifford 100-qubit random rotations and random mat
 test(89,'100-qubit product variational circuit parameter-shift derivative vs analytic -sin(theta)',()=>{const t=.731,evalAt=a=>{const d=new D(n);g(d,'ry',73,[],{theta:a});return d.expectation('I'.repeat(26)+'Z'+'I'.repeat(73))},start=performance.now();near((evalAt(t+Math.PI/2)-evalAt(t-Math.PI/2))/2,-Math.sin(t));return {ms:performance.now()-start}},'PARTIAL');
 test(63,'arbitrary logical permutation of 6-qubit random circuits, all amplitudes; 100-qubit planner checked separately',()=>{const r=rng(7652);for(let k=0;k<20;k++){const gs=[],n=6,order=Array.from({length:n},(_,q)=>q);for(let j=n-1;j>0;j--){const i=Math.floor(r()*(j+1));[order[i],order[j]]=[order[j],order[i]]}for(let j=0;j<24;j++){const q=Math.floor(r()*n),c=(q+1+Math.floor(r()*(n-1)))%n;gs.push(j%3?{name:'ry',q,controls:[],theta:r()*5-2}:{name:'cx',q,controls:[c]})}const a=new D(n),b=new PlannedDSIQ(n,gs,32768,order);for(const t of gs){a.apply(t);b.apply(t)}for(let x=0;x<2**n;x++){const bits=x.toString(2).padStart(n,'0');cx(amp(a,bits),amp(b,bits))}}},'PARTIAL');
 extended(test);
-const counts=Object.fromEntries(['PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN'].map(s=>[s,results.filter(r=>r.status===s).length]));const report={engine:'DSIQ v0.4 research',runtime:process.version,platform:process.platform,arch:process.arch,processMaxRssKiB:process.resourceUsage().maxRSS,counts,releaseEligible:counts.PASS===105,results};writeFileSync(process.argv[2]||'diamond-results.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({counts,maxRssKiB:report.processMaxRssKiB,releaseEligible:report.releaseEligible}));if(!report.releaseEligible)process.exitCode=1;
+further(test);
+advanced(test);
+const counts=Object.fromEntries(['PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN'].map(s=>[s,results.filter(r=>r.status===s).length]));const report={engine:'DSIQ v0.5 research',runtime:process.version,platform:process.platform,arch:process.arch,processMaxRssKiB:process.resourceUsage().maxRSS,counts,releaseEligible:counts.PASS===105,results};writeFileSync(process.argv[2]||'diamond-results.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({counts,maxRssKiB:report.processMaxRssKiB,releaseEligible:report.releaseEligible}));if(!report.releaseEligible)process.exitCode=1;

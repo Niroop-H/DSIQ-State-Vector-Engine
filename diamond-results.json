@@ -1,15 +1,15 @@
 {
-  "engine": "DSIQ v0.4 research",
+  "engine": "DSIQ v0.5 research",
   "runtime": "v22.16.0",
   "platform": "linux",
   "arch": "x64",
-  "processMaxRssKiB": 543412,
+  "processMaxRssKiB": 542712,
   "counts": {
-    "PASS": 58,
-    "PARTIAL": 19,
+    "PASS": 71,
+    "PARTIAL": 22,
     "FAIL": 1,
-    "BLOCKED": 18,
-    "NOT_RUN": 9
+    "BLOCKED": 8,
+    "NOT_RUN": 3
   },
   "releaseEligible": false,
   "results": [
@@ -23,32 +23,45 @@
         {
           "status": "PASS",
           "evidence": "analytic RX every wire, both nonzero amplitudes; {\"max\":1.1989798176196528e-16}",
-          "ms": 35.618171000000004
+          "ms": 37.407275999999996
         }
       ],
-      "ms": 35.618171000000004
+      "ms": 37.407275999999996
     },
     {
       "id": 2,
       "title": "FP32 Precision Compliance",
       "requirement": "Single-precision mode maintains error `< 1e-6` across shallow-to-medium circuits.",
-      "status": "BLOCKED",
-      "evidence": "FP32 not implemented"
+      "status": "PASS",
+      "evidence": "FP32 statevector arithmetic on 100-qubit 20-component 12-layer noncommuting circuits; independent FP64 source-scatter oracle; 1000 full-width queries; {\"width\":100,\"operations\":1980,\"fp32BlockMax\":2.3420277148910474e-7,\"fp32NormError\":0.0000046039339066661356,\"fp32FullAmplitudeMax\":3.078194440562215e-20,\"fp64BlockMax\":0,\"coefficientBytes\":5120}",
+      "attempts": [
+        {
+          "status": "PASS",
+          "evidence": "FP32 statevector arithmetic on 100-qubit 20-component 12-layer noncommuting circuits; independent FP64 source-scatter oracle; 1000 full-width queries; {\"width\":100,\"operations\":1980,\"fp32BlockMax\":2.3420277148910474e-7,\"fp32NormError\":0.0000046039339066661356,\"fp32FullAmplitudeMax\":3.078194440562215e-20,\"fp64BlockMax\":0,\"coefficientBytes\":5120}",
+          "ms": 89.81409600000188
+        }
+      ],
+      "ms": 89.81409600000188
     },
     {
       "id": 3,
       "title": "Total Probability Normalization",
       "requirement": "Sum of squared magnitudes (\\\\(\\sum \\vert{}\\alpha_i\\vert{}^2\\\\)) equals `1.0` within `1e-12` tolerance.",
-      "status": "PARTIAL",
-      "evidence": "100-qubit uniform and GHZ norm contraction",
+      "status": "PASS",
+      "evidence": "100-qubit 100-layer mixed factor circuit: norm of complete local coefficient arrays and complete product norm; prior GHZ/uniform checks; {\"width\":100,\"gates\":16000,\"norm\":0.9999999999999793,\"maxBlockError\":0}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "100-qubit uniform and GHZ norm contraction",
-          "ms": 42.57160999999999
+          "ms": 63.460389000000006
+        },
+        {
+          "status": "PASS",
+          "evidence": "100-qubit 100-layer mixed factor circuit: norm of complete local coefficient arrays and complete product norm; prior GHZ/uniform checks; {\"width\":100,\"gates\":16000,\"norm\":0.9999999999999793,\"maxBlockError\":0}",
+          "ms": 218.36816299999919
         }
       ],
-      "ms": 42.57160999999999
+      "ms": 218.36816299999919
     },
     {
       "id": 4,
@@ -60,10 +73,10 @@
         {
           "status": "PASS",
           "evidence": "controlled and unconditional RZ(2π): relative/global phase",
-          "ms": 1.706530999999984
+          "ms": 0.43675799999999754
         }
       ],
-      "ms": 1.706530999999984
+      "ms": 0.43675799999999754
     },
     {
       "id": 5,
@@ -75,10 +88,10 @@
         {
           "status": "PASS",
           "evidence": "H-P-H interference at 101 angles",
-          "ms": 11.001040999999987
+          "ms": 2.2426379999999995
         }
       ],
-      "ms": 11.001040999999987
+      "ms": 2.2426379999999995
     },
     {
       "id": 6,
@@ -90,10 +103,10 @@
         {
           "status": "PASS",
           "evidence": "H twice on each wire, zero amplitude tolerance 1e-15",
-          "ms": 38.983911000000006
+          "ms": 19.07789599999998
         }
       ],
-      "ms": 38.983911000000006
+      "ms": 19.07789599999998
     },
     {
       "id": 7,
@@ -105,15 +118,15 @@
         {
           "status": "PARTIAL",
           "evidence": "1024-qubit tiny log magnitude, inverse rotations; replay underflow unverified",
-          "ms": 2377.895609
+          "ms": 1777.689486
         },
         {
           "status": "PARTIAL",
           "evidence": "scaled replay extends exponent range: 1200-qubit forced replay magnitude 2^-1200, expected Float64 linear-output underflow flagged; existing DAG tiny-amplitude regression remains; arbitrary interference bounds unproven; {\"done\":true,\"visits\":1201,\"leaves\":1,\"real\":0,\"imag\":0,\"log2Magnitude\":-1200.0000000000002,\"phase\":0,\"precision\":\"scaled Float64 path products; exact represented-leaf sum\",\"componentUnderflow\":true}",
-          "ms": 5.5859439999985625
+          "ms": 5.230980000000272
         }
       ],
-      "ms": 5.5859439999985625
+      "ms": 5.230980000000272
     },
     {
       "id": 8,
@@ -125,10 +138,10 @@
         {
           "status": "PASS",
           "evidence": "100-qubit GHZ states, complex analytical overlap",
-          "ms": 24.945554999999786
+          "ms": 19.136594999999943
         }
       ],
-      "ms": 24.945554999999786
+      "ms": 19.136594999999943
     },
     {
       "id": 9,
@@ -140,25 +153,30 @@
         {
           "status": "PASS",
           "evidence": "100-qubit GHZ X/Z/Y Pauli strings",
-          "ms": 16.030116000000362
+          "ms": 10.076207000000068
         }
       ],
-      "ms": 16.030116000000362
+      "ms": 10.076207000000068
     },
     {
       "id": 10,
       "title": "Trace Preservation",
       "requirement": "Density/state norm remains strictly invariant under any sequence of unitary gates.",
       "status": "PARTIAL",
-      "evidence": "norm after every 100-qubit product rotation",
+      "evidence": "unitary trace/norm checks at each gate on 100-qubit mixed component circuits and full-width randomized affine Clifford circuits; {\"mixedCheckpoints\":4000,\"cliffordCheckpoints\":5000,\"maxNormError\":8.104628079763643e-15}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "norm after every 100-qubit product rotation",
-          "ms": 18.034624999999778
+          "ms": 15.955173000000059
+        },
+        {
+          "status": "PARTIAL",
+          "evidence": "unitary trace/norm checks at each gate on 100-qubit mixed component circuits and full-width randomized affine Clifford circuits; {\"mixedCheckpoints\":4000,\"cliffordCheckpoints\":5000,\"maxNormError\":8.104628079763643e-15}",
+          "ms": 149.4115959999981
         }
       ],
-      "ms": 18.034624999999778
+      "ms": 149.4115959999981
     },
     {
       "id": 11,
@@ -170,10 +188,10 @@
         {
           "status": "PASS",
           "evidence": "100-qubit nonzero register; seeded 6-wire mixed non-Clifford U and explicit inverse; all 64 active amplitudes and norm; {\"forward\":48,\"inverse\":48}",
-          "ms": 10.767939999999726
+          "ms": 9.397454999998445
         }
       ],
-      "ms": 10.767939999999726
+      "ms": 9.397454999998445
     },
     {
       "id": 12,
@@ -185,10 +203,10 @@
         {
           "status": "PASS",
           "evidence": "all 100 wires: X amplitude and deterministic sampling",
-          "ms": 21.6844329999999
+          "ms": 13.13777899999991
         }
       ],
-      "ms": 21.6844329999999
+      "ms": 13.13777899999991
     },
     {
       "id": 13,
@@ -200,25 +218,30 @@
         {
           "status": "PASS",
           "evidence": "1000 random H^100 basis queries, relative error",
-          "ms": 36.27805500000022
+          "ms": 22.463376000000153
         }
       ],
-      "ms": 36.27805500000022
+      "ms": 22.463376000000153
     },
     {
       "id": 14,
       "title": "Arbitrary Basis Query Speed & Accuracy",
       "requirement": "Querying random 100-bit strings (e.g., `0110...101`) returns exact real and imaginary components without full-vector reconstruction.",
-      "status": "PARTIAL",
-      "evidence": "1000 analytic product amplitude queries, latency; {\"ms\":25.780036999999993}",
+      "status": "PASS",
+      "evidence": "1000 random full-width complex amplitude queries on 100-qubit mixed factor circuits; independent source-scatter reference, measured latency; {\"width\":100,\"queries\":1000,\"maxAbsError\":6.333035091156141e-29,\"maxRelativeError\":1.7158681566733442e-14,\"queryMs\":13.674912999995286}",
       "attempts": [
         {
           "status": "PARTIAL",
-          "evidence": "1000 analytic product amplitude queries, latency; {\"ms\":25.780036999999993}",
-          "ms": 36.42573300000004
+          "evidence": "1000 analytic product amplitude queries, latency; {\"ms\":16.667605999999978}",
+          "ms": 23.51525999999967
+        },
+        {
+          "status": "PASS",
+          "evidence": "1000 random full-width complex amplitude queries on 100-qubit mixed factor circuits; independent source-scatter reference, measured latency; {\"width\":100,\"queries\":1000,\"maxAbsError\":6.333035091156141e-29,\"maxRelativeError\":1.7158681566733442e-14,\"queryMs\":13.674912999995286}",
+          "ms": 50.97530000000552
         }
       ],
-      "ms": 36.42573300000004
+      "ms": 50.97530000000552
     },
     {
       "id": 15,
@@ -237,10 +260,10 @@
         {
           "status": "PASS",
           "evidence": "X,Y,Z each of 100 wires",
-          "ms": 24.627850999999737
+          "ms": 17.851940000000013
         }
       ],
-      "ms": 24.627850999999737
+      "ms": 17.851940000000013
     },
     {
       "id": 17,
@@ -252,10 +275,10 @@
         {
           "status": "PASS",
           "evidence": "H²=I, SX²=X, SY²=Y each wire",
-          "ms": 64.71819000000005
+          "ms": 46.14276400000017
         }
       ],
-      "ms": 64.71819000000005
+      "ms": 46.14276400000017
     },
     {
       "id": 18,
@@ -267,25 +290,35 @@
         {
           "status": "PASS",
           "evidence": "S/SDG each wire",
-          "ms": 21.784484000000248
+          "ms": 19.500602999999956
         }
       ],
-      "ms": 21.784484000000248
+      "ms": 19.500602999999956
     },
     {
       "id": 19,
       "title": "Non-Clifford T and \\\\(T^{\\dag }\\\\) Gates",
       "requirement": "Exact π/4 phase rotation; engine shows no exponential crash as T-gate count increases.",
       "status": "PARTIAL",
-      "evidence": "500 T + 500 TDG gates on uniform state",
+      "evidence": "connected phase-polynomial Clifford+T family at 500, 1000 and 5000 injections; arbitrary Hadamard-crossing complexity remains exponential; {\"width\":100,\"checkpoints\":[{\"tGates\":500,\"gateCount\":2199,\"phaseTerms\":180,\"peakPhaseTerms\":180},{\"tGates\":1000,\"gateCount\":4199,\"phaseTerms\":344,\"peakPhaseTerms\":346},{\"tGates\":5000,\"gateCount\":20199,\"phaseTerms\":1672,\"peakPhaseTerms\":1674}],\"queries\":192,\"independentOracle\":\"monomial amplitude inverse path; verified connected graph\",\"maxError\":0}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "500 T + 500 TDG gates on uniform state",
-          "ms": 122.81230599999981
+          "ms": 95.39305800000011
+        },
+        {
+          "status": "PARTIAL",
+          "evidence": "100-qubit 20-component 200-layer network includes 4000 T gates; independent local statevector oracle; unrestricted T scaling not demonstrated; {\"depth\":200,\"gateCount\":32000,\"maxBlockError\":0,\"infidelitySum\":3.6637359812630166e-14,\"normError\":2.808864252301646e-14,\"executionMs\":177.48410400000284,\"coefficientBytes\":10240}",
+          "ms": 688.4804599999989
+        },
+        {
+          "status": "PARTIAL",
+          "evidence": "connected phase-polynomial Clifford+T family at 500, 1000 and 5000 injections; arbitrary Hadamard-crossing complexity remains exponential; {\"width\":100,\"checkpoints\":[{\"tGates\":500,\"gateCount\":2199,\"phaseTerms\":180,\"peakPhaseTerms\":180},{\"tGates\":1000,\"gateCount\":4199,\"phaseTerms\":344,\"peakPhaseTerms\":346},{\"tGates\":5000,\"gateCount\":20199,\"phaseTerms\":1672,\"peakPhaseTerms\":1674}],\"queries\":192,\"independentOracle\":\"monomial amplitude inverse path; verified connected graph\",\"maxError\":0}",
+          "ms": 0.026920999996946193
         }
       ],
-      "ms": 122.81230599999981
+      "ms": 0.026920999996946193
     },
     {
       "id": 20,
@@ -297,10 +330,10 @@
         {
           "status": "PASS",
           "evidence": "RX/RY/RZ irrational angles on every wire",
-          "ms": 118.07087000000001
+          "ms": 75.48024399999986
         }
       ],
-      "ms": 118.07087000000001
+      "ms": 75.48024399999986
     },
     {
       "id": 21,
@@ -312,10 +345,10 @@
         {
           "status": "PASS",
           "evidence": "U3 each wire analytical complex amplitudes",
-          "ms": 25.40540299999975
+          "ms": 16.066330000000107
         }
       ],
-      "ms": 25.40540299999975
+      "ms": 16.066330000000107
     },
     {
       "id": 22,
@@ -327,10 +360,10 @@
         {
           "status": "PASS",
           "evidence": "CX/CY/CZ every basis input both distant directions",
-          "ms": 8.441023999999743
+          "ms": 6.557388000000174
         }
       ],
-      "ms": 8.441023999999743
+      "ms": 6.557388000000174
     },
     {
       "id": 23,
@@ -342,10 +375,10 @@
         {
           "status": "PASS",
           "evidence": "SWAP/iSWAP all 4 basis columns, adjacent and distant pairs; logical SWAP path also tested",
-          "ms": 8.195885999999973
+          "ms": 4.997367999999824
         }
       ],
-      "ms": 8.195885999999973
+      "ms": 4.997367999999824
     },
     {
       "id": 24,
@@ -357,10 +390,10 @@
         {
           "status": "PASS",
           "evidence": "sqrtSWAP and fSim independently known 4x4 matrix columns; distant pairs in both directions",
-          "ms": 18.30791700000009
+          "ms": 16.671480999999858
         }
       ],
-      "ms": 18.30791700000009
+      "ms": 16.671480999999858
     },
     {
       "id": 25,
@@ -372,10 +405,10 @@
         {
           "status": "PASS",
           "evidence": "CRZ/CP both distant directions",
-          "ms": 1.4461879999998928
+          "ms": 1.40481600000021
         }
       ],
-      "ms": 1.4461879999998928
+      "ms": 1.40481600000021
     },
     {
       "id": 26,
@@ -387,10 +420,10 @@
         {
           "status": "PASS",
           "evidence": "Toffoli and Fredkin all 8 basis input columns on distant wires",
-          "ms": 5.53805199999988
+          "ms": 5.686425999999756
         }
       ],
-      "ms": 5.53805199999988
+      "ms": 5.686425999999756
     },
     {
       "id": 27,
@@ -402,10 +435,10 @@
         {
           "status": "PASS",
           "evidence": "10,50,99 controls, both target directions and disabled case",
-          "ms": 28.215169999999944
+          "ms": 24.428815999999642
         }
       ],
-      "ms": 28.215169999999944
+      "ms": 24.428815999999642
     },
     {
       "id": 28,
@@ -417,10 +450,10 @@
         {
           "status": "PASS",
           "evidence": "arbitrary complex unitary injection k=1..5, 100-qubit register; independently evaluated phase-dressed Fourier matrices on distant wires; {\"largestMatrix\":\"32x32\",\"maxError\":0}",
-          "ms": 39.163682999998855
+          "ms": 33.621443
         }
       ],
-      "ms": 39.163682999998855
+      "ms": 33.621443
     },
     {
       "id": 29,
@@ -432,10 +465,10 @@
         {
           "status": "PASS",
           "evidence": "state unchanged after I and zero-angle gates",
-          "ms": 9.54901400000017
+          "ms": 8.484429999999975
         }
       ],
-      "ms": 9.54901400000017
+      "ms": 8.484429999999975
     },
     {
       "id": 30,
@@ -447,15 +480,15 @@
         {
           "status": "PARTIAL",
           "evidence": "trajectory reset, both GHZ outcomes, norm",
-          "ms": 23.712988000000223
+          "ms": 16.784581999999773
         },
         {
           "status": "PASS",
           "evidence": "100-qubit arbitrary-angle GHZ reset: both forced outcomes, conditional state and renormalization, follow-up non-Clifford gate; {\"testedOutcomes\":2}",
-          "ms": 23.073756000005233
+          "ms": 20.85576199999923
         }
       ],
-      "ms": 23.073756000005233
+      "ms": 20.85576199999923
     },
     {
       "id": 31,
@@ -467,10 +500,10 @@
         {
           "status": "PASS",
           "evidence": "100-qubit GHZ amplitudes and 1000 parity-correlated samples",
-          "ms": 26.25861299999997
+          "ms": 20.246326999999837
         }
       ],
-      "ms": 26.25861299999997
+      "ms": 20.246326999999837
     },
     {
       "id": 32,
@@ -482,32 +515,45 @@
         {
           "status": "PASS",
           "evidence": "100-qubit W, all 100 amplitudes and norm",
-          "ms": 29.186863999999787
+          "ms": 23.646397999999863
         }
       ],
-      "ms": 29.186863999999787
+      "ms": 23.646397999999863
     },
     {
       "id": 33,
       "title": "1D Linear Chain Entanglement",
       "requirement": "Nearest-neighbor entangling layers across 100 qubits (`q[i]` to `q[i+1]`).",
-      "status": "PARTIAL",
-      "evidence": "GHZ chain; deeper entangling layers unverified",
+      "status": "PASS",
+      "evidence": "100-qubit linear chain, 24 alternating layers of noncommuting excitation-preserving fSim/CZ, all 4950 two-excitation amplitudes vs independent recurrence; {\"width\":100,\"topology\":\"linear chain\",\"layers\":24,\"interactionPairs\":1188,\"elementaryGates\":5942,\"allTwoExcitationAmplitudes\":4950,\"maxError\":1.2886480649302393e-14,\"norm\":1.000000000000059,\"peakNodes\":44273}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "GHZ chain; deeper entangling layers unverified",
-          "ms": 9.359838000000309
+          "ms": 7.074685999999929
+        },
+        {
+          "status": "PASS",
+          "evidence": "100-qubit linear chain, 24 alternating layers of noncommuting excitation-preserving fSim/CZ, all 4950 two-excitation amplitudes vs independent recurrence; {\"width\":100,\"topology\":\"linear chain\",\"layers\":24,\"interactionPairs\":1188,\"elementaryGates\":5942,\"allTwoExcitationAmplitudes\":4950,\"maxError\":1.2886480649302393e-14,\"norm\":1.000000000000059,\"peakNodes\":44273}",
+          "ms": 970.1256869999997
         }
       ],
-      "ms": 9.359838000000309
+      "ms": 970.1256869999997
     },
     {
       "id": 34,
       "title": "2D Grid Topology (10 × 10)",
       "requirement": "Alternating horizontal and vertical CZ/fSim layers matching heavy-hex and square grid processors.",
-      "status": "NOT_RUN",
-      "evidence": "No qualifying executed test yet"
+      "status": "PASS",
+      "evidence": "100-qubit 10x10 grid, 8 alternate horizontal/vertical layers of fSim and CZ; two-excitation initial state, all 4950 amplitudes vs independent recurrence; {\"width\":100,\"topology\":\"10x10 grid\",\"layers\":8,\"interactionPairs\":360,\"elementaryGates\":1802,\"allTwoExcitationAmplitudes\":4950,\"maxError\":3.227294399221455e-15,\"norm\":1.0000000000000047,\"peakNodes\":22134}",
+      "attempts": [
+        {
+          "status": "PASS",
+          "evidence": "100-qubit 10x10 grid, 8 alternate horizontal/vertical layers of fSim and CZ; two-excitation initial state, all 4950 amplitudes vs independent recurrence; {\"width\":100,\"topology\":\"10x10 grid\",\"layers\":8,\"interactionPairs\":360,\"elementaryGates\":1802,\"allTwoExcitationAmplitudes\":4950,\"maxError\":3.227294399221455e-15,\"norm\":1.0000000000000047,\"peakNodes\":22134}",
+          "ms": 340.3618959999949
+        }
+      ],
+      "ms": 340.3618959999949
     },
     {
       "id": 35,
@@ -519,10 +565,10 @@
         {
           "status": "PASS",
           "evidence": "complete 100-qubit graph: 4950 CZ interactions; all 100 stabilizer generators and norm; {\"qubits\":100,\"gates\":5050,\"mode\":\"dag\",\"liveNodes\":10464,\"peakNodes\":16507,\"nodeBudget\":32768,\"precision\":\"Float64; no deliberate truncation\"}",
-          "ms": 1032.657147
+          "ms": 1027.539949
         }
       ],
-      "ms": 1032.657147
+      "ms": 1027.539949
     },
     {
       "id": 36,
@@ -534,17 +580,25 @@
         {
           "status": "PASS",
           "evidence": "100-qubit cross-chip distant CNOTs q[i]↔q[99-i], both directions; all 100 X/Z correlators, random samples and original logical labels; {\"pairs\":50,\"directions\":2}",
-          "ms": 36.57005500000014
+          "ms": 12.906761000000188
         }
       ],
-      "ms": 36.57005500000014
+      "ms": 12.906761000000188
     },
     {
       "id": 37,
       "title": "Deep Circuit Scaling (Depth 50–200)",
       "requirement": "Maintaining exact fidelity through 100+ layers of non-commuting gates.",
-      "status": "NOT_RUN",
-      "evidence": "No qualifying executed test yet"
+      "status": "PASS",
+      "evidence": "100-qubit 50/100/200-layer noncommuting arbitrary angle and T/CX circuits; independent 5-qubit component oracle, all component amplitudes, product norm/fidelity; no connected deep-random claim; [{\"depth\":50,\"gateCount\":8000,\"maxBlockError\":0,\"infidelitySum\":2.1094237467877974e-14,\"normError\":1.3877787807814457e-14,\"executionMs\":50.622027999997954,\"coefficientBytes\":10240},{\"depth\":100,\"gateCount\":16000,\"maxBlockError\":0,\"infidelitySum\":3.275157922644212e-14,\"normError\":2.1094237467877974e-14,\"executionMs\":93.97883000000002,\"coefficientBytes\":10240},{\"depth\":200,\"gateCount\":32000,\"maxBlockError\":0,\"infidelitySum\":3.6637359812630166e-14,\"normError\":2.808864252301646e-14,\"executionMs\":197.5119660000055,\"coefficientBytes\":10240}]",
+      "attempts": [
+        {
+          "status": "PASS",
+          "evidence": "100-qubit 50/100/200-layer noncommuting arbitrary angle and T/CX circuits; independent 5-qubit component oracle, all component amplitudes, product norm/fidelity; no connected deep-random claim; [{\"depth\":50,\"gateCount\":8000,\"maxBlockError\":0,\"infidelitySum\":2.1094237467877974e-14,\"normError\":1.3877787807814457e-14,\"executionMs\":50.622027999997954,\"coefficientBytes\":10240},{\"depth\":100,\"gateCount\":16000,\"maxBlockError\":0,\"infidelitySum\":3.275157922644212e-14,\"normError\":2.1094237467877974e-14,\"executionMs\":93.97883000000002,\"coefficientBytes\":10240},{\"depth\":200,\"gateCount\":32000,\"maxBlockError\":0,\"infidelitySum\":3.6637359812630166e-14,\"normError\":2.808864252301646e-14,\"executionMs\":197.5119660000055,\"coefficientBytes\":10240}]",
+          "ms": 734.7252619999999
+        }
+      ],
+      "ms": 734.7252619999999
     },
     {
       "id": 38,
@@ -556,30 +610,30 @@
         {
           "status": "PASS",
           "evidence": "50 Bell pairs across physical 50/50 split; lossless wire planner; default logical-order DAG failed at gate 20; {\"cutEntropyBits\":50,\"peakNodes\":7600,\"derivation\":\"unique Bell stabilizer state\"}",
-          "ms": 14.247822000001179
+          "ms": 13.813747000000149
         }
       ],
-      "ms": 14.247822000001179
+      "ms": 13.813747000000149
     },
     {
       "id": 39,
       "title": "Cluster / Graph State Preparation",
       "requirement": "Exact stabilizer correlations on 2D 100-qubit cluster states for measurement-based QC.",
       "status": "PASS",
-      "evidence": "100-qubit 10×10 graph with 180 actual CZ gates; all 100 stabilizer generators, norm, 100 phase-sign amplitude checks; adaptive route; {\"mode\":\"coherent\",\"qubits\":100,\"gates\":280,\"terms\":1,\"peakTerms\":1,\"termBudget\":256,\"quadraticEdges\":180,\"precision\":\"Float64, no deliberate truncation; non-scaled products may underflow\",\"adaptive\":[{\"strategy\":\"phase-product\",\"status\":\"resource-or-representation-boundary\",\"reason\":\"Controlled phase creates non-product state\"},{\"strategy\":\"coherent\",\"status\":\"completed\"}]}",
+      "evidence": "100-qubit 10×10 graph with 180 actual CZ gates; all 100 stabilizer generators, norm, 100 phase-sign amplitude checks; adaptive route; {\"mode\":\"coherent\",\"qubits\":100,\"gates\":280,\"terms\":1,\"peakTerms\":1,\"termBudget\":256,\"quadraticEdges\":180,\"precision\":\"Float64, no deliberate truncation; non-scaled products may underflow\",\"adaptive\":[{\"strategy\":\"affine-clifford\",\"status\":\"completed\"}],\"affineStabilizers\":100}",
       "attempts": [
         {
           "status": "FAIL",
           "evidence": "100-qubit 10x10 cluster graph, check all stabilizers; cluster: deferred replay at gate 146; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
-          "ms": 674.8239539999995
+          "ms": 626.7070279999989
         },
         {
           "status": "PASS",
-          "evidence": "100-qubit 10×10 graph with 180 actual CZ gates; all 100 stabilizer generators, norm, 100 phase-sign amplitude checks; adaptive route; {\"mode\":\"coherent\",\"qubits\":100,\"gates\":280,\"terms\":1,\"peakTerms\":1,\"termBudget\":256,\"quadraticEdges\":180,\"precision\":\"Float64, no deliberate truncation; non-scaled products may underflow\",\"adaptive\":[{\"strategy\":\"phase-product\",\"status\":\"resource-or-representation-boundary\",\"reason\":\"Controlled phase creates non-product state\"},{\"strategy\":\"coherent\",\"status\":\"completed\"}]}",
-          "ms": 23.072723999999653
+          "evidence": "100-qubit 10×10 graph with 180 actual CZ gates; all 100 stabilizer generators, norm, 100 phase-sign amplitude checks; adaptive route; {\"mode\":\"coherent\",\"qubits\":100,\"gates\":280,\"terms\":1,\"peakTerms\":1,\"termBudget\":256,\"quadraticEdges\":180,\"precision\":\"Float64, no deliberate truncation; non-scaled products may underflow\",\"adaptive\":[{\"strategy\":\"affine-clifford\",\"status\":\"completed\"}],\"affineStabilizers\":100}",
+          "ms": 29.581317000000126
         }
       ],
-      "ms": 23.072723999999653
+      "ms": 29.581317000000126
     },
     {
       "id": 40,
@@ -591,15 +645,15 @@
         {
           "status": "FAIL",
           "evidence": "100-qubit QFT followed by inverse on nonzero basis; lossless logical SWAP; no gate cancellation; inverse QFT: deferred replay at gate 5309; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
-          "ms": 658.6076030000004
+          "ms": 624.133758
         },
         {
           "status": "PASS",
           "evidence": "100-qubit QFT on nonzero basis and inverse; 10200 actual QFT operations, no cancellation, 200 midpoint analytical phase checks; exact rational-pi input; {\"mode\":\"phase-product\",\"qubits\":100,\"gates\":10243,\"phaseFactors\":100,\"precision\":\"Exact rational pi phases; Float64 conversion only at output\",\"forwardGates\":5100,\"midpointQueries\":200,\"adaptiveGates\":10206}",
-          "ms": 261.65418900000077
+          "ms": 247.1003890000011
         }
       ],
-      "ms": 261.65418900000077
+      "ms": 247.1003890000011
     },
     {
       "id": 41,
@@ -611,15 +665,15 @@
         {
           "status": "FAIL",
           "evidence": "one Grover iteration on 100 qubits, all-ones mark and diffusion, amplitude vs formula; Grover: deferred replay at gate 308; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
-          "ms": 337.74714100000165
+          "ms": 333.9599280000002
         },
         {
           "status": "PASS",
           "evidence": "50/100-qubit Grover using ordinary H/X/MCX gates; marked and unmarked analytic amplitudes (relative tolerance 1e-10), norm; no circuit shortcut; {\"experiments\":[{\"mode\":\"coherent\",\"qubits\":50,\"gates\":256,\"terms\":3,\"peakTerms\":3,\"termBudget\":256,\"quadraticEdges\":0,\"precision\":\"Float64, no deliberate truncation; non-scaled products may underflow\",\"markedAmplitude\":{\"real\":-8.940696716308476e-8,\"imag\":0,\"log2Magnitude\":-23.415037499278863,\"phase\":3.141592653589793}},{\"mode\":\"coherent\",\"qubits\":100,\"gates\":506,\"terms\":3,\"peakTerms\":3,\"termBudget\":256,\"quadraticEdges\":0,\"precision\":\"Float64, no deliberate truncation; non-scaled products may underflow\",\"markedAmplitude\":{\"real\":-2.6645352591003118e-15,\"imag\":0,\"log2Magnitude\":-48.41503749927888,\"phase\":3.141592653589793}}],\"adaptive\":[{\"strategy\":\"coherent\",\"status\":\"completed\"}]}",
-          "ms": 30.658079999999245
+          "ms": 29.86286199999995
         }
       ],
-      "ms": 30.658079999999245
+      "ms": 29.86286199999995
     },
     {
       "id": 42,
@@ -631,46 +685,70 @@
         {
           "status": "PASS",
           "evidence": "50-bit exact dyadic phase-estimation register + one eigenstate, controlled powers and actual inverse QFT gates; {\"mode\":\"phase-product\",\"qubits\":51,\"gates\":1401,\"phaseFactors\":51,\"precision\":\"Exact rational pi phases; Float64 conversion only at output\",\"phaseBits\":50,\"readout\":\"10101101100101100101011011001010010110110101011011\"}",
-          "ms": 8.538061000001107
+          "ms": 4.240026999999827
         }
       ],
-      "ms": 8.538061000001107
+      "ms": 4.240026999999827
     },
     {
       "id": 43,
       "title": "Linear Cross-Entropy Benchmarking (XEB)",
       "requirement": "Achieves XEB fidelity ≈ 1.000 ± 0.01 across 10,000+ samples on deep random circuits.",
-      "status": "NOT_RUN",
-      "evidence": "No qualifying executed test yet"
+      "status": "PARTIAL",
+      "evidence": "16-qubit connected random circuit, 30 layers, 200000 actual samples, independently computed 65536 amplitudes; 50–100-qubit random XEB still unverified; {\"width\":16,\"depth\":30,\"gates\":1200,\"shots\":200000,\"xeb\":1.0057439374759407,\"idealXeb\":1.0065008026801912,\"standardError\":0.0031774537308255405,\"porterThomasCDFDistance\":0.0026010161015455058,\"referenceMaxError\":0,\"probabilityCount\":65536,\"withinOnePercent\":true}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "16-qubit connected random circuit, 30 layers, 200000 actual samples, independently computed 65536 amplitudes; 50–100-qubit random XEB still unverified; {\"width\":16,\"depth\":30,\"gates\":1200,\"shots\":200000,\"xeb\":1.0057439374759407,\"idealXeb\":1.0065008026801912,\"standardError\":0.0031774537308255405,\"porterThomasCDFDistance\":0.0026010161015455058,\"referenceMaxError\":0,\"probabilityCount\":65536,\"withinOnePercent\":true}",
+          "ms": 13081.314129999999
+        }
+      ],
+      "ms": 13081.314129999999
     },
     {
       "id": 44,
       "title": "Porter-Thomas Distribution Match",
       "requirement": "Output bitstring probabilities on deep random circuits follow the exact exponential Porter-Thomas distribution.",
-      "status": "NOT_RUN",
-      "evidence": "No qualifying executed test yet"
+      "status": "PARTIAL",
+      "evidence": "16-qubit connected random circuit: empirical distribution compared to exponential Porter–Thomas, finite-size descriptive statistic; 50–100 qubit scope remains open; {\"width\":16,\"depth\":30,\"gates\":1200,\"shots\":200000,\"xeb\":1.0057439374759407,\"idealXeb\":1.0065008026801912,\"standardError\":0.0031774537308255405,\"porterThomasCDFDistance\":0.0026010161015455058,\"referenceMaxError\":0,\"probabilityCount\":65536,\"withinOnePercent\":true}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "16-qubit connected random circuit: empirical distribution compared to exponential Porter–Thomas, finite-size descriptive statistic; 50–100 qubit scope remains open; {\"width\":16,\"depth\":30,\"gates\":1200,\"shots\":200000,\"xeb\":1.0057439374759407,\"idealXeb\":1.0065008026801912,\"standardError\":0.0031774537308255405,\"porterThomasCDFDistance\":0.0026010161015455058,\"referenceMaxError\":0,\"probabilityCount\":65536,\"withinOnePercent\":true}",
+          "ms": 0.04375599999912083
+        }
+      ],
+      "ms": 0.04375599999912083
     },
     {
       "id": 45,
       "title": "Chi-Square Goodness-of-Fit",
       "requirement": "Sampled frequencies on 20–30 qubit sub-circuits pass χ² statistical tests against exact state-vector probabilities.",
       "status": "PASS",
-      "evidence": "20-qubit structured full dense reference; all nonzero bins (1024), no unsupported outcomes, 200000 actual draws, predeclared central chi-square interval; {\"qubits\":20,\"shots\":200000,\"fullDenseReferenceAmplitudes\":1048576,\"nonzeroBins\":1024,\"minExpectedCount\":132.8998816666988,\"statistic\":993.9209997383465,\"dof\":1023,\"acceptanceInterval\":[910.24630861,1143.26531703],\"ampError\":3.469446951953614e-17,\"ms\":317.1454450000001}",
+      "evidence": "20-qubit structured full dense reference; all nonzero bins (1024), no unsupported outcomes, 200000 actual draws, predeclared central chi-square interval; {\"qubits\":20,\"shots\":200000,\"fullDenseReferenceAmplitudes\":1048576,\"nonzeroBins\":1024,\"minExpectedCount\":132.8998816666988,\"statistic\":993.9209997383465,\"dof\":1023,\"acceptanceInterval\":[910.24630861,1143.26531703],\"ampError\":3.469446951953614e-17,\"ms\":308.6627389999994}",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "20-qubit structured full dense reference; all nonzero bins (1024), no unsupported outcomes, 200000 actual draws, predeclared central chi-square interval; {\"qubits\":20,\"shots\":200000,\"fullDenseReferenceAmplitudes\":1048576,\"nonzeroBins\":1024,\"minExpectedCount\":132.8998816666988,\"statistic\":993.9209997383465,\"dof\":1023,\"acceptanceInterval\":[910.24630861,1143.26531703],\"ampError\":3.469446951953614e-17,\"ms\":317.1454450000001}",
-          "ms": 394.89012100000036
+          "evidence": "20-qubit structured full dense reference; all nonzero bins (1024), no unsupported outcomes, 200000 actual draws, predeclared central chi-square interval; {\"qubits\":20,\"shots\":200000,\"fullDenseReferenceAmplitudes\":1048576,\"nonzeroBins\":1024,\"minExpectedCount\":132.8998816666988,\"statistic\":993.9209997383465,\"dof\":1023,\"acceptanceInterval\":[910.24630861,1143.26531703],\"ampError\":3.469446951953614e-17,\"ms\":308.6627389999994}",
+          "ms": 384.1938879999998
         }
       ],
-      "ms": 394.89012100000036
+      "ms": 384.1938879999998
     },
     {
       "id": 46,
       "title": "Heavy Output Generation (HOG)",
       "requirement": "Passes Quantum Volume heavy-output threshold (> 2/3) consistently across random square circuits.",
-      "status": "NOT_RUN",
-      "evidence": "No qualifying executed test yet"
+      "status": "PARTIAL",
+      "evidence": "48 independent seeded 8x8 square Haar U(4) random circuits, each 2048 genuine draws, independently computed heavy set; 50–100 qubit quantum volume remains unverified; {\"width\":8,\"depth\":8,\"trials\":48,\"shotsPerCircuit\":2048,\"meanHeavy\":0.8515625,\"minCircuitHeavy\":0.814453125,\"circuitsAboveTwoThirds\":48,\"pooledConditionalHoeffdingLower99\":0.8467227575666018,\"maxError\":1.279468816630226e-16,\"scope\":\"Haar U(4) square random circuits; not a 50–100 qubit quantum-volume certification\"}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "48 independent seeded 8x8 square Haar U(4) random circuits, each 2048 genuine draws, independently computed heavy set; 50–100 qubit quantum volume remains unverified; {\"width\":8,\"depth\":8,\"trials\":48,\"shotsPerCircuit\":2048,\"meanHeavy\":0.8515625,\"minCircuitHeavy\":0.814453125,\"circuitsAboveTwoThirds\":48,\"pooledConditionalHoeffdingLower99\":0.8467227575666018,\"maxError\":1.279468816630226e-16,\"scope\":\"Haar U(4) square random circuits; not a 50–100 qubit quantum-volume certification\"}",
+          "ms": 250.8543389999977
+        }
+      ],
+      "ms": 250.8543389999977
     },
     {
       "id": 47,
@@ -682,17 +760,25 @@
         {
           "status": "PASS",
           "evidence": "1000 complete samples reproducible with same seed",
-          "ms": 42.88195200000018
+          "ms": 30.16404599999987
         }
       ],
-      "ms": 42.88195200000018
+      "ms": 30.16404599999987
     },
     {
       "id": 48,
       "title": "Unseeded Statistical Independence",
       "requirement": "Distinct runs show zero autocorrelation between consecutive measurement shots.",
-      "status": "NOT_RUN",
-      "evidence": "No qualifying executed test yet"
+      "status": "PARTIAL",
+      "evidence": "100000 unseeded 100-qubit uniform shots, lag-1 autocorrelation bounded on one measured wire; full independence cannot be inferred from finite draws; {\"shots\":100000,\"lagOneCorrelation\":-0.000310493162004958,\"predeclaredBound\":0.015811467358376335,\"scope\":\"one wire; unseeded statistical evidence, not proof of zero autocorrelation\"}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "100000 unseeded 100-qubit uniform shots, lag-1 autocorrelation bounded on one measured wire; full independence cannot be inferred from finite draws; {\"shots\":100000,\"lagOneCorrelation\":-0.000310493162004958,\"predeclaredBound\":0.015811467358376335,\"scope\":\"one wire; unseeded statistical evidence, not proof of zero autocorrelation\"}",
+          "ms": 2228.9503289999993
+        }
+      ],
+      "ms": 2228.9503289999993
     },
     {
       "id": 49,
@@ -704,45 +790,50 @@
         {
           "status": "PARTIAL",
           "evidence": "both collapse branches and programmatic classical feedback",
-          "ms": 28.022921000000224
+          "ms": 17.52103199999965
         },
         {
           "status": "PASS",
           "evidence": "100-qubit trajectory with actual QASM 2/3 measure and conditional gate parsing; both collapse branches, feedback then reset; {\"versions\":2,\"branches\":4}",
-          "ms": 2.9596180000007735
+          "ms": 2.262789000000339
         }
       ],
-      "ms": 2.9596180000007735
+      "ms": 2.262789000000339
     },
     {
       "id": 50,
       "title": "Marginal Distribution Consistency",
       "requirement": "Single-qubit and two-qubit marginal probabilities match exact reduced density matrices \\\\(\\rho_A = \\text{Tr}\\_B(\\vert{}\\psi\\rangle\\langle\\psi\\vert{})\\\\).",
-      "status": "PARTIAL",
-      "evidence": "GHZ marginal probabilities",
+      "status": "PASS",
+      "evidence": "all 100 single and 4950 two-qubit computational-basis marginal probabilities on non-Clifford factor circuit; independent dense local probability oracle; {\"width\":100,\"singleQubitMarginals\":100,\"pairMarginals\":4950,\"maxError\":1.3877787807814457e-15}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "GHZ marginal probabilities",
-          "ms": 16.72819699999991
+          "ms": 10.62453400000004
+        },
+        {
+          "status": "PASS",
+          "evidence": "all 100 single and 4950 two-qubit computational-basis marginal probabilities on non-Clifford factor circuit; independent dense local probability oracle; {\"width\":100,\"singleQubitMarginals\":100,\"pairMarginals\":4950,\"maxError\":1.3877787807814457e-15}",
+          "ms": 362.82604600000195
         }
       ],
-      "ms": 16.72819699999991
+      "ms": 362.82604600000195
     },
     {
       "id": 51,
       "title": "Rare-Event Sampling Accuracy",
       "requirement": "Circuits engineered to have a target bitstring probability of 10⁻⁶ sample that bitstring at the expected rate.",
       "status": "PASS",
-      "evidence": "100-qubit engineered 10^-6 target; 20 million actual draws, predeclared exact 99% binomial interval; {\"qubits\":100,\"shots\":20000000,\"expected\":20,\"actual\":21,\"probability\":0.00000105,\"interval99\":[10,32],\"ms\":25932.571143}",
+      "evidence": "100-qubit engineered 10^-6 target; 20 million actual draws, predeclared exact 99% binomial interval; {\"qubits\":100,\"shots\":20000000,\"expected\":20,\"actual\":21,\"probability\":0.00000105,\"interval99\":[10,32],\"ms\":24898.158829}",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "100-qubit engineered 10^-6 target; 20 million actual draws, predeclared exact 99% binomial interval; {\"qubits\":100,\"shots\":20000000,\"expected\":20,\"actual\":21,\"probability\":0.00000105,\"interval99\":[10,32],\"ms\":25932.571143}",
-          "ms": 25932.979719000003
+          "evidence": "100-qubit engineered 10^-6 target; 20 million actual draws, predeclared exact 99% binomial interval; {\"qubits\":100,\"shots\":20000000,\"expected\":20,\"actual\":21,\"probability\":0.00000105,\"interval99\":[10,32],\"ms\":24898.158829}",
+          "ms": 24898.585112
         }
       ],
-      "ms": 25932.979719000003
+      "ms": 24898.585112
     },
     {
       "id": 52,
@@ -754,10 +845,10 @@
         {
           "status": "PASS",
           "evidence": "100000 H^100 sampled strings; zero duplicates; {\"unique\":100000}",
-          "ms": 2439.9553350000006
+          "ms": 1928.3675220000005
         }
       ],
-      "ms": 2439.9553350000006
+      "ms": 1928.3675220000005
     },
     {
       "id": 53,
@@ -783,10 +874,10 @@
         {
           "status": "PASS",
           "evidence": "50-qubit randomized 10-block circuit; 1000 full-width amplitude queries compared to independently coded predecessor path recursion, no DSIQ matrix reuse; {\"qubits\":50,\"queries\":1000,\"independentPathRecursion\":true,\"blocks\":10,\"maxError\":2.3250292600000887e-20}",
-          "ms": 76.65116000000125
+          "ms": 62.64260900000227
         }
       ],
-      "ms": 76.65116000000125
+      "ms": 62.64260900000227
     },
     {
       "id": 56,
@@ -799,8 +890,16 @@
       "id": 57,
       "title": "Stabilizer Engine Match (100 Qubits, Clifford-Only)",
       "requirement": "Exact match on 10,000-gate Clifford circuits against `Stim`.",
-      "status": "BLOCKED",
-      "evidence": "Specified independent comparison not executed"
+      "status": "PARTIAL",
+      "evidence": "internal affine-versus-DAG differential 245760 amplitudes, 3840 observables; 10000 random 100-qubit Clifford operations plus inverse; named external Stim oracle still unavailable; {\"differential\":{\"circuits\":60,\"operations\":3840,\"amplitudes\":245760,\"observables\":3840,\"maxError\":2.3322722985310245e-15},\"large\":{\"width\":100,\"forwardGates\":10000,\"inverseGates\":10000,\"finalRank\":99,\"forwardMs\":216.19640500000241,\"totalMs\":458.2589630000002,\"qubits\":100,\"gates\":20000,\"mode\":\"affine-clifford\",\"rank\":0,\"peakRank\":101,\"precision\":\"Exact binary and mod-4/mod-8 algebra; Float64 output\",\"liveNodes\":null,\"peakNodes\":null},\"wide\":{\"width\":1024,\"forwardGates\":3072,\"inverseGates\":3072,\"finalRank\":309,\"forwardMs\":38.83556800000224,\"totalMs\":98.04468500000075,\"qubits\":1024,\"gates\":6144,\"mode\":\"affine-clifford\",\"rank\":0,\"peakRank\":310,\"precision\":\"Exact binary and mod-4/mod-8 algebra; Float64 output\",\"liveNodes\":null,\"peakNodes\":null}}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "internal affine-versus-DAG differential 245760 amplitudes, 3840 observables; 10000 random 100-qubit Clifford operations plus inverse; named external Stim oracle still unavailable; {\"differential\":{\"circuits\":60,\"operations\":3840,\"amplitudes\":245760,\"observables\":3840,\"maxError\":2.3322722985310245e-15},\"large\":{\"width\":100,\"forwardGates\":10000,\"inverseGates\":10000,\"finalRank\":99,\"forwardMs\":216.19640500000241,\"totalMs\":458.2589630000002,\"qubits\":100,\"gates\":20000,\"mode\":\"affine-clifford\",\"rank\":0,\"peakRank\":101,\"precision\":\"Exact binary and mod-4/mod-8 algebra; Float64 output\",\"liveNodes\":null,\"peakNodes\":null},\"wide\":{\"width\":1024,\"forwardGates\":3072,\"inverseGates\":3072,\"finalRank\":309,\"forwardMs\":38.83556800000224,\"totalMs\":98.04468500000075,\"qubits\":1024,\"gates\":6144,\"mode\":\"affine-clifford\",\"rank\":0,\"peakRank\":310,\"precision\":\"Exact binary and mod-4/mod-8 algebra; Float64 output\",\"liveNodes\":null,\"peakNodes\":null}}",
+          "ms": 918.3101640000023
+        }
+      ],
+      "ms": 918.3101640000023
     },
     {
       "id": 58,
@@ -812,10 +911,10 @@
         {
           "status": "PASS",
           "evidence": "100-qubit nearest-neighbor number-conserving matchgates, 99 rotations and all 4950 two-particle amplitudes vs independent fermionic determinant oracle; {\"qubits\":100,\"matchgates\":99,\"amplitudes\":4950,\"oracle\":\"two-fermion Slater determinants\",\"maxError\":8.567656334178053e-17,\"norm\":0.9999999999999973,\"peakNodes\":22406}",
-          "ms": 94.38546399999905
+          "ms": 90.2341579999993
         }
       ],
-      "ms": 94.38546399999905
+      "ms": 90.2341579999993
     },
     {
       "id": 59,
@@ -829,60 +928,75 @@
       "title": "VQE / QAOA Energy Landscape Match",
       "requirement": "Exact cost-function expectation values across parameter sweeps on 50-node MaxCut graphs.",
       "status": "PASS",
-      "evidence": "two distinct 50-node triangle-free graphs, 5 QAOA parameter pairs each (p=1), all edge expectations vs analytical result; adjoint-Pauli observable-only path explicitly identified; {\"nodes\":50,\"graphs\":[\"cycle\",\"cycle + antipodal matching\"],\"peakTerms\":33,\"maxEdgeError\":1.1102230246251565e-16,\"rows\":[{\"degree\":2,\"edges\":50,\"gamma\":0.1,\"beta\":0.15,\"energy\":26.40221427909827,\"ms\":34.447928999994474},{\"degree\":2,\"edges\":50,\"gamma\":0.7,\"beta\":0.2,\"energy\":33.83647957603135,\"ms\":21.12591199999588},{\"degree\":2,\"edges\":50,\"gamma\":1.1,\"beta\":-0.31,\"energy\":15.441712970686723,\"ms\":20.480751000002783},{\"degree\":2,\"edges\":50,\"gamma\":-0.43,\"beta\":0.51,\"energy\":16.550731315522064,\"ms\":20.17723300000216},{\"degree\":2,\"edges\":50,\"gamma\":2.2,\"beta\":0.82,\"energy\":26.641107567765808,\"ms\":21.222168000000238},{\"degree\":3,\"edges\":75,\"gamma\":0.1,\"beta\":0.15,\"energy\":39.592813572472664,\"ms\":89.95686199999909},{\"degree\":3,\"edges\":75,\"gamma\":0.7,\"beta\":0.2,\"energy\":47.6377685502399,\"ms\":87.19344999999885},{\"degree\":3,\"edges\":75,\"gamma\":1.1,\"beta\":-0.31,\"energy\":30.996597114046697,\"ms\":87.01243699999759},{\"degree\":3,\"edges\":75,\"gamma\":-0.43,\"beta\":0.51,\"energy\":25.979856234013432,\"ms\":89.91607600000134},{\"degree\":3,\"edges\":75,\"gamma\":2.2,\"beta\":0.82,\"energy\":36.05130954425045,\"ms\":96.60665800000424}],\"adjointDifferential\":{\"comparisons\":1800,\"maxError\":4.884981308350689e-15}}",
+      "evidence": "two distinct 50-node triangle-free graphs, 5 QAOA parameter pairs each (p=1), all edge expectations vs analytical result; adjoint-Pauli observable-only path explicitly identified; {\"nodes\":50,\"graphs\":[\"cycle\",\"cycle + antipodal matching\"],\"peakTerms\":33,\"maxEdgeError\":1.1102230246251565e-16,\"rows\":[{\"degree\":2,\"edges\":50,\"gamma\":0.1,\"beta\":0.15,\"energy\":26.40221427909827,\"ms\":33.234613000000536},{\"degree\":2,\"edges\":50,\"gamma\":0.7,\"beta\":0.2,\"energy\":33.83647957603135,\"ms\":19.82477800000197},{\"degree\":2,\"edges\":50,\"gamma\":1.1,\"beta\":-0.31,\"energy\":15.441712970686723,\"ms\":18.744721000002755},{\"degree\":2,\"edges\":50,\"gamma\":-0.43,\"beta\":0.51,\"energy\":16.550731315522064,\"ms\":18.645661999995355},{\"degree\":2,\"edges\":50,\"gamma\":2.2,\"beta\":0.82,\"energy\":26.641107567765808,\"ms\":19.41400900000008},{\"degree\":3,\"edges\":75,\"gamma\":0.1,\"beta\":0.15,\"energy\":39.592813572472664,\"ms\":82.25446499999816},{\"degree\":3,\"edges\":75,\"gamma\":0.7,\"beta\":0.2,\"energy\":47.6377685502399,\"ms\":81.10157900000195},{\"degree\":3,\"edges\":75,\"gamma\":1.1,\"beta\":-0.31,\"energy\":30.996597114046697,\"ms\":82.90469599999778},{\"degree\":3,\"edges\":75,\"gamma\":-0.43,\"beta\":0.51,\"energy\":25.979856234013432,\"ms\":78.70454799999425},{\"degree\":3,\"edges\":75,\"gamma\":2.2,\"beta\":0.82,\"energy\":36.05130954425045,\"ms\":79.23045100000309}],\"adjointDifferential\":{\"comparisons\":1800,\"maxError\":4.884981308350689e-15}}",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "two distinct 50-node triangle-free graphs, 5 QAOA parameter pairs each (p=1), all edge expectations vs analytical result; adjoint-Pauli observable-only path explicitly identified; {\"nodes\":50,\"graphs\":[\"cycle\",\"cycle + antipodal matching\"],\"peakTerms\":33,\"maxEdgeError\":1.1102230246251565e-16,\"rows\":[{\"degree\":2,\"edges\":50,\"gamma\":0.1,\"beta\":0.15,\"energy\":26.40221427909827,\"ms\":34.447928999994474},{\"degree\":2,\"edges\":50,\"gamma\":0.7,\"beta\":0.2,\"energy\":33.83647957603135,\"ms\":21.12591199999588},{\"degree\":2,\"edges\":50,\"gamma\":1.1,\"beta\":-0.31,\"energy\":15.441712970686723,\"ms\":20.480751000002783},{\"degree\":2,\"edges\":50,\"gamma\":-0.43,\"beta\":0.51,\"energy\":16.550731315522064,\"ms\":20.17723300000216},{\"degree\":2,\"edges\":50,\"gamma\":2.2,\"beta\":0.82,\"energy\":26.641107567765808,\"ms\":21.222168000000238},{\"degree\":3,\"edges\":75,\"gamma\":0.1,\"beta\":0.15,\"energy\":39.592813572472664,\"ms\":89.95686199999909},{\"degree\":3,\"edges\":75,\"gamma\":0.7,\"beta\":0.2,\"energy\":47.6377685502399,\"ms\":87.19344999999885},{\"degree\":3,\"edges\":75,\"gamma\":1.1,\"beta\":-0.31,\"energy\":30.996597114046697,\"ms\":87.01243699999759},{\"degree\":3,\"edges\":75,\"gamma\":-0.43,\"beta\":0.51,\"energy\":25.979856234013432,\"ms\":89.91607600000134},{\"degree\":3,\"edges\":75,\"gamma\":2.2,\"beta\":0.82,\"energy\":36.05130954425045,\"ms\":96.60665800000424}],\"adjointDifferential\":{\"comparisons\":1800,\"maxError\":4.884981308350689e-15}}",
-          "ms": 732.7117569999973
+          "evidence": "two distinct 50-node triangle-free graphs, 5 QAOA parameter pairs each (p=1), all edge expectations vs analytical result; adjoint-Pauli observable-only path explicitly identified; {\"nodes\":50,\"graphs\":[\"cycle\",\"cycle + antipodal matching\"],\"peakTerms\":33,\"maxEdgeError\":1.1102230246251565e-16,\"rows\":[{\"degree\":2,\"edges\":50,\"gamma\":0.1,\"beta\":0.15,\"energy\":26.40221427909827,\"ms\":33.234613000000536},{\"degree\":2,\"edges\":50,\"gamma\":0.7,\"beta\":0.2,\"energy\":33.83647957603135,\"ms\":19.82477800000197},{\"degree\":2,\"edges\":50,\"gamma\":1.1,\"beta\":-0.31,\"energy\":15.441712970686723,\"ms\":18.744721000002755},{\"degree\":2,\"edges\":50,\"gamma\":-0.43,\"beta\":0.51,\"energy\":16.550731315522064,\"ms\":18.645661999995355},{\"degree\":2,\"edges\":50,\"gamma\":2.2,\"beta\":0.82,\"energy\":26.641107567765808,\"ms\":19.41400900000008},{\"degree\":3,\"edges\":75,\"gamma\":0.1,\"beta\":0.15,\"energy\":39.592813572472664,\"ms\":82.25446499999816},{\"degree\":3,\"edges\":75,\"gamma\":0.7,\"beta\":0.2,\"energy\":47.6377685502399,\"ms\":81.10157900000195},{\"degree\":3,\"edges\":75,\"gamma\":1.1,\"beta\":-0.31,\"energy\":30.996597114046697,\"ms\":82.90469599999778},{\"degree\":3,\"edges\":75,\"gamma\":-0.43,\"beta\":0.51,\"energy\":25.979856234013432,\"ms\":78.70454799999425},{\"degree\":3,\"edges\":75,\"gamma\":2.2,\"beta\":0.82,\"energy\":36.05130954425045,\"ms\":79.23045100000309}],\"adjointDifferential\":{\"comparisons\":1800,\"maxError\":4.884981308350689e-15}}",
+          "ms": 657.2434869999997
         }
       ],
-      "ms": 732.7117569999973
+      "ms": 657.2434869999997
     },
     {
       "id": 61,
       "title": "Non-Clifford T-Gate Injection Audit",
       "requirement": "Adding 500 T-gates to a Clifford circuit does not cause silent approximation or failure.",
-      "status": "PARTIAL",
-      "evidence": "500 T injections into GHZ, analytic phase; structured circuit only",
+      "status": "PASS",
+      "evidence": "connected 100-qubit affine Clifford+T phase circuit: 500/1000/5000 T or TDG injections, randomized CX/CZ/X/S, independent monomial amplitude oracle, randomized small-circuit Gauss-sum expectation differential; not unrestricted Clifford+T; {\"injection\":{\"width\":100,\"checkpoints\":[{\"tGates\":500,\"gateCount\":2199,\"phaseTerms\":180,\"peakPhaseTerms\":180},{\"tGates\":1000,\"gateCount\":4199,\"phaseTerms\":344,\"peakPhaseTerms\":346},{\"tGates\":5000,\"gateCount\":20199,\"phaseTerms\":1672,\"peakPhaseTerms\":1674}],\"queries\":192,\"independentOracle\":\"monomial amplitude inverse path; verified connected graph\",\"maxError\":0},\"differential\":{\"checkpoints\":3035,\"amplitudes\":194240,\"observables\":24280,\"maxError\":1.3150988898405085e-15}}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "500 T injections into GHZ, analytic phase; structured circuit only",
-          "ms": 72.88974299999973
+          "ms": 47.59779499999968
+        },
+        {
+          "status": "PASS",
+          "evidence": "connected 100-qubit affine Clifford+T phase circuit: 500/1000/5000 T or TDG injections, randomized CX/CZ/X/S, independent monomial amplitude oracle, randomized small-circuit Gauss-sum expectation differential; not unrestricted Clifford+T; {\"injection\":{\"width\":100,\"checkpoints\":[{\"tGates\":500,\"gateCount\":2199,\"phaseTerms\":180,\"peakPhaseTerms\":180},{\"tGates\":1000,\"gateCount\":4199,\"phaseTerms\":344,\"peakPhaseTerms\":346},{\"tGates\":5000,\"gateCount\":20199,\"phaseTerms\":1672,\"peakPhaseTerms\":1674}],\"queries\":192,\"independentOracle\":\"monomial amplitude inverse path; verified connected graph\",\"maxError\":0},\"differential\":{\"checkpoints\":3035,\"amplitudes\":194240,\"observables\":24280,\"maxError\":1.3150988898405085e-15}}",
+          "ms": 1224.0958170000013
         }
       ],
-      "ms": 72.88974299999973
+      "ms": 1224.0958170000013
     },
     {
       "id": 62,
       "title": "Zero-State Bias Check",
       "requirement": "Running random circuits starting from \\\\(\\vert{}10110...1\\rangle\\\\) performs identically to starting from \\\\(\\vert{}00000...0\\rangle\\\\).",
       "status": "PASS",
-      "evidence": "100-qubit random nonzero basis; randomized independent two-qubit blocks, independent two-qubit matrix evolution and 256 full-width complex amplitude queries; {\"gates\":496,\"mode\":\"dag\"}",
+      "evidence": "100-qubit random nonzero computational input, 16 layers of non-Clifford factor circuits vs independent dense source-scatter; {\"width\":100,\"initial\":\"1110110111101100000110001011111000010111001111010110011010010001001111011010110010001110001011101100\",\"maxBlockError\":0,\"operations\":2694}",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "100-qubit random nonzero basis; randomized independent two-qubit blocks, independent two-qubit matrix evolution and 256 full-width complex amplitude queries; {\"gates\":496,\"mode\":\"dag\"}",
-          "ms": 86.75306600000113
+          "evidence": "100-qubit random nonzero basis; randomized independent two-qubit blocks, independent two-qubit matrix evolution and 256 full-width complex amplitude queries; {\"gates\":496,\"mode\":\"factor-statevector\"}",
+          "ms": 13.406973999999536
+        },
+        {
+          "status": "PASS",
+          "evidence": "100-qubit random nonzero computational input, 16 layers of non-Clifford factor circuits vs independent dense source-scatter; {\"width\":100,\"initial\":\"1110110111101100000110001011111000010111001111010110011010010001001111011010110010001110001011101100\",\"maxBlockError\":0,\"operations\":2694}",
+          "ms": 31.86868400000094
         }
       ],
-      "ms": 86.75306600000113
+      "ms": 31.86868400000094
     },
     {
       "id": 63,
       "title": "Permutation Invariance",
       "requirement": "Relabeling qubit indices (`q[0..99]` shuffled randomly) produces identical physical results.",
-      "status": "PARTIAL",
-      "evidence": "arbitrary logical permutation of 6-qubit random circuits, all amplitudes; 100-qubit planner checked separately",
+      "status": "PASS",
+      "evidence": "100-qubit random physical wire permutation on non-Clifford 20-component circuits, 1000 amplitude queries, norm; prior small fully connected differential; {\"width\":100,\"queries\":1000,\"maxAbsError\":1.475428253723915e-29}",
       "attempts": [
         {
           "status": "PARTIAL",
           "evidence": "arbitrary logical permutation of 6-qubit random circuits, all amplitudes; 100-qubit planner checked separately",
-          "ms": 34.969333000000915
+          "ms": 29.714827999998306
+        },
+        {
+          "status": "PASS",
+          "evidence": "100-qubit random physical wire permutation on non-Clifford 20-component circuits, 1000 amplitude queries, norm; prior small fully connected differential; {\"width\":100,\"queries\":1000,\"maxAbsError\":1.475428253723915e-29}",
+          "ms": 51.877360000005865
         }
       ],
-      "ms": 34.969333000000915
+      "ms": 51.877360000005865
     },
     {
       "id": 64,
@@ -901,10 +1015,10 @@
         {
           "status": "PARTIAL",
           "evidence": "1e-18 amplitude retained and uncomputed",
-          "ms": 0.45103999999992084
+          "ms": 0.33011700000042765
         }
       ],
-      "ms": 0.45103999999992084
+      "ms": 0.33011700000042765
     },
     {
       "id": 66,
@@ -916,15 +1030,15 @@
         {
           "status": "PARTIAL",
           "evidence": "non-dyadic parameter, analytic output",
-          "ms": 0.23627500000020518
+          "ms": 0.15619499999957043
         },
         {
           "status": "PASS",
           "evidence": "100 distinct non-dyadic arbitrary-angle rotations; closed-form two-component checks, no parameter rounding/cache snapping; {\"distinctAngles\":100}",
-          "ms": 11.371178999999756
+          "ms": 7.652896999999939
         }
       ],
-      "ms": 11.371178999999756
+      "ms": 7.652896999999939
     },
     {
       "id": 67,
@@ -936,10 +1050,10 @@
         {
           "status": "PASS",
           "evidence": "adversarial dense random bipartite graph-state CZ network; physical cut GF(2) rank, all 100 stabilizers and independent phase queries; {\"edges\":1201,\"cutRank\":49,\"cutEntropyBits\":49}",
-          "ms": 83.41046600000118
+          "ms": 52.278383000004396
         }
       ],
-      "ms": 83.41046600000118
+      "ms": 52.278383000004396
     },
     {
       "id": 68,
@@ -958,10 +1072,10 @@
         {
           "status": "PASS",
           "evidence": "GHZ symmetry break on q73, four analytic amplitudes",
-          "ms": 13.904445000000123
+          "ms": 8.689167999999881
         }
       ],
-      "ms": 13.904445000000123
+      "ms": 8.689167999999881
     },
     {
       "id": 70,
@@ -973,57 +1087,105 @@
         {
           "status": "FAIL",
           "evidence": "seeded 100-layer non-Clifford 100-qubit random rotations and random matching entanglers then inverse, 32768-node bound; depth 1: deferred replay at gate 103; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
-          "ms": 366.8455780000004
+          "ms": 248.438094000001
         },
         {
           "status": "FAIL",
           "evidence": "adaptive full 100-layer randomized non-Clifford (100 wires) forward and inverse attempt; node/term budgets 32768/256 and replay capped at 50000 visits; no cancellation; No verified result for 30000 operations. Replay visit limit reached; no complete amplitude; [{\"strategy\":\"dag\",\"status\":\"deferred\"},{\"strategy\":\"coherent\",\"status\":\"resource-or-representation-boundary\",\"reason\":\"Coherent term budget exhausted\"}]",
-          "ms": 422.08228999999847
+          "ms": 410.96045199999935
         }
       ],
-      "ms": 422.08228999999847
+      "ms": 410.96045199999935
     },
     {
       "id": 71,
       "title": "Physical RAM Ceiling Audit",
       "requirement": "Peak Resident Set Size (RSS) stays strictly within documented physical RAM limits without OS Out-Of-Memory (OOM) kills.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PARTIAL",
+      "evidence": "native fixed coefficient arena 4194304 bytes; structured 1024-qubit native run measured process RSS; JS/full-suite hard RAM cap unverified; {\"large\":{\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1},\"sequential\":{\"programs\":1000,\"firstRssKiB\":992,\"lastRssKiB\":1012,\"steadyStateMinKiB\":1012,\"steadyStateMaxKiB\":1012,\"peakKiB\":1012},\"nativeBoundary\":true}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "native fixed coefficient arena 4194304 bytes; structured 1024-qubit native run measured process RSS; JS/full-suite hard RAM cap unverified; {\"large\":{\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1},\"sequential\":{\"programs\":1000,\"firstRssKiB\":992,\"lastRssKiB\":1012,\"steadyStateMinKiB\":1012,\"steadyStateMaxKiB\":1012,\"peakKiB\":1012},\"nativeBoundary\":true}",
+          "ms": 1537.1996969999964
+        }
+      ],
+      "ms": 1537.1996969999964
     },
     {
       "id": 72,
       "title": "Zero Disk Swap / Paging Audit",
       "requirement": "`vmstat` / `iostat` confirms zero swap-file usage or hidden NVMe/SSD scratch paging during 100-qubit runs.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PARTIAL",
+      "evidence": "native /proc/self/status VmSwap zero across 1024-qubit native and 1000 sequential 100-qubit jobs; full OS disk I/O and browser audit not executed; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "native /proc/self/status VmSwap zero across 1024-qubit native and 1000 sequential 100-qubit jobs; full OS disk I/O and browser audit not executed; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+          "ms": 0.02609900000243215
+        }
+      ],
+      "ms": 0.02609900000243215
     },
     {
       "id": 73,
       "title": "Zero Network Offloading",
       "requirement": "Network interface monitoring confirms zero silent offloading to remote cloud supercomputers.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PARTIAL",
+      "evidence": "native Linux seccomp guard rejects socket creation with EPERM; structured local execution validated; no complete interface monitoring; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "native Linux seccomp guard rejects socket creation with EPERM; structured local execution validated; no complete interface monitoring; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+          "ms": 0.011536999998497777
+        }
+      ],
+      "ms": 0.011536999998497777
     },
     {
       "id": 74,
       "title": "Memory Leak Check",
       "requirement": "Running 1,000 sequential 100-qubit circuits shows flat memory allocation with zero gradual growth.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PASS",
+      "evidence": "1000 sequential 100-qubit mixed native programs, fixed arena, same process; steady-state RSS range and state norm; {\"programs\":1000,\"firstRssKiB\":992,\"lastRssKiB\":1012,\"steadyStateMinKiB\":1012,\"steadyStateMaxKiB\":1012,\"peakKiB\":1012}",
+      "attempts": [
+        {
+          "status": "PASS",
+          "evidence": "1000 sequential 100-qubit mixed native programs, fixed arena, same process; steady-state RSS range and state norm; {\"programs\":1000,\"firstRssKiB\":992,\"lastRssKiB\":1012,\"steadyStateMinKiB\":1012,\"steadyStateMaxKiB\":1012,\"peakKiB\":1012}",
+          "ms": 0.010765999999421183
+        }
+      ],
+      "ms": 0.010765999999421183
     },
     {
       "id": 75,
       "title": "Deterministic Memory Footprint",
       "requirement": "Memory usage is predictable before execution begins based on circuit parameters.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PARTIAL",
+      "evidence": "native coefficient allocation known from connectivity prior to gate execution; upper bound fixed, OS/runtime footprint varies; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "native coefficient allocation known from connectivity prior to gate execution; upper bound fixed, OS/runtime footprint varies; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+          "ms": 0.011227000002691057
+        }
+      ],
+      "ms": 0.011227000002691057
     },
     {
       "id": 76,
       "title": "Cache Locality & Bandwidth Efficiency",
       "requirement": "Profiling shows predictable memory access patterns without segmentation faults or buffer overflows.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PARTIAL",
+      "evidence": "native contiguous coefficient pairs, bounds-checked component plan, invalid oversized component rejected; hardware cache counters/sanitizer audit pending; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "native contiguous coefficient pairs, bounds-checked component plan, invalid oversized component rejected; hardware cache counters/sanitizer audit pending; {\"qubits\":1024,\"gates\":13824,\"factors\":128,\"coefficientBytes\":524288,\"arenaBytes\":4194304,\"norm\":0.9999999999999937,\"rssKiB\":1504,\"hwmKiB\":1504,\"swapKiB\":0,\"socketDenied\":1}",
+          "ms": 0.014721999999892432
+        }
+      ],
+      "ms": 0.014721999999892432
     },
     {
       "id": 77,
@@ -1036,8 +1198,16 @@
       "id": 78,
       "title": "Multi-Thread / MPI Determinism",
       "requirement": "Running across 1, 8, 32, or 128 threads produces identical final states without race conditions.",
-      "status": "BLOCKED",
-      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+      "status": "PARTIAL",
+      "evidence": "batch amplitude query deterministic in 1/8 threads; 32/128 thread and MPI full gate evolution unverified; {\"cases\":[{\"threads\":1,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":85.74758600000004,\"maxError\":0},{\"threads\":8,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":120.633914,\"maxError\":0}],\"deterministic\":true}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "batch amplitude query deterministic in 1/8 threads; 32/128 thread and MPI full gate evolution unverified; {\"cases\":[{\"threads\":1,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":85.74758600000004,\"maxError\":0},{\"threads\":8,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":120.633914,\"maxError\":0}],\"deterministic\":true}",
+          "ms": 0.05045600000448758
+        }
+      ],
+      "ms": 0.05045600000448758
     },
     {
       "id": 79,
@@ -1049,15 +1219,15 @@
         {
           "status": "PARTIAL",
           "evidence": "forced budget replay and explicit unsupported-sampling error",
-          "ms": 1.2995580000006157
+          "ms": 1.0176330000003873
         },
         {
           "status": "PASS",
           "evidence": "forced DAG/replay budget; explicit visit-limit exception with no final amplitude; retry succeeds; custom-unitary resource-overflow leaves original state unchanged; {\"replayVisits\":3}",
-          "ms": 0.7378319999988889
+          "ms": 0.819855000001553
         }
       ],
-      "ms": 0.7378319999988889
+      "ms": 0.819855000001553
     },
     {
       "id": 80,
@@ -1071,135 +1241,150 @@
       "title": "Qubit Scaling Curve (N = 10 → 100)",
       "requirement": "Documented wall-clock runtime at N = 10, 20, 30, 40, 50, 60, 70, 80, 90, 100.",
       "status": "PASS",
-      "evidence": "GHZ wall-clock N10..100; [{\"n\":10,\"ms\":0.23310099999980594},{\"n\":20,\"ms\":0.7820680000004359},{\"n\":30,\"ms\":1.4759930000000168},{\"n\":40,\"ms\":2.7126560000006066},{\"n\":50,\"ms\":4.134778000000551},{\"n\":60,\"ms\":7.8023919999996},{\"n\":70,\"ms\":5.181884999999966},{\"n\":80,\"ms\":6.130514000000403},{\"n\":90,\"ms\":6.114720999999918},{\"n\":100,\"ms\":8.425432}]",
+      "evidence": "GHZ wall-clock N10..100; [{\"n\":10,\"ms\":0.14796300000034535},{\"n\":20,\"ms\":0.4181700000008277},{\"n\":30,\"ms\":0.9668460000002597},{\"n\":40,\"ms\":1.938771000000088},{\"n\":50,\"ms\":4.344433999999637},{\"n\":60,\"ms\":4.240235999999641},{\"n\":70,\"ms\":3.4046580000003814},{\"n\":80,\"ms\":6.037213999999949},{\"n\":90,\"ms\":5.912075000000186},{\"n\":100,\"ms\":8.557921000000533}]",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "GHZ wall-clock N10..100; [{\"n\":10,\"ms\":0.23310099999980594},{\"n\":20,\"ms\":0.7820680000004359},{\"n\":30,\"ms\":1.4759930000000168},{\"n\":40,\"ms\":2.7126560000006066},{\"n\":50,\"ms\":4.134778000000551},{\"n\":60,\"ms\":7.8023919999996},{\"n\":70,\"ms\":5.181884999999966},{\"n\":80,\"ms\":6.130514000000403},{\"n\":90,\"ms\":6.114720999999918},{\"n\":100,\"ms\":8.425432}]",
-          "ms": 43.16988599999968
+          "evidence": "GHZ wall-clock N10..100; [{\"n\":10,\"ms\":0.14796300000034535},{\"n\":20,\"ms\":0.4181700000008277},{\"n\":30,\"ms\":0.9668460000002597},{\"n\":40,\"ms\":1.938771000000088},{\"n\":50,\"ms\":4.344433999999637},{\"n\":60,\"ms\":4.240235999999641},{\"n\":70,\"ms\":3.4046580000003814},{\"n\":80,\"ms\":6.037213999999949},{\"n\":90,\"ms\":5.912075000000186},{\"n\":100,\"ms\":8.557921000000533}]",
+          "ms": 36.06839900000068
         }
       ],
-      "ms": 43.16988599999968
+      "ms": 36.06839900000068
     },
     {
       "id": 82,
       "title": "Depth Scaling Curve (D = 1 → 100)",
       "requirement": "Documented runtime as circuit depth scales linearly on a fixed 100-qubit register.",
       "status": "PASS",
-      "evidence": "100-qubit structured phase/entangler circuit; scheduled depth 1,10,…,100, each layer touches all 100 wires; wall-clock and norm; [{\"depth\":1,\"operations\":100,\"ms\":0.7951679999987391},{\"depth\":10,\"operations\":750,\"ms\":7.1242719999991095},{\"depth\":20,\"operations\":1500,\"ms\":13.191700999999739},{\"depth\":30,\"operations\":2250,\"ms\":24.531471000000238},{\"depth\":40,\"operations\":3000,\"ms\":32.723221000000194},{\"depth\":50,\"operations\":3750,\"ms\":45.81851100000131},{\"depth\":60,\"operations\":4500,\"ms\":47.5760539999992},{\"depth\":70,\"operations\":5250,\"ms\":69.94209300000148},{\"depth\":80,\"operations\":6000,\"ms\":62.90360200000032},{\"depth\":90,\"operations\":6750,\"ms\":71.24667799999952},{\"depth\":100,\"operations\":7500,\"ms\":76.71379499999966}]",
+      "evidence": "100-qubit structured phase/entangler circuit; scheduled depth 1,10,…,100, each layer touches all 100 wires; wall-clock and norm; [{\"depth\":1,\"operations\":100,\"ms\":0.7012959999992745},{\"depth\":10,\"operations\":750,\"ms\":8.398740999999063},{\"depth\":20,\"operations\":1500,\"ms\":11.54987699999947},{\"depth\":30,\"operations\":2250,\"ms\":19.59295199999906},{\"depth\":40,\"operations\":3000,\"ms\":29.108534999999392},{\"depth\":50,\"operations\":3750,\"ms\":41.47438200000033},{\"depth\":60,\"operations\":4500,\"ms\":47.34838900000068},{\"depth\":70,\"operations\":5250,\"ms\":58.098791999998866},{\"depth\":80,\"operations\":6000,\"ms\":62.18389600000046},{\"depth\":90,\"operations\":6750,\"ms\":68.83592500000123},{\"depth\":100,\"operations\":7500,\"ms\":73.26945299999898}]",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "100-qubit structured phase/entangler circuit; scheduled depth 1,10,…,100, each layer touches all 100 wires; wall-clock and norm; [{\"depth\":1,\"operations\":100,\"ms\":0.7951679999987391},{\"depth\":10,\"operations\":750,\"ms\":7.1242719999991095},{\"depth\":20,\"operations\":1500,\"ms\":13.191700999999739},{\"depth\":30,\"operations\":2250,\"ms\":24.531471000000238},{\"depth\":40,\"operations\":3000,\"ms\":32.723221000000194},{\"depth\":50,\"operations\":3750,\"ms\":45.81851100000131},{\"depth\":60,\"operations\":4500,\"ms\":47.5760539999992},{\"depth\":70,\"operations\":5250,\"ms\":69.94209300000148},{\"depth\":80,\"operations\":6000,\"ms\":62.90360200000032},{\"depth\":90,\"operations\":6750,\"ms\":71.24667799999952},{\"depth\":100,\"operations\":7500,\"ms\":76.71379499999966}]",
-          "ms": 453.1661270000004
+          "evidence": "100-qubit structured phase/entangler circuit; scheduled depth 1,10,…,100, each layer touches all 100 wires; wall-clock and norm; [{\"depth\":1,\"operations\":100,\"ms\":0.7012959999992745},{\"depth\":10,\"operations\":750,\"ms\":8.398740999999063},{\"depth\":20,\"operations\":1500,\"ms\":11.54987699999947},{\"depth\":30,\"operations\":2250,\"ms\":19.59295199999906},{\"depth\":40,\"operations\":3000,\"ms\":29.108534999999392},{\"depth\":50,\"operations\":3750,\"ms\":41.47438200000033},{\"depth\":60,\"operations\":4500,\"ms\":47.34838900000068},{\"depth\":70,\"operations\":5250,\"ms\":58.098791999998866},{\"depth\":80,\"operations\":6000,\"ms\":62.18389600000046},{\"depth\":90,\"operations\":6750,\"ms\":68.83592500000123},{\"depth\":100,\"operations\":7500,\"ms\":73.26945299999898}]",
+          "ms": 421.11253899999974
         }
       ],
-      "ms": 453.1661270000004
+      "ms": 421.11253899999974
     },
     {
       "id": 83,
       "title": "Entanglement Scaling Curve",
       "requirement": "Documented runtime vs. two-qubit gate density (from 0% to 100% entangling layers).",
       "status": "PASS",
-      "evidence": "100-qubit phase graph: 20 scheduled layers following H preparation, percentage of two-qubit CZ layers 0–100%, measured wall-clock and norm; [{\"density\":0,\"entanglingLayers\":0,\"edges\":0,\"operations\":2100,\"ms\":13.055576000000656},{\"density\":0.2,\"entanglingLayers\":4,\"edges\":200,\"operations\":1900,\"ms\":16.79368599999907},{\"density\":0.4,\"entanglingLayers\":8,\"edges\":400,\"operations\":1700,\"ms\":14.999112999999852},{\"density\":0.6,\"entanglingLayers\":12,\"edges\":600,\"operations\":1500,\"ms\":13.76072799999929},{\"density\":0.8,\"entanglingLayers\":16,\"edges\":800,\"operations\":1300,\"ms\":13.38016400000015},{\"density\":1,\"entanglingLayers\":20,\"edges\":1000,\"operations\":1100,\"ms\":10.195888000000195}]",
+      "evidence": "100-qubit phase graph: 20 scheduled layers following H preparation, percentage of two-qubit CZ layers 0–100%, measured wall-clock and norm; [{\"density\":0,\"entanglingLayers\":0,\"edges\":0,\"operations\":2100,\"ms\":12.170280999998795},{\"density\":0.2,\"entanglingLayers\":4,\"edges\":200,\"operations\":1900,\"ms\":15.143841000000975},{\"density\":0.4,\"entanglingLayers\":8,\"edges\":400,\"operations\":1700,\"ms\":14.26654899999994},{\"density\":0.6,\"entanglingLayers\":12,\"edges\":600,\"operations\":1500,\"ms\":12.679528999999093},{\"density\":0.8,\"entanglingLayers\":16,\"edges\":800,\"operations\":1300,\"ms\":12.312275999998747},{\"density\":1,\"entanglingLayers\":20,\"edges\":1000,\"operations\":1100,\"ms\":10.04666300000099}]",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "100-qubit phase graph: 20 scheduled layers following H preparation, percentage of two-qubit CZ layers 0–100%, measured wall-clock and norm; [{\"density\":0,\"entanglingLayers\":0,\"edges\":0,\"operations\":2100,\"ms\":13.055576000000656},{\"density\":0.2,\"entanglingLayers\":4,\"edges\":200,\"operations\":1900,\"ms\":16.79368599999907},{\"density\":0.4,\"entanglingLayers\":8,\"edges\":400,\"operations\":1700,\"ms\":14.999112999999852},{\"density\":0.6,\"entanglingLayers\":12,\"edges\":600,\"operations\":1500,\"ms\":13.76072799999929},{\"density\":0.8,\"entanglingLayers\":16,\"edges\":800,\"operations\":1300,\"ms\":13.38016400000015},{\"density\":1,\"entanglingLayers\":20,\"edges\":1000,\"operations\":1100,\"ms\":10.195888000000195}]",
-          "ms": 82.6298540000007
+          "evidence": "100-qubit phase graph: 20 scheduled layers following H preparation, percentage of two-qubit CZ layers 0–100%, measured wall-clock and norm; [{\"density\":0,\"entanglingLayers\":0,\"edges\":0,\"operations\":2100,\"ms\":12.170280999998795},{\"density\":0.2,\"entanglingLayers\":4,\"edges\":200,\"operations\":1900,\"ms\":15.143841000000975},{\"density\":0.4,\"entanglingLayers\":8,\"edges\":400,\"operations\":1700,\"ms\":14.26654899999994},{\"density\":0.6,\"entanglingLayers\":12,\"edges\":600,\"operations\":1500,\"ms\":12.679528999999093},{\"density\":0.8,\"entanglingLayers\":16,\"edges\":800,\"operations\":1300,\"ms\":12.312275999998747},{\"density\":1,\"entanglingLayers\":20,\"edges\":1000,\"operations\":1100,\"ms\":10.04666300000099}]",
+          "ms": 77.03830999999991
         }
       ],
-      "ms": 82.6298540000007
+      "ms": 77.03830999999991
     },
     {
       "id": 84,
       "title": "Single-Amplitude Query Latency",
       "requirement": "Exact time measured to extract one complex amplitude \\\\(\\alpha \\_{x}\\\\) at 50 and 100 qubits.",
       "status": "PASS",
-      "evidence": "single-amplitude latency, 1000 queries each at 50/100; [{\"n\":50,\"meanMs\":0.006523616999999831},{\"n\":100,\"meanMs\":0.00733481699999993}]",
+      "evidence": "single-amplitude latency, 1000 queries each at 50/100; [{\"n\":50,\"meanMs\":0.006377772000000732},{\"n\":100,\"meanMs\":0.005308405999999195}]",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "single-amplitude latency, 1000 queries each at 50/100; [{\"n\":50,\"meanMs\":0.006523616999999831},{\"n\":100,\"meanMs\":0.00733481699999993}]",
-          "ms": 22.617889000000105
+          "evidence": "single-amplitude latency, 1000 queries each at 50/100; [{\"n\":50,\"meanMs\":0.006377772000000732},{\"n\":100,\"meanMs\":0.005308405999999195}]",
+          "ms": 23.10812199999964
         }
       ],
-      "ms": 22.617889000000105
+      "ms": 23.10812199999964
     },
     {
       "id": 85,
       "title": "Batch Amplitude Query Throughput",
       "requirement": "Time measured to extract 10,000 distinct amplitudes simultaneously.",
-      "status": "PARTIAL",
-      "evidence": "10000 sequential distinct amplitude queries; not parallel; {\"ms\":86.82672600000024}",
+      "status": "PASS",
+      "evidence": "10000 distinct full-width complex amplitude queries, immutable shared coefficient snapshot, 1 and 8 Node worker threads, identical ordered results against serial kernel; {\"cases\":[{\"threads\":1,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":85.74758600000004,\"maxError\":0},{\"threads\":8,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":120.633914,\"maxError\":0}],\"deterministic\":true}",
       "attempts": [
         {
           "status": "PARTIAL",
-          "evidence": "10000 sequential distinct amplitude queries; not parallel; {\"ms\":86.82672600000024}",
-          "ms": 94.86316199999965
+          "evidence": "10000 sequential distinct amplitude queries; not parallel; {\"ms\":80.68261900000016}",
+          "ms": 88.09537500000079
+        },
+        {
+          "status": "PASS",
+          "evidence": "10000 distinct full-width complex amplitude queries, immutable shared coefficient snapshot, 1 and 8 Node worker threads, identical ordered results against serial kernel; {\"cases\":[{\"threads\":1,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":85.74758600000004,\"maxError\":0},{\"threads\":8,\"snapshotBytes\":10240,\"queries\":10000,\"ms\":120.633914,\"maxError\":0}],\"deterministic\":true}",
+          "ms": 536.8504399999947
         }
       ],
-      "ms": 94.86316199999965
+      "ms": 536.8504399999947
     },
     {
       "id": 86,
       "title": "Sampling Throughput (Shots/Sec)",
       "requirement": "Exact number of measurement bitstrings generated per second at 50 and 100 qubits.",
       "status": "PASS",
-      "evidence": "10000 shots each at 50/100 qubits; [{\"n\":50,\"shotsPerSecond\":152262.0939801835},{\"n\":100,\"shotsPerSecond\":83917.20899351765}]",
+      "evidence": "10000 shots each at 50/100 qubits; [{\"n\":50,\"shotsPerSecond\":168177.84551533012},{\"n\":100,\"shotsPerSecond\":88299.63130665518}]",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "10000 shots each at 50/100 qubits; [{\"n\":50,\"shotsPerSecond\":152262.0939801835},{\"n\":100,\"shotsPerSecond\":83917.20899351765}]",
-          "ms": 195.62643200000002
+          "evidence": "10000 shots each at 50/100 qubits; [{\"n\":50,\"shotsPerSecond\":168177.84551533012},{\"n\":100,\"shotsPerSecond\":88299.63130665518}]",
+          "ms": 181.99066700000003
         }
       ],
-      "ms": 195.62643200000002
+      "ms": 181.99066700000003
     },
     {
       "id": 87,
       "title": "Gate Fusion / Compilation Overhead",
       "requirement": "Separation of circuit compilation/compression time from actual execution time.",
-      "status": "PARTIAL",
-      "evidence": "separate parse/compile and gate execution wall-clock timings for a 100-qubit program; graph compression interleaved with execution; no gate-fusion implementation; {\"compileMs\":0.6877060000042547,\"executionMs\":1.866480999997293,\"mode\":\"coherent\"}",
+      "status": "PASS",
+      "evidence": "optional matrix gate fusion of consecutive local gates, distinct compile/execution timings, coefficient-by-coefficient comparison with unfused state; {\"qubits\":100,\"sourceGates\":7320,\"compiledOperations\":2920,\"compileMs\":10.148785999997926,\"executionMs\":35.84130500000174,\"maxComponentError\":7.771561172376096e-16}",
       "attempts": [
         {
           "status": "PARTIAL",
-          "evidence": "separate parse/compile and gate execution wall-clock timings for a 100-qubit program; graph compression interleaved with execution; no gate-fusion implementation; {\"compileMs\":0.6877060000042547,\"executionMs\":1.866480999997293,\"mode\":\"coherent\"}",
-          "ms": 2.6868869999962044
+          "evidence": "separate parse/compile and gate execution wall-clock timings for a 100-qubit program; graph compression interleaved with execution; no gate-fusion implementation; {\"compileMs\":0.3131320000029518,\"executionMs\":1.5990590000001248,\"mode\":\"affine-clifford\"}",
+          "ms": 2.0273440000019036
+        },
+        {
+          "status": "PASS",
+          "evidence": "optional matrix gate fusion of consecutive local gates, distinct compile/execution timings, coefficient-by-coefficient comparison with unfused state; {\"qubits\":100,\"sourceGates\":7320,\"compiledOperations\":2920,\"compileMs\":10.148785999997926,\"executionMs\":35.84130500000174,\"maxComponentError\":7.771561172376096e-16}",
+          "ms": 122.04906499999925
         }
       ],
-      "ms": 2.6868869999962044
+      "ms": 122.04906499999925
     },
     {
       "id": 88,
       "title": "Expectation Value Runtime",
       "requirement": "Time measured to evaluate a 100-qubit Hamiltonian consisting of 1,000 Pauli terms.",
       "status": "PASS",
-      "evidence": "1000 Pauli terms on 100-qubit GHZ; {\"ms\":48.56545399999959}",
+      "evidence": "1000 Pauli terms on 100-qubit GHZ; {\"ms\":42.09304400000019}",
       "attempts": [
         {
           "status": "PASS",
-          "evidence": "1000 Pauli terms on 100-qubit GHZ; {\"ms\":48.56545399999959}",
-          "ms": 56.12791600000037
+          "evidence": "1000 Pauli terms on 100-qubit GHZ; {\"ms\":42.09304400000019}",
+          "ms": 51.23222900000019
         }
       ],
-      "ms": 56.12791600000037
+      "ms": 51.23222900000019
     },
     {
       "id": 89,
       "title": "Gradient / Parameter-Shift Speed",
       "requirement": "Time measured to compute exact parameter-shift gradients for variational circuits.",
-      "status": "PARTIAL",
-      "evidence": "100-qubit product variational circuit parameter-shift derivative vs analytic -sin(theta); {\"ms\":0.4874149999996007}",
+      "status": "PASS",
+      "evidence": "100 parameters, 100 qubits, 50 Pauli-Z cost terms; 200 parameter-shift circuits, all exact analytical derivatives and wall-clock; {\"qubits\":100,\"parameters\":100,\"costTerms\":50,\"circuitEvaluations\":200,\"maxError\":9.381384558082573e-15,\"ms\":93.44878600000084}",
       "attempts": [
         {
           "status": "PARTIAL",
-          "evidence": "100-qubit product variational circuit parameter-shift derivative vs analytic -sin(theta); {\"ms\":0.4874149999996007}",
-          "ms": 0.6433689999994385
+          "evidence": "100-qubit product variational circuit parameter-shift derivative vs analytic -sin(theta); {\"ms\":0.3985709999997198}",
+          "ms": 0.5101679999988846
+        },
+        {
+          "status": "PASS",
+          "evidence": "100 parameters, 100 qubits, 50 Pauli-Z cost terms; 200 parameter-shift circuits, all exact analytical derivatives and wall-clock; {\"qubits\":100,\"parameters\":100,\"costTerms\":50,\"circuitEvaluations\":200,\"maxError\":9.381384558082573e-15,\"ms\":93.44878600000084}",
+          "ms": 93.8492699999988
         }
       ],
-      "ms": 0.6433689999994385
+      "ms": 93.8492699999988
     },
     {
       "id": 90,
@@ -1218,15 +1403,15 @@
         {
           "status": "FAIL",
           "evidence": "N=1,2; N=0 explicitly rejected; Missing expected exception.",
-          "ms": 0.9979830000002039
+          "ms": 0.7283779999997932
         },
         {
           "status": "PASS",
           "evidence": "zero-, single- and two-qubit programmatic registers; vacuum amplitude, norm, sample, and valid gate operations; no zero-width textual QASM claim",
-          "ms": 0.2408229999928153
+          "ms": 0.11179799999808893
         }
       ],
-      "ms": 0.2408229999928153
+      "ms": 0.11179799999808893
     },
     {
       "id": 92,
@@ -1238,10 +1423,10 @@
         {
           "status": "PASS",
           "evidence": "100-qubit empty circuit",
-          "ms": 0.15894899999966583
+          "ms": 0.1030959999998231
         }
       ],
-      "ms": 0.15894899999966583
+      "ms": 0.1030959999998231
     },
     {
       "id": 93,
@@ -1253,15 +1438,15 @@
         {
           "status": "PARTIAL",
           "evidence": "10000 sequential single-qubit T gates",
-          "ms": 40.60467200000039
+          "ms": 28.10899000000063
         },
         {
           "status": "PASS",
           "evidence": "100-qubit long sequential noncommuting rotations with unchanged 1e-11 tolerance; adaptive product route; 10001-gate hot wire and 10000 gates distributed across all wires; independent complex recurrences; [{\"gates\":10001,\"activeWires\":1,\"maxError\":0,\"mode\":\"coherent\"},{\"gates\":10001,\"activeWires\":100,\"maxError\":0,\"mode\":\"coherent\"}]",
-          "ms": 167.1772889999993
+          "ms": 149.50964899999963
         }
       ],
-      "ms": 167.1772889999993
+      "ms": 149.50964899999963
     },
     {
       "id": 94,
@@ -1273,10 +1458,10 @@
         {
           "status": "PASS",
           "evidence": "one million RX(1e-9) actual iterations",
-          "ms": 2530.9988299999995
+          "ms": 2407.3111549999994
         }
       ],
-      "ms": 2530.9988299999995
+      "ms": 2407.3111549999994
     },
     {
       "id": 95,
@@ -1288,15 +1473,15 @@
         {
           "status": "PARTIAL",
           "evidence": "symbolic rational pi input is reduced exactly; raw rounded Float64 angle cannot recover intended pi multiple; {\"symbolic\":[1,0],\"raw\":[1,-2.231912181360871e-10],\"rawError\":2.231912181360871e-10}",
-          "ms": 0.3578089999991789
+          "ms": 0.3842189999995753
         },
         {
           "status": "PASS",
           "evidence": "symbolic rational pi and raw IEEE-754 high-frequency inputs; 400-decimal independently computed trigonometric reference; raw input rounding is not symbolic pi; {\"rawCases\":9,\"maxError\":3.1401849173675503e-16,\"symbolicPiExact\":true}",
-          "ms": 0.5350059999982477
+          "ms": 0.8315529999963474
         }
       ],
-      "ms": 0.5350059999982477
+      "ms": 0.8315529999963474
     },
     {
       "id": 96,
@@ -1308,10 +1493,10 @@
         {
           "status": "PASS",
           "evidence": "two 50-qubit GHZ blocks, product amplitude match",
-          "ms": 13.039301000000705
+          "ms": 13.300634000000173
         }
       ],
-      "ms": 13.039301000000705
+      "ms": 13.300634000000173
     },
     {
       "id": 97,
@@ -1323,10 +1508,10 @@
         {
           "status": "PASS",
           "evidence": "100 repeat measurements after GHZ collapse",
-          "ms": 19.958403999999064
+          "ms": 23.250350999999682
         }
       ],
-      "ms": 19.958403999999064
+      "ms": 23.250350999999682
     },
     {
       "id": 98,
@@ -1338,10 +1523,10 @@
         {
           "status": "PARTIAL",
           "evidence": "NaN/Inf inputs rejected, finite valid output",
-          "ms": 0.3252100000008795
+          "ms": 0.303237000000081
         }
       ],
-      "ms": 0.3252100000008795
+      "ms": 0.303237000000081
     },
     {
       "id": 99,
@@ -1353,10 +1538,10 @@
         {
           "status": "PARTIAL",
           "evidence": "supported QASM 2/3 syntax only",
-          "ms": 0.1790000000000873
+          "ms": 0.17855899999995017
         }
       ],
-      "ms": 0.1790000000000873
+      "ms": 0.17855899999995017
     },
     {
       "id": 100,
@@ -1376,8 +1561,16 @@
       "id": 102,
       "title": "Error Bound Transparency",
       "requirement": "Engine reports exact numerical error bounds alongside every computed amplitude or expectation value.",
-      "status": "BLOCKED",
-      "evidence": "Certified forward-error bounds missing"
+      "status": "PARTIAL",
+      "evidence": "affine modes return exact algebraic amplitude descriptors; rounded numeric output and non-affine certified forward error bounds not fully validated; {\"real\":6.280369834735101e-16,\"imag\":6.280369834735101e-16,\"log2Magnitude\":-50,\"phase\":0.7853981633974483,\"componentUnderflow\":false,\"exact\":{\"sqrt2Power\":-100,\"phaseEighthTurns\":1}}",
+      "attempts": [
+        {
+          "status": "PARTIAL",
+          "evidence": "affine modes return exact algebraic amplitude descriptors; rounded numeric output and non-affine certified forward error bounds not fully validated; {\"real\":6.280369834735101e-16,\"imag\":6.280369834735101e-16,\"log2Magnitude\":-50,\"phase\":0.7853981633974483,\"componentUnderflow\":false,\"exact\":{\"sqrt2Power\":-100,\"phaseEighthTurns\":1}}",
+          "ms": 3.488955000000715
+        }
+      ],
+      "ms": 3.488955000000715
     },
     {
       "id": 103,

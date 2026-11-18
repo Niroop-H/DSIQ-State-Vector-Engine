@@ -1,0 +1,5 @@
+import assert from 'node:assert/strict';
+import {randomBlocks,compareBlocks,near} from './factor.test.mjs';
+import {batchAmplitude} from '../native/batch.mjs';
+import {rng} from '../apps/web/public/dsiq/worker.mjs';
+const p=randomBlocks(100,5,15,846),d=compareBlocks(p).d,r=rng(128),qs=new Set();while(qs.size<10000)qs.add(Array.from({length:100},()=>r()<.5?'0':'1').join(''));const queries=[...qs],cases=[];let baseline;for(const threads of [1,8]){const t=performance.now(),b=await batchAmplitude(d,queries,{threads});const ms=performance.now()-t;let max=0;for(let i=0;i<queries.length;i++){const v=d.amplitude(queries[i]),u=b.results[i];assert.equal(u.log2Magnitude,v.log2Magnitude);const err=Math.hypot(v.real-u.real,v.imag-u.imag);max=Math.max(max,err);near(err,0,1e-13)}if(baseline)assert.deepEqual(b.results,baseline);else baseline=b.results;cases.push({threads:b.threads,snapshotBytes:b.snapshotBytes,queries:queries.length,ms,maxError:max})}console.log(JSON.stringify({cases,deterministic:true}));
