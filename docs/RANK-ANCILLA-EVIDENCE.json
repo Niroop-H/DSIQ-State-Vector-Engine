@@ -1,0 +1,32 @@
+{
+  "qubits": 1024,
+  "gates": 3590,
+  "shots": 1024,
+  "unique": 1024,
+  "probabilityQueries": 32,
+  "maxLog2ProbabilityError": 1.1368683772161603e-13,
+  "uniformInactiveOnesFraction": 0.4990234375,
+  "maxDataFrequencyDeviation": 0.017515692771081406,
+  "mode": "rank-frame",
+  "conjugatedRotations": 240,
+  "executedRotations": 240,
+  "frameCliffords": 3351,
+  "frameComponents": 1021,
+  "flipRank": 4,
+  "rankBasisGates": 1,
+  "maxFrameQubits": 4,
+  "coefficientBytes": 32896,
+  "coefficientBudgetBytes": 67108864,
+  "compileWork": 6993,
+  "predictedEvolutionWork": 3840,
+  "queryWork": 0,
+  "peakQueryBytes": 0,
+  "monomialSampling": false,
+  "rankSampling": {
+    "inactiveUniformBits": 1020,
+    "logicalMeasurements": 4,
+    "deterministicRows": 0,
+    "peakCoefficientBytes": 33920
+  },
+  "precision": "FP64 factor amplitudes; exact Clifford conjugation; coherent projection; no deliberate pruning"
+}
