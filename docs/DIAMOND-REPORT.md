@@ -1,123 +1,28 @@
-# DSIQ v0.9 — Diamond-105 condensed validation record
+# DSIQ v0.10 — Diamond-105 condensed validation record
 
-**82/105 PASS · 16 PARTIAL · 1 FAIL · 4 BLOCKED · 2 NOT_RUN. Release gate closed.**
+**INTERNAL RESEARCH VALIDATION — NOT CERTIFIED. Release eligible: false.**
 
-All 105 criteria retained. The complete local harness was executed and returned exit status 1 by design. All 81 earlier passes retained; #19 passed on tested low-displacement-rank connected circuits with interleaved Hadamards and 500/1000/5000 T/TDG gates. This is not a proof of arbitrary efficient simulation or independent certification.
+83 PASS · 17 PARTIAL · 1 FAIL · 4 BLOCKED · 0 NOT_RUN. All 82 previous passes retained. #68 passed internal novel-input testing (56 generated circuit variants; 9,422 comparisons; max absolute error 2.56709e-15). Independent blind testing remains blocked. #80 and #101 gained partial restart evidence only (three fresh processes, two warm runs each; 128 queries and 128 seeded samples per run; identical scientific output digest 4132a9e33b500bca71e244cd0a6095b1dd5d196db53911e263efffa2a5b322c8).
 
-- 1024-qubit encoded circuit: 11,595 gates; 36,608 bytes coefficient storage; flip rank 8; 256 support amplitudes vs independent extended-precision oracle, max absolute error 1.7268586255920952e-15; 16 off-support queries and 512 samples.
-- T-gate scaling: 2,245 / 3,983 / 17,888 total gates, 3,552 coefficient bytes at all three counts; max errors 2.9865631336773386e-15 / 5.584598387299587e-15 / 2.269389623728351e-14.
-- 50 randomized small circuits: 1,600 amplitude comparisons, 1,000 observable comparisons; maximum discrepancy 1.3322676295501878e-15.
-- 40 nonmonomial six-qubit circuits: 2,560 full-basis probability comparisons, 5,120 draws; max error 4.440892098500626e-16.
-- Supplemental 1024-qubit measurement test: 3,590 gates, 1,024 unique samples, 1,020 independent uniform readout bits and four logical measurements, 32 log-probability checks, max error 1.1368683772161603e-13. See docs/RANK-ANCILLA-EVIDENCE.json.
-- Entire harness peak RSS: 560400 KiB. Coefficient bytes exclude runtime, code and metadata.
-- #70 remains failed; #100/#105 require independent evaluators; #77 and #90 require unavailable hardware. The named external reference tools, MPI, production frontend build and remote CI are unverified.
+## Executed experiments
 
-The full unabridged v0.9 local report and raw JSON are included in the distributed integrated workspace; only this condensed report is committed because the file transfer bridge did not expose the full file. Raw JSON SHA-256: `56b1db5694785cf39763df322cdcec4aa58a542d5d0856ff7408f45cc4a33394`. Re-run `node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json` for fresh evidence. Timestamps and telemetry vary.
+- Connected structured non-Clifford circuit, 25 qubits, 120 gates: all 33,554,432 nonzero complex amplitudes compared to a separately implemented complete dense reference. Maximum absolute error 3.408259845555477e-17; L2 error 6.158591430883039e-16; coefficient payload 800 bytes, streaming output buffer 4 MiB, additional runtime and frame metadata excluded. Dense vector alone 512 MiB. #53 PARTIAL pending named external reference.
+- Native bond/compact/affine contraction: 512 amplitude comparisons on randomized small circuits, max error 6.335327934766281e-16; 100-wire depth-four random case cross-checked. Depth-five selected-plan forecast 6,610,223,104 array bytes, not executed. #70 still FAIL: no completed 100-wire depth-100 randomized uncompute.
+- Runtime Node v22.16.0 linux/x64. Acceptance harness process peak RSS 511908 KiB; child reference processes separate. Dense reference child peak ~1.38 GiB. Exit 1 expected, release gate closed.
+- Manual external-oracle workflow prepared for Aer, quimb and Stim; missing dependencies and unsuccessful installation prevented execution here. Native headless contractor not browser-integrated. GPU/MPI, production React build, full QASM support, hardware instrumentation, complete error certification and independent replication remain unresolved.
 
-| Test ID | Status |
-|---:|---|
-| 1 | PASS |
-| 2 | PASS |
-| 3 | PASS |
-| 4 | PASS |
-| 5 | PASS |
-| 6 | PASS |
-| 7 | PASS |
-| 8 | PASS |
-| 9 | PASS |
-| 10 | PASS |
-| 11 | PASS |
-| 12 | PASS |
-| 13 | PASS |
-| 14 | PASS |
-| 15 | PASS |
-| 16 | PASS |
-| 17 | PASS |
-| 18 | PASS |
-| 19 | PASS |
-| 20 | PASS |
-| 21 | PASS |
-| 22 | PASS |
-| 23 | PASS |
-| 24 | PASS |
-| 25 | PASS |
-| 26 | PASS |
-| 27 | PASS |
-| 28 | PASS |
-| 29 | PASS |
-| 30 | PASS |
-| 31 | PASS |
-| 32 | PASS |
-| 33 | PASS |
-| 34 | PASS |
-| 35 | PASS |
-| 36 | PASS |
-| 37 | PASS |
-| 38 | PASS |
-| 39 | PASS |
-| 40 | PASS |
-| 41 | PASS |
-| 42 | PASS |
-| 43 | PARTIAL |
-| 44 | PARTIAL |
-| 45 | PASS |
-| 46 | PARTIAL |
-| 47 | PASS |
-| 48 | PARTIAL |
-| 49 | PASS |
-| 50 | PASS |
-| 51 | PASS |
-| 52 | PASS |
-| 53 | PARTIAL |
-| 54 | PARTIAL |
-| 55 | PASS |
-| 56 | PARTIAL |
-| 57 | PARTIAL |
-| 58 | PASS |
-| 59 | PASS |
-| 60 | PASS |
-| 61 | PASS |
-| 62 | PASS |
-| 63 | PASS |
-| 64 | PASS |
-| 65 | PASS |
-| 66 | PASS |
-| 67 | PASS |
-| 68 | PARTIAL |
-| 69 | PASS |
-| 70 | FAIL |
-| 71 | PASS |
-| 72 | PASS |
-| 73 | PASS |
-| 74 | PASS |
-| 75 | PARTIAL |
-| 76 | PARTIAL |
-| 77 | BLOCKED |
-| 78 | PARTIAL |
-| 79 | PASS |
-| 80 | NOT_RUN |
-| 81 | PASS |
-| 82 | PASS |
-| 83 | PASS |
-| 84 | PASS |
-| 85 | PASS |
-| 86 | PASS |
-| 87 | PASS |
-| 88 | PASS |
-| 89 | PASS |
-| 90 | BLOCKED |
-| 91 | PASS |
-| 92 | PASS |
-| 93 | PASS |
-| 94 | PASS |
-| 95 | PASS |
-| 96 | PASS |
-| 97 | PASS |
-| 98 | PARTIAL |
-| 99 | PARTIAL |
-| 100 | BLOCKED |
-| 101 | NOT_RUN |
-| 102 | PARTIAL |
-| 103 | PARTIAL |
-| 104 | PASS |
-| 105 | BLOCKED |
+## Requirement IDs
+
+- PASS (83): 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 45, 47, 49, 50, 51, 52, 55, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 72, 73, 74, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 104
+- PARTIAL (17): 43, 44, 46, 48, 53, 54, 56, 57, 75, 76, 78, 80, 98, 99, 101, 102, 103
+- FAIL (1): 70
+- BLOCKED (4): 77, 90, 100, 105
+- NOT_RUN (0): none
+
+## Full evidence
+
+This repository record is condensed because the full evidence transfer was unavailable. Complete per-test attempts, telemetry and detailed evidence are included in the downloadable v0.10 workspace and standalone artifacts.
+
+- DSIQ-Diamond-105-v0.10-report.md — SHA256 ccfa81fb632d7bd10243a05b1c6e22c4e5c8a46832adb1d51cd74a77cf8d7123
+- DSIQ-Diamond-105-v0.10-results.json — SHA256 efe44a8f231dfad33ec6ca678bddfa1c7b0d8590aa9836e2978e0793328214e9
+- DSIQ-State-Vector-Engine-integrated-v0.10.zip — SHA256 80252a00d64a8474eb5bf206e4add909aa7d216692115fe9bcd65d712d1ec08d

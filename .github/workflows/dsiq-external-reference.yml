@@ -1,0 +1,40 @@
+name: DSIQ external named reference validation (manual)
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reference:
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [stim, quimb, aer]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '2'
+      OMP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test-only reference package
+        run: |
+          python -m pip install numpy
+          if [ '${{ matrix.engine }}' = 'aer' ]; then python -m pip install qiskit-aer; else python -m pip install '${{ matrix.engine }}'; fi
+          python -m pip freeze > reference-packages.txt
+      - name: Compare scientific outputs
+        shell: bash
+        run: |
+          set -o pipefail
+          if [ '${{ matrix.engine }}' = 'aer' ]; then python tests/connected-frame-audit.py 25 aer | tee reference-result.json; else python tests/external-oracle.py '${{ matrix.engine }}' | tee reference-result.json; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dsiq-external-${{ matrix.engine }}
+          path: |
+            reference-packages.txt
+            reference-result.json
