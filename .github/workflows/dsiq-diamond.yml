@@ -32,6 +32,7 @@ jobs:
           node tests/batch.test.mjs
           node tests/ladder.test.mjs
           node tests/parallel.test.mjs
+          node tests/frame-factor.test.mjs
       - name: Diamond 105 (must fail closed)
         run: node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
       - name: Preserve evidence even for rejected builds

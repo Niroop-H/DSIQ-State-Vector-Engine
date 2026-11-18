@@ -10,7 +10,7 @@ const zero=([r,i])=>r===0&&i===0;
 const toggle=(a)=>({v:a.v,c:a.c^1});
 const parity=(x)=>{x^=x>>>16;x^=x>>>8;x^=x>>>4;return (0x6996>>>(x&15))&1};
 export function parityAmplitude(n,gates,bits,{maxBytes=67108864,maxWork=500000000,maxVariables=100000,ordering='degree'}={}){
- if(!Number.isInteger(n)||n<1||n>4096||!Array.isArray(gates)||typeof bits!=='string'||bits.length!==n||!/^[01]+$/.test(bits)||!Number.isSafeInteger(maxBytes)||maxBytes<16||!Number.isSafeInteger(maxWork)||maxWork<1||!Number.isSafeInteger(maxVariables)||maxVariables<1||!['degree','fill','search'].includes(ordering))throw Error('Invalid parity contraction configuration');
+ if(!Number.isInteger(n)||n<1||n>4096||!Array.isArray(gates)||typeof bits!=='string'||bits.length!==n||!/^[01]+$/.test(bits)||!Number.isSafeInteger(maxBytes)||maxBytes<16||!Number.isSafeInteger(maxWork)||maxWork<1||!Number.isSafeInteger(maxVariables)||maxVariables<1||!['degree','fill','search','pair'].includes(ordering))throw Error('Invalid parity contraction configuration');
  const wires=Array.from({length:n},z),raw=[];let next=0,work=0,affineGates=0,pivots=0,maxExpression=0;
  const spend=k=>{if((work+=k)>maxWork)throw new ContractionBudget('Parity preprocessing work budget exceeded')};
  const fresh=()=>{if(next>=maxVariables)throw new ContractionBudget('Parity variable budget exceeded');return variable(next++)};

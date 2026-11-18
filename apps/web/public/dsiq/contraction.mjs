@@ -4,6 +4,7 @@
 import {matrix} from './engine.mjs';
 import {createScaledAccumulator} from './scaled-replay.mjs';
 import {planElimination} from './contraction-plan.mjs';
+import {evaluatePairFactors,PairBudget} from './pair-contraction.mjs';
 import {evaluateDyadicFactors} from './dyadic-contraction.mjs';
 export class ContractionBudget extends Error{}
 const zero=z=>z[0]===0&&z[1]===0;
@@ -20,6 +21,11 @@ export function contractProbability(n,gates,mask,options={}){
  if(r.log2Magnitude!==null&&(r.phase < -1e-9||r.phase>1e-9||r.log2Magnitude>1e-9))throw new ContractionBudget('Non-real or negative probability; numerical result rejected');
  return {...r,probability:r.real,log2Probability:r.log2Magnitude,mode:'double-layer-probability'}
 }
+export function exactDyadicExpectation(n,gates,pauli,options={}){
+ if(typeof pauli!=='string'||pauli.length!==n||!/^[IXYZ]+$/.test(pauli))throw Error('Invalid Pauli string');
+ const extra=[];for(let q=0;q<n;q++){const name=pauli[n-1-q].toLowerCase();if(name!=='i')extra.push({name,q,controls:[]})}
+ const r=contractNetwork(n,gates,'*'.repeat(n),{...options,dyadic:true},true,extra);if(r.exact.imagMantissa!=='0')throw Error('Non-real exact Hermitian contraction');return {...r,value:r.real,mode:'dyadic-expectation'}
+}
 export function contractExpectation(n,gates,pauli,options={}){
  if(typeof pauli!=='string'||pauli.length!==n||!/^[IXYZ]+$/.test(pauli))throw Error('Invalid Pauli string');
  const extra=[];for(let q=0;q<n;q++){const name=pauli[n-1-q].toLowerCase();if(name!=='i')extra.push({name,q,controls:[]})}
@@ -28,7 +34,7 @@ export function contractExpectation(n,gates,pauli,options={}){
  return {...r,value:r.real,mode:'double-layer-expectation'}
 }
 function contractNetwork(n,gates,bits,{maxBytes=4194304,maxWork=50000000,maxVariables=4096,internalFixed=[],ordering='degree',dyadic=false,maxBits=131072,maxArity=18}={},double=false,extra=[]){
- if(!Number.isInteger(n)||n<1||n>4096||typeof bits!=='string'||bits.length!==n||!(double?/^[01*]+$/:/^[01]+$/).test(bits)||!Array.isArray(gates)||!Number.isSafeInteger(maxBytes)||maxBytes<16||!Number.isSafeInteger(maxWork)||maxWork<1||!Number.isSafeInteger(maxVariables)||maxVariables<n||!['degree','fill','search'].includes(ordering))throw Error('Invalid contraction configuration');
+ if(!Number.isInteger(n)||n<1||n>4096||typeof bits!=='string'||bits.length!==n||!(double?/^[01*]+$/:/^[01]+$/).test(bits)||!Array.isArray(gates)||!Number.isSafeInteger(maxBytes)||maxBytes<16||!Number.isSafeInteger(maxWork)||maxWork<1||!Number.isSafeInteger(maxVariables)||maxVariables<n||!['degree','fill','search','pair'].includes(ordering))throw Error('Invalid contraction configuration');
  let next=0,raw=[];const fixed=new Map(),alloc=()=>{if(next>=maxVariables)throw new ContractionBudget('Contraction variable budget exceeded');return next++};
  function build(program,conj){const wire=Array.from({length:n},()=>{const v=alloc();fixed.set(v,0);return v});for(const g of program){validate(n,g);if(g.name==='swap'){[wire[g.q],wire[g.controls[0]]]=[wire[g.controls[0]],wire[g.q]];continue}let m=matrix(g);if(m.some(v=>!v.every(Number.isFinite)))throw Error('Nonfinite contraction matrix');if(conj)m=m.map(([r,i])=>[r,-i]);const c=g.controls.map(q=>wire[q]),a=wire[g.q],diag=zero(m[1])&&zero(m[2]),b=diag?a:alloc();wire[g.q]=b;raw.push({vars:diag?[...c,a]:[...c,a,b],c:c.length,diag,m})}return wire}
  const wire=build(double&&extra.length?[...gates,...extra]:gates,false);
@@ -41,6 +47,7 @@ function contractNetwork(n,gates,bits,{maxBytes=4194304,maxWork=50000000,maxVari
 // Internal reusable contraction primitive; factors contain trusted compiled
 // coefficient generators with unique binary variable identifiers.
 export function evaluateBinaryFactors(raw,{maxBytes=4194304,maxWork=50000000,ordering='degree'}={}){
+ if(ordering==='pair'){try{return evaluatePairFactors(raw,{maxBytes,maxWork})}catch(e){if(e instanceof PairBudget)throw Object.assign(new ContractionBudget(e.message),{...e});throw e}}
  let plan=null;if(ordering==='search'){try{plan=planElimination(raw.map(f=>f.vars),{maxPlannerWork:Math.min(maxWork,100000000)})}catch(e){throw new ContractionBudget('Elimination planner: '+e.message)}}let planCursor=0;if(plan&&(plan.peakTensorBytes>maxBytes||plan.maxSeparatorVariables>24||plan.estimatedProducts+plan.plannerWork>maxWork))throw Object.assign(new ContractionBudget('Predicted contraction exceeds configured tensor/work budget'),{work:plan.plannerWork,peakTensorBytes:0,predictedBytes:plan.peakTensorBytes,predictedWidth:plan.maxSeparatorVariables,predictedProducts:plan.estimatedProducts,variable:raw.length?plan.order[0]:undefined});
  let bytes=0,peak=0,work=plan?.plannerWork??0,id=0,eliminated=0,maxWidth=0;const fs=new Map(),links=new Map();let scalar=[1,0],exponent=0;
  const limit=(message,variable)=>{throw Object.assign(new ContractionBudget(message),{variable,work,peakTensorBytes:peak})};const spend=k=>{work+=k;if(work>maxWork)limit('Contraction work budget exceeded')};const reserve=(k,variable)=>{if(!Number.isSafeInteger(k)||bytes+k>maxBytes)limit('Contraction tensor byte budget exceeded',variable??links.keys().next().value);bytes+=k;peak=Math.max(peak,bytes)};
