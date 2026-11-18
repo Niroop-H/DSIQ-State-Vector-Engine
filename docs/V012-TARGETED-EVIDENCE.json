@@ -1,0 +1,54 @@
+{
+  "engine": "DSIQ v0.12 research candidate",
+  "scope": "LOCAL tests only; no independent certification",
+  "peerRehearsal": {
+    "scope": "LOCAL REHEARSAL; two clean directory copies on the same host, neither independent evaluator nor independent hardware",
+    "strictFormatCircuits": 20,
+    "queriesPerRun": 70,
+    "allQueriesPerRunPassed": true,
+    "maxAbsoluteError": 3.8191672047105385e-14,
+    "maxRelativeAmplitudeError": 1.9095879196542718e-14,
+    "sourceSHA256": "fd73c30ba1ca5415516f104aea914ae0d9b16aa08a3b86c1c1521b52fc453abb",
+    "scientificSHA256": "744936aed69531d28a6305abfd530881096b4271f9119d77477fc15f155f91ec",
+    "bitExactScientificOutputs": true,
+    "tamperAndInvalidInputRejections": 5,
+    "test100Certified": false,
+    "test105Certified": false
+  },
+  "strictCertificateAndAudit": {
+    "scope": "strict headless CPU unitary query API; certified gate domain only; not general browser or hardware certification",
+    "connected100": {
+      "gates": 200,
+      "checkpoints": 201,
+      "queries": 7,
+      "peakRssKiB": 84088,
+      "cpuCycles": {
+        "value": null,
+        "timeEnabledNs": null,
+        "timeRunningNs": null,
+        "unavailableReason": "perf_event_open errno 2: No such file or directory",
+        "scope": "Linux hardware CPU cycles for wrapper and inherited children; user mode; raw not scaled"
+      },
+      "gpu": {
+        "used": false,
+        "cycles": null,
+        "reason": "CPU-only path"
+      }
+    },
+    "denseReferenceAmplitudeComparisons": 128,
+    "denseReferenceObservableComparisons": 40,
+    "allCertifiedQueries": 175,
+    "normCheckpoints": 433,
+    "maxObservedError": 6.661338147750939e-16,
+    "maxBoundFraction": 0.070577976794812,
+    "maxReportedBound": 1.2862523546272722e-12,
+    "rejectedInvalidOrUnaffordableRequests": 6,
+    "testedModes": [
+      "certified-contraction",
+      "certified-factor"
+    ]
+  },
+  "workerRegression": "worker: phase, DAG, trajectory, observable-only, forced replay passed\nworker: additional affine, affine-phase and FP32 paths passed\nworker: bounded contraction explicit and automatic fallback passed\nworker: contracted state, affine-parity, exact dyadic and certified FP64 modes passed\nworker: new frame, certified connected and pair contraction paths passed\nworker: rank-reduced Clifford sampling passed\nworker: strict certified automatic factor / contraction selection and fail-closed unsupported shots passed\n",
+  "firstPeerAttempt": "All 20 computations completed; initial scoring script used an undefined strict variable. Scorer corrected and re-evaluated successfully, followed by a new frozen-source two-copy run. The first failed attempt is retained in the downloadable kit.",
+  "releaseEligible": false
+}

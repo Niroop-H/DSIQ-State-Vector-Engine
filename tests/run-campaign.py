@@ -35,7 +35,7 @@ def main():
             report=json.loads(raw.read_text());rows=report['results'];assert len(rows)==105 and all(str(a['id'])==str(b['id']) and a['title']==b['title'] and a['requirement']==b['requirement'] for a,b in zip(rows,original))
             counts={s:sum(r['status']==s for r in rows) for s in ('PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN')};assert sum(counts.values())==105 and counts==report['counts'];assert bool(report['releaseEligible'])==(counts['PASS']==105);assert h['exitCode']==(0 if counts['PASS']==105 else 1)
         except (AssertionError,ValueError,KeyError,TypeError) as e:print('Invalid Diamond result:',e,file=sys.stderr);report=None
-    for file in ('mps-audit.py','mps-deep-audit.py','mps-random-uncompute.py','sliced-bond-audit.py'):run(file.removesuffix('.py'),[sys.executable,'-B','tests/'+file],json_output=True)
+    for file in ('mps-audit.py','mps-deep-audit.py','mps-random-uncompute.py','sliced-bond-audit.py','v12-audit.test.py'):run(file.removesuffix('.py'),[sys.executable,'-B','tests/'+file],json_output=True)
     for name,dep,cmd in [('Aer','qiskit_aer',[sys.executable,'-B','tests/connected-frame-audit.py','25','aer']),('Stim','stim',[sys.executable,'-B','tests/external-oracle.py','stim']),('quimb','quimb',[sys.executable,'-B','tests/external-oracle.py','quimb'])]:
         if args.external and importlib.util.find_spec(dep):run('reference-'+name,cmd,json_output=True)
         else:jobs.append(dict(name='reference-'+name,status='NOT_RUN',reason='optional external check not enabled or dependency missing'))

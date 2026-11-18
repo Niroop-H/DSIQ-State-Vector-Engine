@@ -1,0 +1,10 @@
+// Local evidence only: an independent reviewer/hardware cannot be replaced by a successful smoke test.
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+const path=f=>new URL(f,import.meta.url).pathname;
+function python(file,args=[]){const p=spawnSync('python',['-B',path(file),...args],{encoding:'utf8',timeout:900000,maxBuffer:16*1024**2,env:{...process.env,OPENBLAS_NUM_THREADS:'1',OMP_NUM_THREADS:'1',PYTHONDONTWRITEBYTECODE:'1'}});assert.equal(p.status,0,p.stderr+' '+p.stdout);return JSON.parse(p.stdout)}
+export function v12(test){let audit,peer;test(100,'Prereveal commitment/reveal protocol and locally generated 20-case rehearsal; independent evaluator and independent reference remain required',()=>{const dir=mkdtempSync(join(tmpdir(),'dsiq-v12-review-'));try{peer=python('./v12-peer.test.py',['--evidence',join(dir,'evidence')]);assert.ok(peer.allQueriesPerRunPassed&&!peer.test100Certified);return peer}finally{rmSync(dir,{recursive:true,force:true})}},'BLOCKED');test(105,'Local clean source-directory comparison with deterministic query digests; separate engineering team and clean hardware remain required',()=>{assert.ok(peer&&peer.bitExactScientificOutputs&&!peer.test105Certified);return peer},'BLOCKED');test(103,'Headless genuine norm checkpoints and CPU/RSS telemetry; GPU and full browser instrumentation not established; hardware counter availability recorded',()=>{audit=python('./v12-audit.test.py');assert.ok(audit.normCheckpoints>400);return audit},'PARTIAL');test(102,'Strict certified factor/contraction API with finite outward bounds for every admitted query and fail-closed unsupported inputs; other modes and ideal real parameter domain not certified',()=>{assert.ok(audit&&audit.allCertifiedQueries===175&&audit.maxBoundFraction<=1);return audit},'PARTIAL')}
+if(process.argv[1]===new URL(import.meta.url).pathname)v12((id,scope,fn,status)=>{try{console.log(id,status,JSON.stringify(fn()))}catch(e){console.error(id,'FAIL',e.stack);process.exitCode=1}});
