@@ -1,0 +1,24 @@
+name: DSIQ Diamond-105 (release gate)
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regression
+        run: node tests/dsiq.test.mjs
+      - name: Diamond 105 (must fail closed)
+        run: node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
+      - name: Preserve evidence even for rejected builds
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diamond-105-evidence
+          path: diamond-results.json
+          if-no-files-found: warn

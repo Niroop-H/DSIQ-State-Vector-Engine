@@ -1,0 +1,812 @@
+{
+  "engine": "DSIQ v0.3 research",
+  "runtime": "v22.16.0",
+  "platform": "linux",
+  "arch": "x64",
+  "processMaxRssKiB": 1026992,
+  "counts": {
+    "PASS": 35,
+    "PARTIAL": 25,
+    "FAIL": 4,
+    "BLOCKED": 22,
+    "NOT_RUN": 19
+  },
+  "releaseEligible": false,
+  "results": [
+    {
+      "id": 1,
+      "title": "FP64 Machine Epsilon Precision",
+      "requirement": "Complex amplitudes match analytical values within `< 1e-13` error in double precision.",
+      "status": "PASS",
+      "evidence": "analytic RX every wire, both nonzero amplitudes; {\"max\":1.1989798176196528e-16}",
+      "ms": 29.09354
+    },
+    {
+      "id": 2,
+      "title": "FP32 Precision Compliance",
+      "requirement": "Single-precision mode maintains error `< 1e-6` across shallow-to-medium circuits.",
+      "status": "BLOCKED",
+      "evidence": "FP32 not implemented"
+    },
+    {
+      "id": 3,
+      "title": "Total Probability Normalization",
+      "requirement": "Sum of squared magnitudes (\\\\(\\sum \\vert{}\\alpha_i\\vert{}^2\\\\)) equals `1.0` within `1e-12` tolerance.",
+      "status": "PARTIAL",
+      "evidence": "100-qubit uniform and GHZ norm contraction",
+      "ms": 25.427088000000005
+    },
+    {
+      "id": 4,
+      "title": "Global Phase Tracking",
+      "requirement": "Correctly preserves global phase \\\\(e^{i\\theta }\\\\) across controlled operations (e.g., controlled-U vs. raw U).",
+      "status": "PASS",
+      "evidence": "controlled and unconditional RZ(2π): relative/global phase",
+      "ms": 0.45945200000001307
+    },
+    {
+      "id": 5,
+      "title": "Relative Phase Accuracy",
+      "requirement": "Interference fringes in Hadamard-Phase-Hadamard tests match exact \\\\(\\cos^2(\\theta/2)\\\\) and \\\\(\\sin^2(\\theta/2)\\\\) curves.",
+      "status": "PASS",
+      "evidence": "H-P-H interference at 101 angles",
+      "ms": 2.534698000000006
+    },
+    {
+      "id": 6,
+      "title": "Zero-Amplitude Stability",
+      "requirement": "States that should destructively interfere to exact `0.0 + 0.0j` do not accumulate floating-point noise above `1e-15`.",
+      "status": "PASS",
+      "evidence": "H twice on each wire, zero amplitude tolerance 1e-15",
+      "ms": 12.061696999999995
+    },
+    {
+      "id": 7,
+      "title": "Denormal / Subnormal Handling",
+      "requirement": "Tiny amplitudes (`< 1e-300`) do not underflow to zero prematurely and break downstream interference.",
+      "status": "PARTIAL",
+      "evidence": "1024-qubit tiny log magnitude, inverse rotations; replay underflow unverified",
+      "ms": 1554.903027
+    },
+    {
+      "id": 8,
+      "title": "Inner Product Exactness",
+      "requirement": "Overlap \\\\(\\langle \\psi_1 \\vert{} \\psi_2 \\rangle\\\\) between two distinct 100-qubit states matches exact analytical dot products.",
+      "status": "PASS",
+      "evidence": "100-qubit GHZ states, complex analytical overlap",
+      "ms": 27.02541499999984
+    },
+    {
+      "id": 9,
+      "title": "Expectation Value Accuracy",
+      "requirement": "Pauli string expectation values \\\\(\\langle \\psi \\vert{} P_1 \\otimes \\dots \\otimes P\\_{100} \\vert{} \\psi \\rangle\\\\) match exact theoretical bounds `[-1, 1]`.",
+      "status": "PASS",
+      "evidence": "100-qubit GHZ X/Z/Y Pauli strings",
+      "ms": 11.34036100000003
+    },
+    {
+      "id": 10,
+      "title": "Trace Preservation",
+      "requirement": "Density/state norm remains strictly invariant under any sequence of unitary gates.",
+      "status": "PARTIAL",
+      "evidence": "norm after every 100-qubit product rotation",
+      "ms": 12.31499900000017
+    },
+    {
+      "id": 11,
+      "title": "Hermitian Conjugate Consistency",
+      "requirement": "Running U followed by \\\\(U^{\\dag }\\\\) restores the exact initial complex vector.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 12,
+      "title": "Bitstring Endianness Consistency",
+      "requirement": "Qubit 0 to Qubit 99 ordering remains strictly consistent across gate application, amplitude queries, and sampling.",
+      "status": "PASS",
+      "evidence": "all 100 wires: X amplitude and deterministic sampling",
+      "ms": 13.442297000000053
+    },
+    {
+      "id": 13,
+      "title": "Superposition Uniformity",
+      "requirement": "Applying \\\\(H^{\\otimes 100}\\\\) produces exact 2⁻⁵⁰ real amplitudes across every queried basis state.",
+      "status": "PASS",
+      "evidence": "1000 random H^100 basis queries, relative error",
+      "ms": 22.745108000000073
+    },
+    {
+      "id": 14,
+      "title": "Arbitrary Basis Query Speed & Accuracy",
+      "requirement": "Querying random 100-bit strings (e.g., `0110...101`) returns exact real and imaginary components without full-vector reconstruction.",
+      "status": "PARTIAL",
+      "evidence": "1000 analytic product amplitude queries, latency; {\"ms\":17.783525000000054}",
+      "ms": 23.103939000000082
+    },
+    {
+      "id": 15,
+      "title": "Analytical Circuit Match",
+      "requirement": "Exact amplitude agreement with closed-form solutions for 100-qubit QFT, GHZ, W-states, and Dicke states.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 16,
+      "title": "Pauli Gates (X, Y, Z)",
+      "requirement": "Exact bit-flip and phase-flip behavior on every individual wire from `q[0]` to `q[99]`.",
+      "status": "PASS",
+      "evidence": "X,Y,Z each of 100 wires",
+      "ms": 20.58682799999997
+    },
+    {
+      "id": 17,
+      "title": "Hadamard (H) & \\\\(\\sqrt{X}, \\sqrt{Y}\\\\) Gates",
+      "requirement": "Exact equal-superposition creation and inverse behavior (H² = I).",
+      "status": "PASS",
+      "evidence": "H²=I, SX²=X, SY²=Y each wire",
+      "ms": 47.60908799999993
+    },
+    {
+      "id": 18,
+      "title": "Clifford Phase Gates (\\\\(S, S^\\dagger\\\\))",
+      "requirement": "Exact ± i phase rotation without drift.",
+      "status": "PASS",
+      "evidence": "S/SDG each wire",
+      "ms": 20.311781999999994
+    },
+    {
+      "id": 19,
+      "title": "Non-Clifford T and \\\\(T^{\\dag }\\\\) Gates",
+      "requirement": "Exact π/4 phase rotation; engine shows no exponential crash as T-gate count increases.",
+      "status": "PARTIAL",
+      "evidence": "500 T + 500 TDG gates on uniform state",
+      "ms": 99.27289399999995
+    },
+    {
+      "id": 20,
+      "title": "Arbitrary Parametric Rotations (\\\\(R_x, R_y, R_z\\\\))",
+      "requirement": "Exact evaluation at irrational angles (e.g., \\\\(\\theta = \\sqrt{2}, \\pi/7, e\\\\)).",
+      "status": "PASS",
+      "evidence": "RX/RY/RZ irrational angles on every wire",
+      "ms": 76.25839999999994
+    },
+    {
+      "id": 21,
+      "title": "General U3(θ, φ, λ) Gate",
+      "requirement": "Full SU(2) coverage on any single qubit.",
+      "status": "PASS",
+      "evidence": "U3 each wire analytical complex amplitudes",
+      "ms": 15.824104000000261
+    },
+    {
+      "id": 22,
+      "title": "Two-Qubit Entanglers (CNOT, CZ, CY)",
+      "requirement": "Exact control-target logic for both forward (`q[0] -> q[99]`) and reverse (`q[99] -> q[0]`) directions.",
+      "status": "PASS",
+      "evidence": "CX/CY/CZ every basis input both distant directions",
+      "ms": 6.177755000000161
+    },
+    {
+      "id": 23,
+      "title": "SWAP & iSWAP Gates",
+      "requirement": "Exact state exchange and phase rotation between adjacent and non-adjacent qubits.",
+      "status": "PASS",
+      "evidence": "SWAP/iSWAP all 4 basis columns, adjacent and distant pairs; logical SWAP path also tested",
+      "ms": 7.7575950000000375
+    },
+    {
+      "id": 24,
+      "title": "\\\\(\\sqrt{\\text{SWAP}}\\\\) & fSim Gates",
+      "requirement": "Exact fractional entangling gates used in Google/Sycamore-style benchmarks.",
+      "status": "PASS",
+      "evidence": "sqrtSWAP and fSim independently known 4x4 matrix columns; distant pairs in both directions",
+      "ms": 15.641759000000093
+    },
+    {
+      "id": 25,
+      "title": "Controlled-Phase (\\\\(CR_z(\\theta), CP(\\theta)\\\\))",
+      "requirement": "Exact phase kickback for arbitrary angles on distant qubit pairs.",
+      "status": "PASS",
+      "evidence": "CRZ/CP both distant directions",
+      "ms": 1.4410609999999906
+    },
+    {
+      "id": 26,
+      "title": "Three-Qubit Toffoli (CCX) & Fredkin (CSWAP)",
+      "requirement": "Exact multi-controlled logic without decomposing into lossy approximations.",
+      "status": "PASS",
+      "evidence": "Toffoli and Fredkin all 8 basis input columns on distant wires",
+      "ms": 4.665877999999793
+    },
+    {
+      "id": 27,
+      "title": "Multi-Controlled \\\\(C^{k}X\\\\) Gates (k = 10, 50, 99)",
+      "requirement": "Exact execution of a 99-control NOT gate across all 100 qubits simultaneously.",
+      "status": "PASS",
+      "evidence": "10,50,99 controls, both target directions and disabled case",
+      "ms": 23.59835299999986
+    },
+    {
+      "id": 28,
+      "title": "Custom Unitary Matrix Injection",
+      "requirement": "Ability to apply an arbitrary user-defined \\\\(2^k \\times 2^k\\\\) unitary matrix (k ≤ 5).",
+      "status": "BLOCKED",
+      "evidence": "Custom matrix injection unavailable"
+    },
+    {
+      "id": 29,
+      "title": "Identity & Zero-Angle Gates",
+      "requirement": "Applying \\\\(R_z(0)\\\\) or I causes zero state mutation and zero rounding drift.",
+      "status": "PASS",
+      "evidence": "state unchanged after I and zero-angle gates",
+      "ms": 9.208059000000048
+    },
+    {
+      "id": 30,
+      "title": "Mid-Circuit Reset Operations",
+      "requirement": "Projecting a qubit to \\\\(\\vert{}0\\rangle\\\\) mid-circuit properly renormalizes the remaining 99-qubit state.",
+      "status": "PARTIAL",
+      "evidence": "trajectory reset, both GHZ outcomes, norm",
+      "ms": 16.481574000000364
+    },
+    {
+      "id": 31,
+      "title": "100-Qubit GHZ State",
+      "requirement": "\\\\((\\vert{}0\\rangle^{\\otimes 100} + \\vert{}1\\rangle^{\\otimes 100})/\\sqrt{2}\\\\) verified via parity correlations.",
+      "status": "PASS",
+      "evidence": "100-qubit GHZ amplitudes and 1000 parity-correlated samples",
+      "ms": 20.481338999999934
+    },
+    {
+      "id": 32,
+      "title": "100-Qubit W-State",
+      "requirement": "Exact \\\\(1/\\sqrt{100}\\\\) amplitude on all 100 single-excitation Hamming-weight-1 states.",
+      "status": "PASS",
+      "evidence": "100-qubit W, all 100 amplitudes and norm",
+      "ms": 26.407415000000128
+    },
+    {
+      "id": 33,
+      "title": "1D Linear Chain Entanglement",
+      "requirement": "Nearest-neighbor entangling layers across 100 qubits (`q[i]` to `q[i+1]`).",
+      "status": "PARTIAL",
+      "evidence": "GHZ chain; deeper entangling layers unverified",
+      "ms": 10.628377999999884
+    },
+    {
+      "id": 34,
+      "title": "2D Grid Topology (10 × 10)",
+      "requirement": "Alternating horizontal and vertical CZ/fSim layers matching heavy-hex and square grid processors.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 35,
+      "title": "All-to-All Complete Graph Entanglement",
+      "requirement": "Every qubit entangled directly with every other qubit (\\\\(\\binom{100}{2} = 4,950\\\\) pairs).",
+      "status": "PASS",
+      "evidence": "complete 100-qubit graph: 4950 CZ interactions; all 100 stabilizer generators and norm; {\"qubits\":100,\"gates\":5050,\"mode\":\"dag\",\"liveNodes\":10464,\"peakNodes\":16507,\"nodeBudget\":32768,\"precision\":\"Float64; no deliberate truncation\"}",
+      "ms": 1198.2521320000005
+    },
+    {
+      "id": 36,
+      "title": "Long-Range Cross-Chip Gates",
+      "requirement": "Direct CNOTs between `q[0]` and `q[99]`, `q[1]` and `q[98]`, etc., with zero swap-routing errors.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 37,
+      "title": "Deep Circuit Scaling (Depth 50–200)",
+      "requirement": "Maintaining exact fidelity through 100+ layers of non-commuting gates.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 38,
+      "title": "Maximally Entangled Page-Curve Test",
+      "requirement": "Bipartite entanglement entropy across a 50/50 qubit cut reaches theoretical maximum without truncation.",
+      "status": "PASS",
+      "evidence": "50 Bell pairs across physical 50/50 split; lossless wire planner; default logical-order DAG failed at gate 20; {\"cutEntropyBits\":50,\"peakNodes\":7600,\"derivation\":\"unique Bell stabilizer state\"}",
+      "ms": 16.29500999999982
+    },
+    {
+      "id": 39,
+      "title": "Cluster / Graph State Preparation",
+      "requirement": "Exact stabilizer correlations on 2D 100-qubit cluster states for measurement-based QC.",
+      "status": "FAIL",
+      "evidence": "100-qubit 10x10 cluster graph, check all stabilizers; cluster: deferred replay at gate 146; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
+      "ms": 741.0282480000005
+    },
+    {
+      "id": 40,
+      "title": "Quantum Fourier Transform (100-Qubit QFT)",
+      "requirement": "Full QFT followed by inverse QFT recovers initial basis state with `< 1e-12` error.",
+      "status": "FAIL",
+      "evidence": "100-qubit QFT followed by inverse on nonzero basis; lossless logical SWAP; no gate cancellation; inverse QFT: deferred replay at gate 5309; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
+      "ms": 602.1289159999997
+    },
+    {
+      "id": 41,
+      "title": "Grover Diffusion Operator (50–100 Qubits)",
+      "requirement": "Single-step amplitude amplification matches exact analytical \\\\(\\sin((2k+1)\\theta)\\\\) formula.",
+      "status": "FAIL",
+      "evidence": "one Grover iteration on 100 qubits, all-ones mark and diffusion, amplitude vs formula; Grover: deferred replay at gate 308; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
+      "ms": 331.8163110000005
+    },
+    {
+      "id": 42,
+      "title": "Quantum Phase Estimation (QPE)",
+      "requirement": "Exact phase readout on a 50-bit precision register.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 43,
+      "title": "Linear Cross-Entropy Benchmarking (XEB)",
+      "requirement": "Achieves XEB fidelity ≈ 1.000 ± 0.01 across 10,000+ samples on deep random circuits.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 44,
+      "title": "Porter-Thomas Distribution Match",
+      "requirement": "Output bitstring probabilities on deep random circuits follow the exact exponential Porter-Thomas distribution.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 45,
+      "title": "Chi-Square Goodness-of-Fit",
+      "requirement": "Sampled frequencies on 20–30 qubit sub-circuits pass χ² statistical tests against exact state-vector probabilities.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 46,
+      "title": "Heavy Output Generation (HOG)",
+      "requirement": "Passes Quantum Volume heavy-output threshold (> 2/3) consistently across random square circuits.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 47,
+      "title": "Seeded Determinism",
+      "requirement": "Running sampling with a fixed RNG seed reproduces the exact same sequence of bitstrings bit-for-bit.",
+      "status": "PASS",
+      "evidence": "1000 complete samples reproducible with same seed",
+      "ms": 34.51796099999956
+    },
+    {
+      "id": 48,
+      "title": "Unseeded Statistical Independence",
+      "requirement": "Distinct runs show zero autocorrelation between consecutive measurement shots.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 49,
+      "title": "Single-Shot Mid-Circuit Measurement",
+      "requirement": "Measuring qubit k collapses the state properly and routes classical feedback (`if c == 1: X(q[j])`).",
+      "status": "PARTIAL",
+      "evidence": "both collapse branches and programmatic classical feedback",
+      "ms": 19.23448099999996
+    },
+    {
+      "id": 50,
+      "title": "Marginal Distribution Consistency",
+      "requirement": "Single-qubit and two-qubit marginal probabilities match exact reduced density matrices \\\\(\\rho_A = \\text{Tr}\\_B(\\vert{}\\psi\\rangle\\langle\\psi\\vert{})\\\\).",
+      "status": "PARTIAL",
+      "evidence": "GHZ marginal probabilities",
+      "ms": 13.870601999999963
+    },
+    {
+      "id": 51,
+      "title": "Rare-Event Sampling Accuracy",
+      "requirement": "Circuits engineered to have a target bitstring probability of 10⁻⁶ sample that bitstring at the expected rate.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 52,
+      "title": "No Mode Collapse",
+      "requirement": "Sampling 100,000 shots from \\\\(H^{\\otimes 100}\\\\) produces 100,000 unique 100-bit strings with zero duplicates.",
+      "status": "PASS",
+      "evidence": "100000 H^100 sampled strings; zero duplicates; {\"unique\":100000}",
+      "ms": 2104.528172
+    },
+    {
+      "id": 53,
+      "title": "25-Qubit Full Vector Equivalence",
+      "requirement": "Every single one of the 2²⁵ (33,554,432) complex amplitudes matches Qiskit Aer / cuStateVec to `1e-13`.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 54,
+      "title": "30-Qubit Full Vector Equivalence",
+      "requirement": "Every single one of the 2³⁰ (1,073,741,824) complex amplitudes matches QuEST / Intel-QS to `1e-13`.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 55,
+      "title": "Feynman Path-Sum Single-Amplitude Match (50 Qubits)",
+      "requirement": "Exact match on 1,000 randomly chosen bitstrings against an independent path-integral calculator.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 56,
+      "title": "Tensor Network Contraction Match (100 Qubits, Low Depth)",
+      "requirement": "Exact match on 2D shallow circuits against `quimb` or `cuTensorNet`.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 57,
+      "title": "Stabilizer Engine Match (100 Qubits, Clifford-Only)",
+      "requirement": "Exact match on 10,000-gate Clifford circuits against `Stim`.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 58,
+      "title": "Matchgate / Fermionic Simulator Match",
+      "requirement": "Exact match on 100-qubit nearest-neighbor matchgate circuits.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 59,
+      "title": "Analytical Hamiltonian Evolution (\\\\(e^{-iHt}\\\\))",
+      "requirement": "Exact match against analytical solutions for 100-spin Transverse Field Ising Model (TFIM).",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 60,
+      "title": "VQE / QAOA Energy Landscape Match",
+      "requirement": "Exact cost-function expectation values across parameter sweeps on 50-node MaxCut graphs.",
+      "status": "BLOCKED",
+      "evidence": "Specified independent comparison not executed"
+    },
+    {
+      "id": 61,
+      "title": "Non-Clifford T-Gate Injection Audit",
+      "requirement": "Adding 500 T-gates to a Clifford circuit does not cause silent approximation or failure.",
+      "status": "PARTIAL",
+      "evidence": "500 T injections into GHZ, analytic phase; structured circuit only",
+      "ms": 59.060927999999876
+    },
+    {
+      "id": 62,
+      "title": "Zero-State Bias Check",
+      "requirement": "Running random circuits starting from \\\\(\\vert{}10110...1\\rangle\\\\) performs identically to starting from \\\\(\\vert{}00000...0\\rangle\\\\).",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 63,
+      "title": "Permutation Invariance",
+      "requirement": "Relabeling qubit indices (`q[0..99]` shuffled randomly) produces identical physical results.",
+      "status": "PARTIAL",
+      "evidence": "arbitrary logical permutation of 6-qubit random circuits, all amplitudes; 100-qubit planner checked separately",
+      "ms": 29.421226999998908
+    },
+    {
+      "id": 64,
+      "title": "No Bond-Dimension Truncation",
+      "requirement": "Verify zero singular value truncation (no SVD cutoff) is occurring under the hood.",
+      "status": "PARTIAL",
+      "evidence": "No intentional SVD truncation in source; independent audit pending"
+    },
+    {
+      "id": 65,
+      "title": "No Amplitude Pruning / Thresholding",
+      "requirement": "Verify small amplitudes (`1e-18`) are never dropped to enforce artificial sparsity.",
+      "status": "PARTIAL",
+      "evidence": "1e-18 amplitude retained and uncomputed",
+      "ms": 0.3145039999999426
+    },
+    {
+      "id": 66,
+      "title": "Irrational Gate Parameter Audit",
+      "requirement": "Gates parameterized with non-dyadic fractions (e.g., θ = 0.1234567891234567) prevent lookup-table caching.",
+      "status": "PARTIAL",
+      "evidence": "non-dyadic parameter, analytic output",
+      "ms": 0.1541930000003049
+    },
+    {
+      "id": 67,
+      "title": "Adversarial Circuit Check",
+      "requirement": "Circuits specifically designed to maximize entanglement (e.g., expander-graph CZ networks) still execute accurately.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 68,
+      "title": "Input Independence",
+      "requirement": "Engine does not rely on pre-compiled circuit templates or hardcoded benchmark answers.",
+      "status": "PARTIAL",
+      "evidence": "Generic gate code, independent blind audit pending"
+    },
+    {
+      "id": 69,
+      "title": "Bit-Flip Symmetry Break",
+      "requirement": "Breaking symmetry on a single qubit (`Rx(0.0001)` on `q[73]`) propagates accurately across all entangled qubits.",
+      "status": "PASS",
+      "evidence": "GHZ symmetry break on q73, four analytic amplitudes",
+      "ms": 8.82203699999991
+    },
+    {
+      "id": 70,
+      "title": "Uncompute (\\\\(U^{\\dag }U\\\\)) at Depth 100",
+      "requirement": "Applying 100 layers of random non-Clifford gates followed by their exact inverse returns to \\\\(\\vert{}0\\rangle^{\\otimes 100}\\\\) with probability `1.000000000000`.",
+      "status": "FAIL",
+      "evidence": "seeded 100-layer non-Clifford 100-qubit random rotations and random matching entanglers then inverse, 32768-node bound; depth 1: deferred replay at gate 103; no verified result within DAG budget\n\n'replay' !== 'dag'\n",
+      "ms": 245.24310500000138
+    },
+    {
+      "id": 71,
+      "title": "Physical RAM Ceiling Audit",
+      "requirement": "Peak Resident Set Size (RSS) stays strictly within documented physical RAM limits without OS Out-Of-Memory (OOM) kills.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 72,
+      "title": "Zero Disk Swap / Paging Audit",
+      "requirement": "`vmstat` / `iostat` confirms zero swap-file usage or hidden NVMe/SSD scratch paging during 100-qubit runs.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 73,
+      "title": "Zero Network Offloading",
+      "requirement": "Network interface monitoring confirms zero silent offloading to remote cloud supercomputers.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 74,
+      "title": "Memory Leak Check",
+      "requirement": "Running 1,000 sequential 100-qubit circuits shows flat memory allocation with zero gradual growth.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 75,
+      "title": "Deterministic Memory Footprint",
+      "requirement": "Memory usage is predictable before execution begins based on circuit parameters.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 76,
+      "title": "Cache Locality & Bandwidth Efficiency",
+      "requirement": "Profiling shows predictable memory access patterns without segmentation faults or buffer overflows.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 77,
+      "title": "GPU/CPU Parity",
+      "requirement": "Running the exact same 50-qubit circuit on CPU vs. GPU yields identical results within floating-point rounding (`1e-13`).",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 78,
+      "title": "Multi-Thread / MPI Determinism",
+      "requirement": "Running across 1, 8, 32, or 128 threads produces identical final states without race conditions.",
+      "status": "BLOCKED",
+      "evidence": "Hardware/OS instrumentation, long runs or backend required; node count is not RAM cap"
+    },
+    {
+      "id": 79,
+      "title": "Graceful Resource Boundary Handling",
+      "requirement": "If a circuit genuinely exceeds hardware time/memory budgets, the engine raises a clean exception rather than returning corrupted data.",
+      "status": "PARTIAL",
+      "evidence": "forced budget replay and explicit unsupported-sampling error",
+      "ms": 0.7529240000003483
+    },
+    {
+      "id": 80,
+      "title": "Cold-Start vs. Warm-Start Consistency",
+      "requirement": "First run after system reboot produces the exact same result as subsequent cached runs.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 81,
+      "title": "Qubit Scaling Curve (N = 10 → 100)",
+      "requirement": "Documented wall-clock runtime at N = 10, 20, 30, 40, 50, 60, 70, 80, 90, 100.",
+      "status": "PASS",
+      "evidence": "GHZ wall-clock N10..100; [{\"n\":10,\"ms\":0.14729199999965203},{\"n\":20,\"ms\":0.41189999999915017},{\"n\":30,\"ms\":1.3273089999993317},{\"n\":40,\"ms\":1.9339830000008078},{\"n\":50,\"ms\":2.7236420000008366},{\"n\":60,\"ms\":4.966851000000133},{\"n\":70,\"ms\":3.358629000000292},{\"n\":80,\"ms\":7.1029080000007525},{\"n\":90,\"ms\":6.398017000000436},{\"n\":100,\"ms\":9.912419999999656}]",
+      "ms": 38.38629700000001
+    },
+    {
+      "id": 82,
+      "title": "Depth Scaling Curve (D = 1 → 100)",
+      "requirement": "Documented runtime as circuit depth scales linearly on a fixed 100-qubit register.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 83,
+      "title": "Entanglement Scaling Curve",
+      "requirement": "Documented runtime vs. two-qubit gate density (from 0% to 100% entangling layers).",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 84,
+      "title": "Single-Amplitude Query Latency",
+      "requirement": "Exact time measured to extract one complex amplitude \\\\(\\alpha \\_{x}\\\\) at 50 and 100 qubits.",
+      "status": "PASS",
+      "evidence": "single-amplitude latency, 1000 queries each at 50/100; [{\"n\":50,\"meanMs\":0.006920643999999811},{\"n\":100,\"meanMs\":0.008068121999999676}]",
+      "ms": 24.647493999999824
+    },
+    {
+      "id": 85,
+      "title": "Batch Amplitude Query Throughput",
+      "requirement": "Time measured to extract 10,000 distinct amplitudes simultaneously.",
+      "status": "PARTIAL",
+      "evidence": "10000 sequential distinct amplitude queries; not parallel; {\"ms\":89.13010699999995}",
+      "ms": 98.26566699999967
+    },
+    {
+      "id": 86,
+      "title": "Sampling Throughput (Shots/Sec)",
+      "requirement": "Exact number of measurement bitstrings generated per second at 50 and 100 qubits.",
+      "status": "PASS",
+      "evidence": "10000 shots each at 50/100 qubits; [{\"n\":50,\"shotsPerSecond\":148895.34469324318},{\"n\":100,\"shotsPerSecond\":90881.14743483117}]",
+      "ms": 186.78664499999923
+    },
+    {
+      "id": 87,
+      "title": "Gate Fusion / Compilation Overhead",
+      "requirement": "Separation of circuit compilation/compression time from actual execution time.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 88,
+      "title": "Expectation Value Runtime",
+      "requirement": "Time measured to evaluate a 100-qubit Hamiltonian consisting of 1,000 Pauli terms.",
+      "status": "PASS",
+      "evidence": "1000 Pauli terms on 100-qubit GHZ; {\"ms\":45.770980000000236}",
+      "ms": 53.167059000000336
+    },
+    {
+      "id": 89,
+      "title": "Gradient / Parameter-Shift Speed",
+      "requirement": "Time measured to compute exact parameter-shift gradients for variational circuits.",
+      "status": "PARTIAL",
+      "evidence": "100-qubit product variational circuit parameter-shift derivative vs analytic -sin(theta); {\"ms\":0.41293299999961164}",
+      "ms": 0.526082000000315
+    },
+    {
+      "id": 90,
+      "title": "Energy / Power Draw Efficiency",
+      "requirement": "Total CPU/GPU watt-hours consumed per 100-qubit circuit execution.",
+      "status": "BLOCKED",
+      "evidence": "No calibrated power meter"
+    },
+    {
+      "id": 91,
+      "title": "Zero-Qubit / Single-Qubit Edge Case",
+      "requirement": "Engine handles N=1 and N=2 circuits cleanly without index errors.",
+      "status": "PARTIAL",
+      "evidence": "N=1,2; N=0 explicitly rejected",
+      "ms": 0.19176900000002206
+    },
+    {
+      "id": 92,
+      "title": "Empty Circuit Execution",
+      "requirement": "A 100-qubit circuit with 0 gates returns \\\\(\\vert{}0\\rangle^{\\otimes 100}\\\\) immediately.",
+      "status": "PASS",
+      "evidence": "100-qubit empty circuit",
+      "ms": 0.09607499999947322
+    },
+    {
+      "id": 93,
+      "title": "Extreme Circuit Depth (10,000+ Gates)",
+      "requirement": "Long sequential circuits do not suffer catastrophic floating-point drift.",
+      "status": "PARTIAL",
+      "evidence": "10000 sequential single-qubit T gates",
+      "ms": 26.92711800000052
+    },
+    {
+      "id": 94,
+      "title": "Near-Identity Gate Sequences",
+      "requirement": "Applying \\\\(R_x(10^{-9})\\\\) one million times accumulates the exact net angle \\\\(R_x(10^{-3})\\\\).",
+      "status": "PASS",
+      "evidence": "one million RX(1e-9) actual iterations",
+      "ms": 2531.5465319999994
+    },
+    {
+      "id": 95,
+      "title": "High-Frequency Phase Interference",
+      "requirement": "Rapidly oscillating phases (\\\\(e^{i\\cdot 10^{6}\\pi }\\\\)) maintain trigonometric precision without argument-reduction errors.",
+      "status": "PARTIAL",
+      "evidence": "symbolic rational pi input is reduced exactly; raw rounded Float64 angle cannot recover intended pi multiple; {\"symbolic\":[1,0],\"raw\":[1,-2.231912181360871e-10],\"rawError\":2.231912181360871e-10}",
+      "ms": 0.3465619999997216
+    },
+    {
+      "id": 96,
+      "title": "Disconnected Sub-Circuits",
+      "requirement": "Simulating two independent 50-qubit circuits inside one 100-qubit register matches simulating them separately.",
+      "status": "PASS",
+      "evidence": "two 50-qubit GHZ blocks, product amplitude match",
+      "ms": 13.378630000000157
+    },
+    {
+      "id": 97,
+      "title": "Repeated Measurement Stability",
+      "requirement": "Measuring the same qubit 100 times in a row yields the exact same classical bit every time.",
+      "status": "PASS",
+      "evidence": "100 repeat measurements after GHZ collapse",
+      "ms": 20.912718999999925
+    },
+    {
+      "id": 98,
+      "title": "NaN / Inf Guardrails",
+      "requirement": "Engine never outputs `NaN` or `Inf` under any valid unitary input.",
+      "status": "PARTIAL",
+      "evidence": "NaN/Inf inputs rejected, finite valid output",
+      "ms": 0.28691299999991315
+    },
+    {
+      "id": 99,
+      "title": "OpenQASM 2.0 / 3.0 Compatibility",
+      "requirement": "Standard QASM circuit files import and execute without manual rewriting.",
+      "status": "PARTIAL",
+      "evidence": "supported QASM 2/3 syntax only",
+      "ms": 0.170125999999982
+    },
+    {
+      "id": 100,
+      "title": "Blind Third-Party Circuit Test",
+      "requirement": "An independent evaluator generates 20 mystery 50-to-100 qubit circuits (mixing QFT, RCS, QAOA, and uncompute tests) and verifies all outputs blind.",
+      "status": "BLOCKED",
+      "evidence": "Independent external evaluation cannot be self-certified"
+    },
+    {
+      "id": 101,
+      "title": "Bit-Exact Reproducibility",
+      "requirement": "Re-running the entire 105-point suite produces identical checksums for all deterministic outputs.",
+      "status": "NOT_RUN",
+      "evidence": "No qualifying executed test yet"
+    },
+    {
+      "id": 102,
+      "title": "Error Bound Transparency",
+      "requirement": "Engine reports exact numerical error bounds alongside every computed amplitude or expectation value.",
+      "status": "BLOCKED",
+      "evidence": "Certified forward-error bounds missing"
+    },
+    {
+      "id": 103,
+      "title": "Complete Audit Logging",
+      "requirement": "Full telemetry logs (RAM, CPU/GPU cycles, gate counts, intermediate norms) are exported for every run.",
+      "status": "PARTIAL",
+      "evidence": "Gate/node/time telemetry only"
+    },
+    {
+      "id": 104,
+      "title": "Formal Complexity Documentation",
+      "requirement": "Clear mathematical specification explaining exactly how runtime and memory scale with qubit count, circuit depth, and entanglement entropy.",
+      "status": "PARTIAL",
+      "evidence": "DAG and replay complexity documented; no general efficient bound proven"
+    },
+    {
+      "id": 105,
+      "title": "Independent Replication",
+      "requirement": "A separate engineering team reproduces the exact benchmark results on clean hardware using the documented engine build.",
+      "status": "BLOCKED",
+      "evidence": "Independent external evaluation cannot be self-certified"
+    }
+  ]
+}
