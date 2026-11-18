@@ -35,6 +35,15 @@ jobs:
           node tests/frame-factor.test.mjs
           node tests/rank-frame.test.mjs
           node tests/rank-ancilla.test.mjs
+      - name: Native MPS and sliced contractor validation
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+        run: |
+          python -B tests/mps-audit.py
+          python -B tests/mps-deep-audit.py
+          python -B tests/mps-random-uncompute.py
+          python -B tests/sliced-bond-audit.py
       - name: Diamond 105 (must fail closed)
         run: DSIQ_AUDIT_SEED=2738912009 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
       - name: Preserve evidence even for rejected builds
