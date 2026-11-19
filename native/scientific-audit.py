@@ -34,7 +34,7 @@ def recover_journal(raw,stderr,report=None,failure=None):
                 if x.get('kind')=='event' and x['data'].get('sequence')==len(events):events.append(x['data'])
                 elif x.get('kind')=='output':outputs.append(x['data'])
             cp=[x for x in events if x.get('kind')=='checkpoint']
-            report={'schema':'DSIQ-scientific-run-v1','status':'FAILED','error':failure,'inputSHA256':sha(raw),'runtime':begin.get('runtime'),'requestedGates':begin.get('requestedGates'),'checkpointEvery':begin.get('checkpointEvery'),'completedPrefix':max((x['prefix'] for x in cp),default=None),'events':events,'outputs':outputs,'metrics':{},'recoveredFromJournal':True}
+            report={'schema':'DSIQ-scientific-run-v1','status':'FAILED','error':failure,'inputSHA256':sha(raw),'runtime':begin.get('runtime'),'requestedGates':begin.get('requestedGates'),'checkpointEvery':begin.get('checkpointEvery'),'completedPrefix':max((x['prefix'] for x in cp),default=None),'events':events,'outputs':outputs,'metrics':{k:events[-1][k] for k in ('elapsedMs','cpuMicros','rssBytes','peakRssKiB','heapUsedBytes','externalBytes','arrayBuffersBytes') if events and k in events[-1]},'metricsScope':'last acknowledged journal event, not terminal measurement','recoveredFromJournal':True}
     stderr=b'\n'.join(diagnostic)
     return report, stderr, journal
 
@@ -66,7 +66,18 @@ def run(raw,timeout=120,limit_mib=2048):
     report,stderr,journal=recover_journal(raw,stderr,report,failure)
     valid=bool(report and report.get('inputSHA256')==sha(raw) and report.get('status')=='COMPLETED' and code==0 and not failure)
     if not valid:failure=failure or (report or {}).get('error') or f'Worker exit {code}'
-    return {'schema':'DSIQ-scientific-audit-v1','status':'COMPLETED' if valid else 'FAILED','error':failure,'inputSHA256':sha(raw),'workerExitCode':code,'workerReport':report,'workerStdoutSHA256':sha(stdout),'stderr':stderr.decode(errors='replace')[-4000:],'elapsedSeconds':elapsed,'limitMiB':limit_mib,'wallTimeoutSeconds':timeout,'cpuSoftLimitSeconds':timeout,'cpuHardLimitSeconds':timeout+1,'terminationSignal':-code if code is not None and code<0 else None,'journalRecords':len(journal),'journalPipeSHA256':journal_sha,'childCPUSeconds':{'user':after.ru_utime-before.ru_utime,'system':after.ru_stime-before.ru_stime},'childPeakRssKiB':after.ru_maxrss,'peakRssScope':'RUSAGE_CHILDREN cumulative maximum for this wrapper process; per-worker peak in workerReport.metrics','cpuCycles':{'value':cycles,'timeEnabledNs':enabled,'timeRunningNs':running,'unavailableReason':reason,'scope':'Linux hardware CPU cycles for wrapper and inherited children; user mode; raw not scaled'},'gpu':{'used':False,'cycles':None,'reason':'CPU-only path'},'host':{'system':platform.system(),'machine':platform.machine(),'release':platform.release(),'python':platform.python_version()},'isolation':'Linux RLIMIT_AS and CPU; inherited seccomp socket and write-open denial; trusted-code harness'}
+    diagnostic=stderr.decode(errors='replace')[-4000:]
+    # Classification from concrete evidence only; never infer physical OOM
+    # from an abort signal or RSS. Retain both raw and attributed failure.
+    if valid:category=None
+    elif failure=='Wall-time limit exceeded':category='WALL_TIMEOUT'
+    elif 'heap out of memory' in diagnostic.lower() or 'allocation failed - javascript heap' in diagnostic.lower():category='V8_HEAP_EXHAUSTION'
+    elif code==-24:category='CPU_TIME_LIMIT_SIGNAL'
+    elif code is not None and code<0:category='SIGNAL_'+str(-code)
+    elif 'budget' in failure.lower() or 'limit' in failure.lower():category='REPORTED_RESOURCE_BOUNDARY'
+    else:category='EXECUTION_ERROR'
+
+    return {'schema':'DSIQ-scientific-audit-v1','status':'COMPLETED' if valid else 'FAILED','error':failure,'failureCategory':category,'inputSHA256':sha(raw),'workerExitCode':code,'workerReport':report,'workerStdoutSHA256':sha(stdout),'stderr':stderr.decode(errors='replace')[-4000:],'elapsedSeconds':elapsed,'limitMiB':limit_mib,'wallTimeoutSeconds':timeout,'cpuSoftLimitSeconds':timeout,'cpuHardLimitSeconds':timeout+1,'terminationSignal':-code if code is not None and code<0 else None,'journalRecords':len(journal),'journalPipeSHA256':journal_sha,'childCPUSeconds':{'user':after.ru_utime-before.ru_utime,'system':after.ru_stime-before.ru_stime},'childPeakRssKiB':after.ru_maxrss,'peakRssScope':'RUSAGE_CHILDREN cumulative maximum for this wrapper process; per-worker peak in workerReport.metrics','cpuCycles':{'value':cycles,'timeEnabledNs':enabled,'timeRunningNs':running,'unavailableReason':reason,'scope':'Linux hardware CPU cycles for wrapper and inherited children; user mode; raw not scaled'},'gpu':{'used':False,'cycles':None,'reason':'CPU-only path'},'host':{'system':platform.system(),'machine':platform.machine(),'release':platform.release(),'python':platform.python_version()},'isolation':'Linux RLIMIT_AS and CPU; inherited seccomp socket and write-open denial; trusted-code harness'}
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--timeout',type=int,default=120);p.add_argument('--limit-mib',type=int,default=2048);a=p.parse_args()
     try:r=run(sys.stdin.buffer.read(),a.timeout,a.limit_mib);print(json.dumps(r,allow_nan=False));sys.exit(0 if r['status']=='COMPLETED' else 1)
