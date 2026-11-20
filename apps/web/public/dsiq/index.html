@@ -1,3 +1,178 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DSIQ | MAH Quantum</title><style>
-:root{color-scheme:dark;font:14px system-ui,sans-serif;background:#091420;color:#dceaf4}*{box-sizing:border-box}body{max-width:1400px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}h1{font-size:30px;letter-spacing:-.04em;margin:5px 0}h2{font-size:16px;margin:0 0 14px}small,.muted{color:#99acc0}small{letter-spacing:.07em}p{line-height:1.55}.tag{border:1px solid #365168;border-radius:6px;padding:8px 12px;color:#98d9ce}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:#101f2e;border:1px solid #2b4154;border-radius:10px;padding:18px;min-width:0}label{display:block;color:#afc3d4;margin:10px 0 5px}input,select,textarea,button{font:inherit;border:1px solid #3d556a;border-radius:5px;background:#0b1723;color:#edf6ff;padding:9px}input,select,textarea{width:100%}textarea{height:360px;resize:vertical;line-height:1.5;font:12px ui-monospace,monospace}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}.primary{background:#167d72;border-color:#2ea495;color:white}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.controls,.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#0a1825;padding:12px;border:1px solid #2c4154;border-radius:6px}.metric strong{font-size:22px;display:block;margin-top:5px;overflow-wrap:anywhere}.metric small{font-size:10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto;color:#b8d7dc;background:#091420;padding:12px;border-radius:5px}progress{width:100%;accent-color:#2cb6a3}.note{border-left:3px solid #d8a958;padding-left:10px;color:#cbd5e0}.error{color:#ffb1ad}@media(max-width:760px){body{padding:12px}.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
-</style><header><div><small>MAH QUANTUM / COMPUTATIONAL RESEARCH</small><h1>DSIQ State Vector Engine</h1><div class="muted">Clifford reference frame · adaptive affine phase · factor statevectors · coherent terms · amplitude DAG · sliced contraction · scaled replay</div></div><div class="tag">EXPERIMENTAL · LOCAL CPU</div></header><div class="grid"><section class="panel"><h2>01 / Circuit configuration</h2><div class="actions"><button id="ghz">1024Q phase GHZ</button><button id="product">1024Q rotations</button><button id="bell">Bell &amp; T</button></div><label for="source">OpenQASM (restricted unitary / trajectory subset)</label><textarea id="source" spellcheck="false"></textarea><div class="controls"><div><label for="query">Basis amplitude query (q0 rightmost)</label><input id="query" value="ones" placeholder="zeros, ones, or binary string"></div><div><label for="budget">Maximum DAG nodes</label><input id="budget" type="number" min="2" max="1000000" value="32768"></div><div><label for="precision">Numerical precision</label><select id="precision"><option value="fp64">FP64 / exact symbolic</option><option value="fp32">FP32 factor statevector</option></select></div><div><label for="shots">Requested samples</label><input id="shots" type="number" min="0" max="1024" value="128"></div><div><label for="pauli">Optional Pauli observable (q0 rightmost)</label><input id="pauli" placeholder="IXYZ string; exact register width"></div><div><label for="visits">Maximum replay visits</label><input id="visits" type="number" min="1" max="1000000000" value="10000000"></div><div><label for="tensorbytes">Coefficient byte limit (64 MiB default)</label><input id="tensorbytes" type="number" min="256" max="536870912" value="67108864"></div><div><label for="method">Execution method</label><select id="method"><option value="adaptive">Adaptive statevector</option><option value="contracted">Double-layer contracted state</option><option value="parity">Affine parity amplitude</option><option value="dyadic">Exact dyadic amplitude</option><option value="certified">Certified FP64 factor</option><option value="frame">Clifford frame factor</option><option value="rank-frame">Rank-reduced Clifford frame</option><option value="certified-auto">Strict certified auto (zero shots)</option><option value="certified-contraction">Certified connected contraction (0 shots)</option></select></div><div><label for="ordering">Contraction ordering</label><select id="ordering"><option value="degree">Minimum degree</option><option value="fill">Minimum fill</option><option value="search">Multi-start forecast</option><option value="pair">Pair contraction forecast</option></select></div><div><label for="slices">Maximum coherent slices</label><input id="slices" type="number" min="1" max="65536" value="256"></div><div><label for="seed">PRNG seed</label><input id="seed" type="number" min="0" max="4294967295" value="42"></div></div><div class="actions"><button class="primary" id="run">Execute DSIQ</button><button id="observable">Pauli only</button><button id="contraction">Amplitude contraction only</button><button id="cancel" disabled>Cancel</button><button id="export" disabled>Export evidence</button></div><p class="muted">Supports H, X, Y, Z, S/SDG, T/TDG, SX/SY, RX/RY/RZ, P, U, CX/CY/CZ, CRX/CRY/CRZ, CP, CU3, CCX, MCX/MCRY (DSIQ extensions), Fredkin (cswap), SWAP, iSWAP, sqrtSWAP and fSim (limited OpenQASM subset). Supports restricted single-register measure/reset and equality-conditioned gate statements. Trajectory amplitudes refer to the first conditional state; each requested shot reruns the program. No general classical language or noise simulation.</p></section><section class="panel"><h2>02 / Execution telemetry</h2><div id="status" role="status">Ready</div><progress id="progress" value="0" max="1"></progress><div class="metrics"><div class="metric"><small>LOGICAL QUBITS</small><strong id="n">—</strong></div><div class="metric"><small>GATE OPERATIONS</small><strong id="gates">—</strong></div><div class="metric"><small>REPRESENTATION</small><strong id="mode">—</strong></div><div class="metric"><small>PEAK REPRESENTATION SIZE</small><strong id="peak">—</strong></div></div><h2 style="margin-top:20px">03 / Complex amplitude</h2><pre id="amp">No result</pre><h2>04 / Scientific observables</h2><pre id="science">No result</pre><h2>05 / Measurement samples</h2><pre id="counts">No result</pre><p class="note">Research build: Diamond-105 release gate is not satisfied. Node cap is not a hard RAM cap. Replay trades memory for potentially exponential time and stops cleanly at its visit limit; sampling is unavailable in replay mode. Float64 results may suffer cancellation and underflow; symbolic phases and scaled replay expose logarithmic amplitude magnitude. Contraction evaluates all branches or returns a budget error; coefficient byte limits exclude runtime metadata. Amplitude-only modes require zero shots and no Pauli query. Double-layer contracted-state mode supports conditional sampling and observables within the query-work budget. Exact dyadic results refer to rounded gate matrices; certified mode has a separate admitted regime. The configurable byte limit is not a total process RAM cap. No physical hardware is connected.</p></section></div><script type="module" src="./ui.mjs"></script></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="DSIQ scientific computational workspace by Devashri S Industries, MAH Quantum Research Institute.">
+  <title>DSIQ | Scientific Workspace</title>
+  <style>
+    :root{color-scheme:dark;background:#000000;color:#eeeeee;font-family:Aptos,'Segoe UI',Arial,sans-serif;font-size:13px;font-synthesis:none}
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;background:#000000;color:#eaeaea;min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #fff;outline-offset:3px}
+    button:disabled{opacity:.35;cursor:not-allowed}
+    a{color:#e5e5e5;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .app{display:grid;grid-template-columns:226px minmax(0,1fr);min-height:100vh}
+    .sidebar{border-right:1px solid #222;display:flex;flex-direction:column;padding:25px 18px 24px;position:sticky;top:0;height:100vh;background:#000}
+    .brand{display:flex;gap:11px;align-items:center;padding:0 8px 29px;border-bottom:1px solid #222}
+    .monogram{width:39px;height:39px;flex:none;border:1px solid #777;display:grid;place-items:center;font-family:'Times New Roman',Times,serif;font-size:17px;letter-spacing:-.05em;color:#fff}
+    .brand-title{font-family:'Times New Roman',Times,serif;font-size:17px;letter-spacing:.02em;color:#fff;line-height:1.1}
+    .brand-sub{font-size:10px;color:#858585;letter-spacing:.11em;margin-top:5px}
+    .nav-caption,.eyebrow,.field-label,.label-small,.metric dt,.display-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c8c;font-weight:600}
+    .nav-caption{margin:30px 12px 10px}
+    .nav-btn{width:100%;background:transparent;border:1px solid transparent;color:#9c9c9c;text-align:left;padding:12px 12px;display:flex;align-items:center;gap:12px;letter-spacing:.01em}
+    .nav-btn:hover{color:#fff;border-color:#303030;text-decoration:none}
+    .nav-btn.active{border:1px solid #3f3f3f;background:#0c0c0c;color:#fff}
+    .nav-number{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:#707070;min-width:20px}
+    .side-bottom{margin-top:auto;padding:18px 8px 0;border-top:1px solid #222}
+    .side-bottom strong{font-weight:600;font-size:12px;display:block;margin:6px 0}
+    .side-bottom p{font-size:11px;line-height:1.7;color:#929292;margin:5px 0}
+    .work{padding:0 34px 42px;min-width:0}
+    .top{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:26px 0 23px;border-bottom:1px solid #282828}
+    .top-path{font-size:11px;color:#8c8c8c;letter-spacing:.06em}
+    .top-path strong{color:#e8e8e8;font-weight:500}
+    .top-right{display:flex;gap:19px;align-items:center;flex-wrap:wrap;font-size:11px;color:#888}
+    .live{display:inline-flex;align-items:center;gap:8px;color:#d6d6d6}
+    .live::before{content:'';display:block;width:6px;height:6px;border-radius:50%;background:#d9d9d9}
+    h1,h2,h3{font-family:'Times New Roman',Times,serif;color:#fff;font-weight:500}
+    h1{font-size:clamp(31px,3.6vw,46px);line-height:1.12;margin:10px 0 12px;letter-spacing:-.018em}
+    h2{font-size:24px;line-height:1.2;margin:0}
+    h3{font-size:19px;line-height:1.2;margin:0}
+    .lead{margin:0;line-height:1.75;font-size:13px;color:#aaa;max-width:770px}
+    .intro{padding:33px 0 31px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+    .release{font-size:11px;color:#bcbcbc;border:1px solid #383838;padding:10px 14px;white-space:nowrap}
+    .pane{display:none}
+    .pane.active{display:block}
+    .workspace-grid{display:grid;grid-template-columns:minmax(380px,1.07fr) minmax(330px,.93fr);gap:18px;align-items:start}
+    .sheet{min-width:0;border:1px solid #292929;background:#030303}
+    .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid #282828}
+    .sheet-head h2{font-size:20px}
+    .head-note{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#888}
+    .sheet-body{padding:19px 20px 20px}
+    .micro{font-size:11px;line-height:1.7;color:#8d8d8d}
+    .template-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:18px}
+    .field{min-width:0}
+    .field-label{display:block;margin-bottom:9px}
+    input,select,textarea{width:100%;min-width:0;background:#080808;color:#efefef;border:1px solid #3a3a3a;border-radius:0;padding:11px 12px;box-shadow:none}
+    select{cursor:pointer}
+    textarea{resize:vertical;min-height:335px;line-height:1.68;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;font-size:12px;tab-size:2;letter-spacing:0}
+    .editor-meta{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 0 8px}
+    .meta-mono{font:10px ui-monospace,SFMono-Regular,Consolas,monospace;color:#7f7f7f}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 14px}
+    .form-grid .wide{grid-column:1/-1}
+    .rule{border:0;border-top:1px solid #292929;margin:21px 0}
+    .btn{border:1px solid #484848;padding:11px 14px;background:#070707;color:#eee;min-height:40px;white-space:nowrap}
+    .btn:hover:not(:disabled){background:#161616;border-color:#777}
+    .btn-primary{background:#efefef;border-color:#efefef;color:#000;font-weight:650}
+    .btn-primary:hover:not(:disabled){background:#d6d6d6;border-color:#d6d6d6}
+    .btn-row{display:flex;gap:9px;flex-wrap:wrap}
+    .execution{padding:16px 20px;border-bottom:1px solid #292929;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .status-main{font-size:13px;color:#eee;font-weight:600}
+    .status-sub{color:#888;font-size:11px;margin-top:6px;overflow-wrap:anywhere}
+    .status-progress{height:2px;width:100%;background:#242424;margin-top:15px;position:relative;overflow:hidden}
+    .status-progress>span{display:block;height:100%;width:0;background:#dfdfdf;transition:width .15s ease}
+    .status-progress.indeterminate>span{width:40%;animation:busy 1.4s ease-in-out infinite}
+    @keyframes busy{0%{transform:translateX(-110%)}100%{transform:translateX(350%)}}
+    .metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .metric{padding:18px 19px;min-width:0;border-bottom:1px solid #252525}
+    .metric:nth-child(odd){border-right:1px solid #252525}
+    .metric dt{margin-bottom:9px}
+    .metric dd{margin:0;font:23px ui-monospace,SFMono-Regular,Consolas,monospace;color:#f2f2f2;overflow-wrap:anywhere}
+    .metric dd.small-value{font-size:13px;line-height:1.65}
+    .data-section{padding:18px 20px;border-bottom:1px solid #262626}
+    .data-section:last-child{border-bottom:0}
+    .data-title{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .data-title h3{font-size:17px}
+    .output{font:12px/1.85 ui-monospace,SFMono-Regular,Consolas,monospace;color:#e7e7e7;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;margin:0}
+    .field-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+    .field-table td{border-bottom:1px solid #202020;padding:9px 3px;vertical-align:top;overflow-wrap:anywhere}
+    .field-table tr:last-child td{border-bottom:0}
+    .field-table td:first-child{color:#969696;width:47%}
+    .field-table td:last-child{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#e1e1e1}
+    .hist{display:grid;gap:9px;min-height:40px}
+    .hist-row{display:grid;grid-template-columns:minmax(55px,100px) 1fr 53px;gap:9px;align-items:center;font:11px ui-monospace,SFMono-Regular,Consolas,monospace}
+    .hist-label{color:#bcbcbc;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+    .hist-track{height:14px;background:#141414}
+    .hist-bar{height:100%;background:#b7b7b7;transition:width .15s}
+    .hist-value{color:#c2c2c2;text-align:right}
+    .inline-note{font-size:11px;color:#969696;line-height:1.65;margin:0}
+    .error{color:#ffbfbf!important}
+    .method-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .method-card{padding:18px;border:1px solid #2d2d2d;background:#030303}
+    .method-card h3{margin-bottom:12px}
+    .method-card p{color:#b1b1b1;font-size:12px;line-height:1.8;margin:0}
+    .method-card code{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:#f6f6f6}
+    .diagnostics-grid{display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.2fr);gap:18px}
+    .diagnostic-list{list-style:none;padding:0;margin:0}
+    .diagnostic-list li{display:grid;grid-template-columns:1fr 130px;gap:12px;align-items:center;padding:15px 0;border-bottom:1px solid #222}
+    .diagnostic-list li:last-child{border:0}
+    .diagnostic-status{text-align:right;font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:#bcbcbc}
+    .diag-result{font:12px ui-monospace,SFMono-Regular,Consolas,monospace;color:#e7e7e7;white-space:pre-wrap;line-height:2}
+    footer{margin-top:26px;border-top:1px solid #242424;padding:18px 0 0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:#797979;font-size:11px;line-height:1.7}
+    .hidden{display:none!important}
+    @media(max-width:1170px){.workspace-grid{grid-template-columns:1fr}.intro{align-items:flex-start}.release{white-space:normal}}
+    @media(max-width:740px){.app{display:block}.sidebar{height:auto;position:relative;border-right:0;border-bottom:1px solid #292929;padding:12px 16px}.brand{border-bottom:0;padding:0 0 10px}.nav-caption,.side-bottom{display:none}.side-nav{display:flex;gap:6px;overflow-x:auto}.nav-btn{width:auto;padding:9px;white-space:nowrap}.work{padding:0 15px 30px}.top{padding:16px 0}.top-right{gap:8px}.intro{display:block;padding:23px 0}.release{display:inline-block;margin-top:15px}.workspace-grid,.diagnostics-grid,.method-grid{display:block}.sheet{margin-bottom:14px}.template-row{grid-template-columns:1fr}.template-row button{width:100%}.sheet-head,.sheet-body,.data-section,.execution{padding-left:14px;padding-right:14px}textarea{min-height:260px}.form-grid{grid-template-columns:1fr 1fr}.hist-row{grid-template-columns:minmax(42px,75px) 1fr 45px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Research navigation">
+      <div class="brand"><div class="monogram" aria-hidden="true">MQ</div><div><div class="brand-title">MAH Quantum</div><div class="brand-sub">RESEARCH INSTITUTE</div></div></div>
+      <div class="nav-caption">Scientific instruments</div>
+      <nav class="side-nav" aria-label="Workspace views">
+        <button class="nav-btn active" data-tab="workspace" aria-current="page"><span class="nav-number">01</span> Experiment workspace</button>
+        <button class="nav-btn" data-tab="diagnostics"><span class="nav-number">02</span> Engine diagnostics</button>
+        <button class="nav-btn" data-tab="methods"><span class="nav-number">03</span> Methods and scope</button>
+      </nav>
+      <div class="side-bottom"><span class="eyebrow">Research software</span><strong>DSIQ State Vector Engine</strong><p>Developed at Devashri S Industries.<br>Controlled research candidate v0.16.</p><p>Local browser computation. No uploaded circuits or execution telemetry.</p></div>
+    </aside>
+    <main class="work">
+      <div class="top"><div class="top-path">MAH QUANTUM / RESEARCH COMPUTATION / <strong>DSIQ WORKSPACE</strong></div><div class="top-right"><span class="live">LOCAL WORKER READY</span><span>v0.16 / SCIENTIFIC INTERFACE</span></div></div>
+      <div class="intro"><div><div class="eyebrow">COMPUTATIONAL PHYSICS / QUANTUM SYSTEMS</div><h1>DSIQ State Vector Engine</h1><p class="lead">A scientific environment for circuit execution, complex amplitude interrogation, Pauli observables, measurement statistics and reproducible numerical records.</p></div><div class="release">RESEARCH CANDIDATE&nbsp; / &nbsp;CONTROLLED ACCESS</div></div>
+      <section id="workspace" class="pane active" aria-label="Experiment workspace">
+        <div class="workspace-grid">
+          <div class="sheet">
+            <div class="sheet-head"><h2>Experiment specification</h2><div class="head-note">OPENQASM / LOCAL EXECUTION</div></div>
+            <div class="sheet-body">
+              <div class="template-row"><div class="field"><label for="template" class="field-label">Reference experiment</label><select id="template"><option value="bell">Bell pair / 2 qubits</option><option value="ghz50">GHZ chain / 50 qubits</option><option value="ghz100">GHZ chain / 100 qubits</option><option value="interference">Phase interference / 1 qubit</option><option value="product100">Product rotations / 100 qubits</option></select></div><button id="load-template" class="btn">Load experiment</button></div>
+              <div class="editor-meta"><label class="field-label" for="source" style="margin:0">Quantum circuit source</label><span class="meta-mono" id="editor-lines">0 lines</span></div>
+              <textarea id="source" spellcheck="false" aria-label="OpenQASM circuit source"></textarea>
+              <p class="micro" style="margin:9px 0 0">Restricted OpenQASM 2.0/3.0 subset. Qubit 0 is the least significant bit. Changes run only when explicitly executed.</p>
+              <hr class="rule">
+              <div class="form-grid">
+                <div class="field wide"><label for="query" class="field-label">Computational basis amplitude</label><input id="query" value="ones" autocomplete="off" spellcheck="false"><p class="micro" style="margin:7px 0 0">Use <code>zeros</code>, <code>ones</code>, or a register-width binary string.</p></div>
+                <div class="field"><label for="method" class="field-label">Computational method</label><select id="method"><option value="adaptive">Adaptive state representation</option><option value="contracted">Contracted state</option><option value="frame">Clifford frame factor</option><option value="rank-frame">Rank-reduced Clifford frame</option><option value="parity">Affine parity amplitude</option><option value="dyadic">Exact dyadic amplitude</option><option value="certified">Certified FP64 factor</option><option value="certified-auto">Strict certified auto</option><option value="certified-contraction">Certified contraction</option></select></div>
+                <div class="field"><label for="precision" class="field-label">Arithmetic</label><select id="precision"><option value="fp64">FP64 / symbolic supported</option><option value="fp32">FP32 factor representation</option></select></div>
+                <div class="field"><label for="shots" class="field-label">Measurement shots</label><input id="shots" type="number" min="0" max="1024" step="1" value="128"></div>
+                <div class="field"><label for="seed" class="field-label">Pseudo-random seed</label><input id="seed" type="number" min="0" max="4294967295" step="1" value="42"></div>
+                <div class="field wide"><label for="pauli" class="field-label">Pauli expectation observable (optional)</label><input id="pauli" autocomplete="off" spellcheck="false" placeholder="Example: XX for a two-qubit system"><p class="micro" style="margin:7px 0 0">Exactly one I, X, Y or Z symbol per qubit; q0 rightmost.</p></div>
+              </div>
+              <details style="margin:19px 0 0;border-top:1px solid #292929;padding-top:16px"><summary style="cursor:pointer;color:#dedede;font-size:12px">Advanced execution bounds</summary><div class="form-grid" style="padding-top:16px"><div class="field"><label for="budget" class="field-label">Max DAG nodes</label><input id="budget" type="number" min="2" max="1000000" value="32768"></div><div class="field"><label for="visits" class="field-label">Max contraction/replay work</label><input id="visits" type="number" min="1" max="1000000000" value="10000000"></div><div class="field"><label for="tensorbytes" class="field-label">Max coefficient bytes</label><input id="tensorbytes" type="number" min="256" max="536870912" value="67108864"></div><div class="field"><label for="slices" class="field-label">Maximum slices</label><input id="slices" type="number" min="1" max="65536" value="256"></div><div class="field wide"><label for="ordering" class="field-label">Contraction ordering</label><select id="ordering"><option value="degree">Minimum degree</option><option value="fill">Minimum fill</option><option value="search">Multi-start forecast</option><option value="pair">Pair contraction forecast</option></select></div></div><p class="micro">Coefficient-byte budgets are not process-wide memory guarantees. All execution methods reject unsupported requests or signal explicit resource limits.</p></details>
+              <hr class="rule">
+              <div class="btn-row"><button id="run" class="btn btn-primary">Execute circuit</button><button id="observable" class="btn">Pauli only</button><button id="contraction" class="btn">Amplitude only</button><button id="cancel" class="btn" disabled>Cancel</button></div>
+              <p class="micro" id="method-note" style="margin:14px 0 0">Adaptive execution supports measured amplitudes, observables and sampling when representation and budgets permit.</p>
+            </div>
+          </div>
+          <div class="sheet" aria-label="Measured results">
+            <div class="sheet-head"><h2>Execution record</h2><span id="run-id" class="head-note">NO EXECUTION</span></div>
+            <div class="execution"><div style="min-width:0;flex:1"><div id="status" class="status-main" role="status" aria-live="polite">Ready for a new experiment</div><div id="status-sub" class="status-sub">Results will be populated from the DSIQ worker, never generated as examples.</div><div id="progress" class="status-progress" aria-hidden="true"><span></span></div></div><button id="export" class="btn" disabled>Export JSON</button></div>
+            <dl class="metric-grid" style="margin:0"><div class="metric"><dt>LOGICAL QUBITS</dt><dd id="n">—</dd></div><div class="metric"><dt>EXPANDED OPERATIONS</dt><dd id="gates">—</dd></div><div class="metric"><dt>EXECUTION TIME</dt><dd id="elapsed">—</dd></div><div class="metric"><dt>ACTIVE REPRESENTATION</dt><dd id="mode" class="small-value">—</dd></div></dl>
+            <div class="data-section"><div class="data-title"><h3>Complex amplitude</h3><span class="head-note">⟨x|ψ⟩</span></div><table class="field-table"><tbody><tr><td>Queried bitstring</td><td id="query-out">Not evaluated</td></tr><tr><td>Real component</td><td id="amp-real">Not evaluated</td></tr><tr><td>Imaginary component</td><td id="amp-imag">Not evaluated</td></tr><tr><td>Log2 magnitude</td><td id="amp-log">Not evaluated</td></tr><tr><td>Absolute error enclosure</td><td id="amp-bound">Not available</td></tr></tbody></table></div>
+            <div class="data-section"><div class="data-title"><h3>Scientific observables</h3><span class="head-note">MEASURED OUTPUT</span></div><table class="field-table"><tbody><tr><td>State norm</td><td id="norm">Not evaluated</td></tr><tr><td>Pauli expectation</td><td id="expectation">Not evaluated</td></tr><tr><td>Peak representation</td><td id="peak">Not evaluated</td></tr><tr><td>Shots completed</td><td id="shots-out">Not evaluated</td></tr></tbody></table><p id="science-note" class="micro">No numerical results yet.</p></div>
+            <div class="data-section"><div class="data-title"><h3>Measurement distribution</h3><span id="sample-count" class="head-note">NO DATA</span></div><div id="histogram" class="hist"><p class="inline-note">Execute a circuit with measurement shots to view observed frequencies.</p></div><p class="micro" style="margin:13px 0 0">Bars display actual sampled counts. No synthetic data or extrapolated probabilities.</p></div>
+          </div>
+        </div>
+      </section>
+      <section id="diagnostics" class="pane" aria-label="Diagnostic checks"><div class="diagnostics-grid"><div class="sheet"><div class="sheet-head"><h2>Independent local checks</h2><span class="head-note">RUNTIME TESTS</span></div><div class="sheet-body"><p class="lead">Execute a reproducible set of small and structured circuits directly through the same browser worker used by the experiment workspace. Expected analytical amplitudes and observables are compared to returned numerical values.</p><div class="btn-row" style="margin:22px 0"><button id="diagnose" class="btn btn-primary">Run diagnostic suite</button><button id="diag-cancel" class="btn" disabled>Cancel suite</button></div><div id="diag-summary" class="status-main">Not executed in this session</div><p id="diag-meta" class="micro">Checks are evaluated on demand; previous published campaign totals are not substituted for local results.</p></div></div><div class="sheet"><div class="sheet-head"><h2>Test execution</h2><span class="head-note">ANALYTIC ORACLE</span></div><div class="sheet-body"><ol id="diagnostic-list" class="diagnostic-list"><li><span>Bell state amplitude and XX parity</span><span class="diagnostic-status">NOT RUN</span></li><li><span>8-qubit GHZ correlation</span><span class="diagnostic-status">NOT RUN</span></li><li><span>100-qubit separable rotation amplitude</span><span class="diagnostic-status">NOT RUN</span></li></ol><pre id="diag-log" class="diag-result" aria-live="polite"></pre></div></div></div></section>
+      <section id="methods" class="pane" aria-label="Methods and scope"><div class="method-grid"><div class="method-card"><h3>Browser execution boundary</h3><p>This interface executes the existing DSIQ JavaScript engine in an isolated browser Worker. No circuit inputs are uploaded to Vercel functions and no simulated result values are embedded in the interface. The v0.16 native binary128 research pipeline is separate and is not represented as browser execution.</p></div><div class="method-card"><h3>State representations</h3><p>The scientific worker exposes <code>adaptive</code>, <code>contracted</code>, <code>frame</code>, <code>rank-frame</code>, <code>parity</code>, <code>dyadic</code> and certified numerical variants. Individual methods admit different gate families, observables and resource bounds. Unsupported requests return an explicit error.</p></div><div class="method-card"><h3>Reproducibility</h3><p>Each completed experiment can be exported as a JSON evidence record containing the submitted circuit, query, execution parameters, machine-reported statistics, sampled counts, scientific outputs and SHA-256 source digest.</p></div><div class="method-card"><h3>Validation and access</h3><p>The Diamond-105 research qualification has not been declared complete. This workspace is intended for controlled laboratory review. Hosting configuration must enforce access protection before sharing a Vercel URL outside the authorized research team.</p></div></div></section>
+      <footer><span>MAH Quantum Research Institute &nbsp; / &nbsp; DSIQ developed at Devashri S Industries</span><span>Computation is local to this browser session &nbsp; · &nbsp; Scientific research software</span></footer>
+    </main>
+  </div>
+  <script type="module" src="./ui.mjs"></script>
+</body>
+</html>

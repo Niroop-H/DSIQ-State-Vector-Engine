@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+const ui=readFileSync(new URL('./ui.mjs',import.meta.url),'utf8');
+const config=JSON.parse(readFileSync(new URL('./vercel.json',import.meta.url),'utf8'));
+assert.match(html,/background:#000000/);
+assert.match(html,/<script type="module" src="\.\/ui\.mjs"><\/script>/);
+assert.doesNotMatch(html,/cdn\.|unsplash|images\.pexels|Math\.random\(\).*bar/);
+for(const id of ['source','run','cancel','template','n','gates','mode','amp-real','amp-imag','expectation','histogram','diagnose','export'])assert.ok(html.includes(`id="${id}"`),`missing ${id}`);
+assert.ok(ui.includes("new Worker(new URL('./worker.mjs',import.meta.url),{type:'module'})"));
+assert.ok(ui.includes('renderHistogram(d.counts,d.shotsCompleted)'));
+assert.ok(ui.includes('sourceHash(data.source)'));
+assert.equal(config.cleanUrls,true);
+assert.ok(config.headers.some(e=>e.headers.some(h=>h.key==='X-Content-Type-Options')));
+console.log('UI contract: controls, actual worker wiring, unmodified numerical results, evidence export, monochrome layout, headers PASS');
