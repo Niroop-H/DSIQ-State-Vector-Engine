@@ -1,0 +1,50 @@
+/* Scientific circuit composer: monochrome, no mock data, no decorative grids. */
+#qc-editor{border:1px solid #363636;background:#000;padding:0;margin:0 0 20px}
+.qc-header{padding:16px 17px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid #333}
+.qc-header h3{font-size:19px;margin:0 0 4px;color:#fff}
+.qc-header p{font-size:11px;color:#9c9c9c;line-height:1.5;margin:0}
+.qc-body{padding:15px}
+.qc-tools{display:flex;flex-wrap:wrap;align-items:end;gap:10px 13px;margin-bottom:15px}
+.qc-tools .field{width:100px}
+.qc-tools .field input{padding:9px 10px;min-height:35px}
+.qc-tool-actions{display:flex;gap:7px;flex-wrap:wrap}
+.qc-tool-actions button,.qc-palette button{padding:8px 11px;min-height:35px;border:1px solid #454545;background:#030303;color:#e9e9e9}
+.qc-tool-actions button:hover:not(:disabled),.qc-palette button:hover{border-color:#aaa;background:#151515}
+.qc-palette button.active{background:#eee;color:#000;border-color:#fff;font-weight:700}
+.qc-category{font-size:10px;letter-spacing:.15em;color:#979797;font-weight:600;min-width:55px;padding-top:12px}
+.qc-palette{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:0 0 13px}
+.qc-palette button{min-width:42px;font:12px ui-monospace,Consolas,monospace}
+.qc-palette button[data-qc-gate="ccx"]{min-width:54px}
+.qc-angle{width:105px;display:inline-flex;align-items:center;gap:7px}
+.qc-angle input{width:105px;padding:8px 9px;height:35px}
+.qc-editor-status{padding:10px 0;border-top:1px solid #252525;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.qc-note{color:#bababa;font-size:11px;line-height:1.6;margin:0}
+.qc-error{color:#ffb3b3!important}
+.qc-chip{font:10px ui-monospace,Consolas,monospace;color:#aaa;letter-spacing:.05em}
+.qc-canvas-wrap{max-width:100%;overflow-x:auto;border-top:1px solid #2a2a2a;border-bottom:1px solid #2a2a2a;background:#000;padding:14px 0 13px}
+.qc-board{display:flex;align-items:flex-start;width:max-content;min-width:100%;padding:0 12px}
+.qc-labels{display:flex;flex-direction:column;position:sticky;left:0;z-index:3;background:#000;box-shadow:6px 0 0 #000}
+.qc-wire-label{height:52px;width:94px;display:flex;align-items:center;border:0;background:#000;color:#dedede;text-align:left;padding:0 6px;font:11px ui-monospace,Consolas,monospace;white-space:nowrap}
+.qc-wire-label:hover{color:#fff;text-decoration:underline}
+.qc-timeline{display:flex;align-items:flex-start;gap:3px}
+.qc-step{width:65px;flex:none;position:relative}
+.qc-step.selected{background:#101010}
+.qc-step-cap{height:25px;width:100%;display:grid;place-items:center;border:0;background:transparent;color:#797979;font:10px ui-monospace,Consolas,monospace}
+.qc-step-cap:hover{color:white}
+.qc-cell{height:52px;width:65px;display:flex;align-items:center;justify-content:center;position:relative;background:transparent;border:0;padding:0}
+.qc-wire-line{width:100%;height:1px;background:#555;position:absolute;top:50%;left:0}
+.qc-vertical{position:absolute;left:calc(50% - .5px);top:0;bottom:0;background:#ddd;width:1px;z-index:1}
+.qc-vertical.qc-stem-start{top:50%}.qc-vertical.qc-stem-end{bottom:50%}
+.qc-gate{width:37px;height:32px;display:grid;place-items:center;z-index:2;border:1px solid #dedede;background:#000;color:#fff;font:11px ui-monospace,Consolas,monospace;padding:0;cursor:pointer}
+.qc-gate:hover{background:#fff;color:#000}
+.qc-add{cursor:pointer;color:#ddd}
+.qc-add:hover,.qc-add.pending{background:#101010}
+.qc-plus{position:relative;z-index:1;display:grid;place-items:center;width:25px;height:25px;border:1px dashed #767676;background:#000;font:18px ui-monospace,Consolas,monospace}
+.qc-add:hover .qc-plus{border:1px solid #fff;color:#fff}
+.qc-add.pending .qc-plus{background:#fff;color:#000}
+.qc-bottom{padding:12px 15px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.qc-bottom p{margin:0;color:#8e8e8e;font-size:11px;line-height:1.5}
+.qc-metrics{font:11px ui-monospace,Consolas,monospace;color:#ddd}
+.qc-primary{background:#fff!important;color:#000!important;border-color:#fff!important;font-weight:700}
+.qc-primary:hover{background:#ddd!important}
+@media(max-width:740px){.qc-body{padding:11px}.qc-tools .field{width:92px}.qc-category{min-width:100%;padding-top:7px}.qc-header{padding:12px}.qc-palette{gap:5px}.qc-palette button{padding:9px}}

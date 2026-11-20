@@ -118,6 +118,7 @@
     @media(max-width:740px){.app{display:block}.sidebar{height:auto;position:relative;border-right:0;border-bottom:1px solid #292929;padding:12px 16px}.brand{border-bottom:0;padding:0 0 10px}.nav-caption,.side-bottom{display:none}.side-nav{display:flex;gap:6px;overflow-x:auto}.nav-btn{width:auto;padding:9px;white-space:nowrap}.work{padding:0 15px 30px}.top{padding:16px 0}.top-right{gap:8px}.intro{display:block;padding:23px 0}.release{display:inline-block;margin-top:15px}.workspace-grid,.diagnostics-grid,.method-grid{display:block}.sheet{margin-bottom:14px}.template-row{grid-template-columns:1fr}.template-row button{width:100%}.sheet-head,.sheet-body,.data-section,.execution{padding-left:14px;padding-right:14px}textarea{min-height:260px}.form-grid{grid-template-columns:1fr 1fr}.hist-row{grid-template-columns:minmax(42px,75px) 1fr 45px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
   </style>
+<link rel="stylesheet" href="./circuit-editor.css">
 </head>
 <body>
   <div class="app">
@@ -139,6 +140,25 @@
           <div class="sheet">
             <div class="sheet-head"><h2>Experiment specification</h2><div class="head-note">OPENQASM / LOCAL EXECUTION</div></div>
             <div class="sheet-body">
+<section id="qc-editor" aria-label="Interactive quantum circuit composer">
+  <div class="qc-header"><div><h3>Quantum circuit composer</h3><p>Place real gates on wires. Operations are compiled into the engine's executable OpenQASM input.</p></div><span class="head-note">VISUAL / UNITARY</span></div>
+  <div class="qc-body">
+    <div class="qc-tools">
+      <div class="field"><label class="field-label" for="qc-wire-count">Qubit wires</label><input id="qc-wire-count" type="number" min="1" max="16" step="1" value="2"></div>
+      <div class="qc-tool-actions"><button id="qc-new" type="button">New circuit</button><button id="qc-resize" type="button">Resize wires</button><button id="qc-import" type="button">Import QASM</button><button id="qc-example-bell" type="button">Bell</button><button id="qc-example-ghz" type="button">GHZ</button><button id="qc-example-phase" type="button">Interference</button></div>
+    </div>
+    <div class="qc-palette" aria-label="Single-qubit gate palette"><span class="qc-category">SINGLE QUBIT</span>
+      <button type="button" data-qc-gate="h">H</button><button type="button" data-qc-gate="x">X</button><button type="button" data-qc-gate="y">Y</button><button type="button" data-qc-gate="z">Z</button><button type="button" data-qc-gate="s">S</button><button type="button" data-qc-gate="sdg">S†</button><button type="button" data-qc-gate="t">T</button><button type="button" data-qc-gate="tdg">T†</button><button type="button" data-qc-gate="sx">√X</button>
+      <span class="qc-category">ROTATIONS</span><button type="button" data-qc-gate="rx">RX</button><button type="button" data-qc-gate="ry">RY</button><button type="button" data-qc-gate="rz">RZ</button><button type="button" data-qc-gate="p">P</button>
+      <span id="qc-angle-wrap" class="qc-angle hidden"><input id="qc-angle" value="pi/2" aria-label="Rotation angle in radians" title="Use pi, pi/2, -pi/4 or a decimal number"></span>
+      <span class="qc-category">CONTROLLED</span><button type="button" data-qc-gate="cx">CX</button><button type="button" data-qc-gate="cy">CY</button><button type="button" data-qc-gate="cz">CZ</button><button type="button" data-qc-gate="cp">CP</button><button type="button" data-qc-gate="swap">SWAP</button><button type="button" data-qc-gate="ccx">CCX</button>
+    </div>
+    <div class="qc-editor-status"><p id="qc-message" class="qc-note" aria-live="polite">Choose a gate and then select a wire in the ADD column.</p><span id="qc-code-state" class="qc-chip">SYNCHRONIZING</span></div>
+  </div>
+  <div class="qc-canvas-wrap" role="region" aria-label="Quantum circuit operations, scroll horizontally for all gates" tabindex="0"><div id="qc-board" class="qc-board"></div></div>
+  <div class="qc-bottom"><div><div class="qc-metrics"><span id="qc-qubits">2</span> QUBITS / <span id="qc-gates">0</span> GATES</div><p id="qc-board-caption">Sequential unitary circuit</p></div><div class="qc-tool-actions"><button id="qc-undo" type="button">Undo</button><button id="qc-redo" type="button">Redo</button><button id="qc-left" type="button">←</button><button id="qc-right" type="button">→</button><button id="qc-remove" type="button">Remove gate</button><button id="qc-download" type="button">Download .qasm</button><button id="qc-run" class="qc-primary" type="button">Execute circuit</button></div></div>
+</section>
+
               <div class="template-row"><div class="field"><label for="template" class="field-label">Reference experiment</label><select id="template"><option value="bell">Bell pair / 2 qubits</option><option value="ghz50">GHZ chain / 50 qubits</option><option value="ghz100">GHZ chain / 100 qubits</option><option value="interference">Phase interference / 1 qubit</option><option value="product100">Product rotations / 100 qubits</option></select></div><button id="load-template" class="btn">Load experiment</button></div>
               <div class="editor-meta"><label class="field-label" for="source" style="margin:0">Quantum circuit source</label><span class="meta-mono" id="editor-lines">0 lines</span></div>
               <textarea id="source" spellcheck="false" aria-label="OpenQASM circuit source"></textarea>
@@ -174,5 +194,6 @@
     </main>
   </div>
   <script type="module" src="./ui.mjs"></script>
+<script type="module" src="./circuit-editor.mjs"></script>
 </body>
 </html>
