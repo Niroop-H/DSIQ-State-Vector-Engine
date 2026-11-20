@@ -6,7 +6,7 @@ Developer: Devashri S Industries. Research institution: MAH Quantum Research Ins
 
 The circuit composer is a **functional** graphical circuit authoring interface, not a simulated visualization. Every placed gate generates deterministic OpenQASM 2.0 source that is executed by the existing DSIQ JavaScript Web Worker. The display of amplitudes, norm, Pauli expectations, samples and execution time comes exclusively from the worker. The composer does not generate fake numerical outputs.
 
-The visual mode supports 1 through 16 wires and at most 256 sequential gate operations. These are graphical editing limits only, not the engine's entire logical-qubit capability. Larger experiments, measurement/reset instructions and more sophisticated restricted OpenQASM can continue to run through the original QASM editor. Unsupported source files remain intact rather than being silently truncated on visual import.
+The visual mode supports 1 through 100 wires and at most 2,048 sequential gate operations. The composer displays only twelve gate columns at a time, keeping the DOM bounded while retaining the full ordered gate list. Scroll vertically to reach qubits 0 through 99, or use Go to qubit. Page through the gate sequence with Previous steps, Next steps, and Page Go. These remain authoring limits, not blanket guarantees of feasible arbitrary-depth 100-qubit execution. Larger experiments, measurement/reset instructions and more sophisticated restricted OpenQASM can continue to run through the original QASM editor. Unsupported source files remain intact rather than being silently truncated on visual import.
 
 ## Supported visual operations
 
@@ -32,3 +32,5 @@ The interface is pure black (`#000000`) with grayscale scientific notation. It d
 `node tests/worker.test.mjs`
 
 The circuit editor regression tests check OpenQASM serialization and import, valid and invalid register/gate/angle inputs, and true worker results for Bell entanglement, phase interference, and SWAP. Browser-level automation is recommended before considering the interface production qualified.
+
+The **100Q GHZ** reference composer button builds `h q[0]` followed by 99 nearest-neighbor `cx` gates, sets the amplitude query to `ones`, the Pauli observable to 100 X symbols, and disables sampling by setting shots to zero. The worker computes the outputs; no values are fabricated in the UI.

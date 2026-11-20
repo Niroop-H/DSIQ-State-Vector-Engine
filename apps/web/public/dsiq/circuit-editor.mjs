@@ -3,8 +3,9 @@
  * The browser UI serializes operations into OpenQASM consumed by the existing worker.
  * No synthetic computation or fabricated measurement data is produced here.
  */
-export const MAX_VISUAL_QUBITS = 16;
-export const MAX_VISUAL_GATES = 256;
+export const MAX_VISUAL_QUBITS = 100;
+export const VISIBLE_GATE_COLUMNS = 12;
+export const MAX_VISUAL_GATES = 2048;
 export const GATE_SPEC = Object.freeze({
   h:{arity:1},x:{arity:1},y:{arity:1},z:{arity:1},s:{arity:1},sdg:{arity:1},t:{arity:1},tdg:{arity:1},sx:{arity:1},
   rx:{arity:1,angle:true},ry:{arity:1,angle:true},rz:{arity:1,angle:true},p:{arity:1,angle:true},
@@ -63,7 +64,7 @@ function setupComposer(){
   const byId=id=>document.getElementById(id);
   const host=byId('qc-editor');if(!host)return;
   const source=byId('source');
-  let state=newCircuit(2),picked='h',waiting=[],selected=-1,undoStack=[],redoStack=[],lastWritten='',synced=false;
+  let state=newCircuit(2),picked='h',waiting=[],selected=-1,undoStack=[],redoStack=[],lastWritten='',synced=false,page=0;
   const clone=s=>({n:s.n,steps:s.steps.map(x=>({...x,qubits:[...x.qubits]}))});
   const info=(message,isError=false)=>{const el=byId('qc-message');el.textContent=message;el.classList.toggle('qc-error',isError);};
   const make=(tag,cls,text)=>{const element=document.createElement(tag);if(cls)element.className=cls;if(text!==undefined)element.textContent=text;return element;};
@@ -76,9 +77,9 @@ function setupComposer(){
     const pauli=byId('pauli');if(pauli.value.trim().length!==state.n)pauli.value='';
     const query=byId('query');if(!['zeros','ones'].includes(query.value)&&query.value.length!==state.n)query.value='zeros';
   }
-  function commit(next,message){save();state=next;selected=-1;waiting=[];sync();render();info(message||'Circuit compiled into OpenQASM. Execute to calculate numerical results.');}
-  function apply(newState){state=newState;selected=-1;waiting=[];render();}
-  function importSource(silent=false){try{const imported=fromQasm(source.value);state=imported;selected=-1;waiting=[];undoStack=[];redoStack=[];synced=true;lastWritten=source.value;render();byId('qc-code-state').textContent='VISUAL MODEL MATCHES SOURCE';if(!silent)info(`Imported ${state.steps.length} gates on ${state.n} qubits. The executable source has not been changed.`);return true;}catch(e){synced=false;render();byId('qc-code-state').textContent='SOURCE-ONLY MODE';info(`Visual import: ${e.message} The source editor and execution remain available.`,!silent);return false;}}
+  function commit(next,message){save();state=next;selected=-1;waiting=[];page=Math.floor(Math.max(0,state.steps.length-1)/VISIBLE_GATE_COLUMNS);sync();render();info(message||'Circuit compiled into OpenQASM. Execute to calculate numerical results.');}
+  function apply(newState){state=newState;selected=-1;waiting=[];page=Math.floor(Math.max(0,state.steps.length-1)/VISIBLE_GATE_COLUMNS);render();}
+  function importSource(silent=false){try{const imported=fromQasm(source.value);state=imported;selected=-1;waiting=[];page=0;undoStack=[];redoStack=[];synced=true;lastWritten=source.value;render();byId('qc-code-state').textContent='VISUAL MODEL MATCHES SOURCE';if(!silent)info(`Imported ${state.steps.length} gates on ${state.n} qubits. The executable source has not been changed.`);return true;}catch(e){synced=false;render();byId('qc-code-state').textContent='SOURCE-ONLY MODE';info(`Visual import: ${e.message} The source editor and execution remain available.`,!silent);return false;}}
   function selectGate(name){if(!GATE_SPEC[name])return;picked=name;waiting=[];render();info(`Selected ${name.toUpperCase()}. ${GATE_SPEC[name].arity===1?'Click a wire in the + column.':`Click ${GATE_SPEC[name].arity} distinct wires in order: ${name==='ccx'?'control 1, control 2, target':name==='swap'?'first and second wire':'control, then target'}.`}`);}
   function place(wire){if(!synced){info('Source has unsynchronized edits. Select “Import QASM” or “New circuit” before editing the diagram.',true);return;}if(!selectable()){info('Finish or cancel the current computation before modifying the circuit.',true);return;}
     if(waiting.includes(wire)){waiting=[];render();info('Selection cleared. Choose distinct wires.');return;}
@@ -86,17 +87,23 @@ function setupComposer(){
     try{const nextState=addGate(state,picked,next,byId('qc-angle').value);commit(nextState,`Placed ${picked.toUpperCase()} at step ${nextState.steps.length}. Ready for numerical execution.`);}catch(e){waiting=[];render();info(e.message,true)}
   }
   function render(){
+    const pages=Math.max(1,Math.ceil(state.steps.length/VISIBLE_GATE_COLUMNS));page=Math.max(0,Math.min(page,pages-1));
+    byId('qc-page-info').textContent=`${page+1} / ${pages} · steps ${state.steps.length?String(page*VISIBLE_GATE_COLUMNS+1)+'–'+String(Math.min((page+1)*VISIBLE_GATE_COLUMNS,state.steps.length)):'0'}`;
+    byId('qc-page-prev').disabled=page===0;byId('qc-page-next').disabled=page>=pages-1;
+    byId('qc-page-index').max=String(pages);byId('qc-page-index').value=String(page+1);
+    byId('qc-wire-jump').max=String(state.n-1);
     byId('qc-gates').textContent=String(state.steps.length);byId('qc-qubits').textContent=String(state.n);
     byId('qc-wire-count').value=String(state.n);
     byId('qc-undo').disabled=!undoStack.length;byId('qc-redo').disabled=!redoStack.length;
     byId('qc-remove').disabled=selected<0;byId('qc-left').disabled=selected<=0;byId('qc-right').disabled=selected<0||selected>=state.steps.length-1;
     for(const b of host.querySelectorAll('[data-qc-gate]'))b.classList.toggle('active',b.dataset.qcGate===picked);
     byId('qc-angle-wrap').classList.toggle('hidden',!GATE_SPEC[picked].angle);
-    const board=byId('qc-board');board.replaceChildren();
+    const board=byId('qc-board'),scroller=byId('qc-scroll'),scrollY=scroller.scrollTop;board.replaceChildren();
     const labels=make('div','qc-labels');labels.append(make('div','qc-step-cap','QUBIT'));
     for(let q=0;q<state.n;q++){const b=make('button','qc-wire-label',`q[${q}]  |0⟩`);b.type='button';b.title=`Append ${picked.toUpperCase()} to q[${q}]`;b.addEventListener('click',()=>place(q));labels.append(b)}board.append(labels);
     const timeline=make('div','qc-timeline');
-    for(const [index,op] of state.steps.entries()){
+    for(let index=page*VISIBLE_GATE_COLUMNS;index<Math.min(state.steps.length,(page+1)*VISIBLE_GATE_COLUMNS);index++){
+      const op=state.steps[index];
       const column=make('div','qc-step'+(index===selected?' selected':'') );
       const cap=make('button','qc-step-cap',String(index+1).padStart(2,'0'));cap.type='button';cap.title=`Select operation ${index+1} for reordering or removal`;cap.addEventListener('click',()=>{selected=index;render();info(`Selected step ${index+1}: ${op.name.toUpperCase()} ${op.qubits.map(q=>'q['+q+']').join(', ')}.`)});column.append(cap);
       const min=Math.min(...op.qubits),max=Math.max(...op.qubits);
@@ -120,21 +127,26 @@ function setupComposer(){
       cell.addEventListener('click',()=>place(q));cell.addEventListener('dragover',e=>{if(e.dataTransfer?.types?.includes('text/plain'))e.preventDefault()});cell.addEventListener('drop',e=>{e.preventDefault();const name=e.dataTransfer?.getData('text/plain');if(GATE_SPEC[name])selectGate(name);place(q)});
       extra.append(cell);
     }
-    timeline.append(extra);board.append(timeline);
-    byId('qc-board-caption').textContent=`${state.n} wires · ${state.steps.length} sequential gates · source mode supports larger circuits`;
+    timeline.append(extra);board.append(timeline);scroller.scrollTop=scrollY;
+    byId('qc-board-caption').textContent=`${state.n} wires · ${state.steps.length} ordered operations · page ${page+1}/${pages} · 100-qubit circuit authoring`; 
   }
   function applyHistory(stack,opposite,message){if(!stack.length)return;if(!synced){info('Import or reset manually edited source first.',true);return;}opposite.push(clone(state));apply(stack.pop());sync();render();info(message);}
   host.querySelectorAll('[data-qc-gate]').forEach(b=>{b.type='button';b.draggable=true;b.addEventListener('click',()=>selectGate(b.dataset.qcGate));b.addEventListener('dragstart',e=>{e.dataTransfer?.setData('text/plain',b.dataset.qcGate);selectGate(b.dataset.qcGate)})});
-  byId('qc-new').addEventListener('click',()=>{if(!selectable())return;const n=Number(byId('qc-wire-count').value);try{const s=newCircuit(n);save();state=s;selected=-1;waiting=[];sync();render();info('Created an empty '+n+'-qubit circuit. Select a gate and click a wire in the ADD column.');}catch(e){info(e.message,true)}});
+  byId('qc-new').addEventListener('click',()=>{if(!selectable())return;const n=Number(byId('qc-wire-count').value);try{const s=newCircuit(n);save();state=s;selected=-1;waiting=[];page=0;sync();render();info('Created an empty '+n+'-qubit circuit. Select a gate and click a wire in the ADD column.');}catch(e){info(e.message,true)}});
   byId('qc-example-bell').addEventListener('click',()=>{if(!selectable())return;commit(addGate(addGate(newCircuit(2),'h',[0]),'cx',[0,1]),'Loaded a Bell-state circuit. Run to obtain actual amplitudes and samples.');byId('query').value='00';byId('pauli').value='XX';byId('shots').value='128';byId('method').value='adaptive';byId('method').dispatchEvent(new Event('change'));});
   byId('qc-example-ghz').addEventListener('click',()=>{if(!selectable())return;let s=addGate(newCircuit(4),'h',[0]);for(let i=0;i<3;i++)s=addGate(s,'cx',[i,i+1]);commit(s,'Loaded a four-qubit GHZ circuit.');byId('query').value='ones';byId('pauli').value='XXXX';byId('shots').value='128';byId('method').value='adaptive';byId('method').dispatchEvent(new Event('change'));});
+  byId('qc-example-ghz100').addEventListener('click',()=>{if(!selectable())return;let s=addGate(newCircuit(100),'h',[0]);for(let i=0;i<99;i++)s=addGate(s,'cx',[i,i+1]);commit(s,'Loaded 100-qubit GHZ circuit with 100 real gate operations. Run to evaluate a basis amplitude and global correlation.');page=0;render();byId('query').value='ones';byId('pauli').value='X'.repeat(100);byId('shots').value='0';byId('method').value='adaptive';byId('method').dispatchEvent(new Event('change'));});
   byId('qc-example-phase').addEventListener('click',()=>{if(!selectable())return;let s=addGate(newCircuit(1),'h',[0]);s=addGate(s,'rz',[0],'pi/2');s=addGate(s,'h',[0]);commit(s,'Loaded a phase-interference circuit.');byId('query').value='0';byId('pauli').value='Z';byId('shots').value='128';byId('method').value='adaptive';byId('method').dispatchEvent(new Event('change'));});
   byId('qc-import').addEventListener('click',()=>{if(!selectable())return;importSource()});
   byId('qc-resize').addEventListener('click',()=>{if(!synced){info('Import or reset the source before changing qubits.',true);return;}if(!selectable())return;try{const n=normalizeQubits(byId('qc-wire-count').value);if(state.steps.some(op=>op.qubits.some(q=>q>=n)))throw Error('Remove gates using higher-numbered wires before reducing qubit count, or select New circuit.');if(n!==state.n){commit({n,steps:state.steps},`Resized quantum register to ${n} qubits.`);}else render();}catch(e){info(e.message,true)}});
+  byId('qc-page-prev').addEventListener('click',()=>{if(page>0){page--;render()}});
+  byId('qc-page-next').addEventListener('click',()=>{if((page+1)*VISIBLE_GATE_COLUMNS<state.steps.length){page++;render()}});
+  byId('qc-page-go').addEventListener('click',()=>{const desired=Number(byId('qc-page-index').value)-1;if(!Number.isInteger(desired)||desired<0||desired>=Math.max(1,Math.ceil(state.steps.length/VISIBLE_GATE_COLUMNS))){info('Page number is outside the circuit operation range.',true);return}page=desired;render()});
+  byId('qc-wire-go').addEventListener('click',()=>{const q=Number(byId('qc-wire-jump').value);if(!Number.isInteger(q)||q<0||q>=state.n){info('Select a valid qubit from 0 through '+(state.n-1)+'.',true);return}const scroller=byId('qc-scroll');scroller.scrollTop=Math.max(0,q*52-52);info(`Showing q[${q}]. Select a gate, then click the ADD cell on this wire to append an operation.`)});
   byId('qc-undo').addEventListener('click',()=>applyHistory(undoStack,redoStack,'Undo applied. OpenQASM regenerated.'));
   byId('qc-redo').addEventListener('click',()=>applyHistory(redoStack,undoStack,'Redo applied. OpenQASM regenerated.'));
   byId('qc-remove').addEventListener('click',()=>{if(selected<0||!selectable())return;const steps=state.steps.filter((_,i)=>i!==selected);commit({n:state.n,steps},'Removed selected operation.');});
-  function move(delta){if(selected<0||!selectable())return;const j=selected+delta;if(j<0||j>=state.steps.length)return;save();const steps=[...state.steps];[steps[selected],steps[j]]=[steps[j],steps[selected]];state={n:state.n,steps};selected=j;waiting=[];sync();render();info('Gate order updated. The exact execution sequence is reflected in OpenQASM.');}
+  function move(delta){if(selected<0||!selectable())return;const j=selected+delta;if(j<0||j>=state.steps.length)return;save();const steps=[...state.steps];[steps[selected],steps[j]]=[steps[j],steps[selected]];state={n:state.n,steps};selected=j;waiting=[];page=Math.floor(j/VISIBLE_GATE_COLUMNS);sync();render();info('Gate order updated. The exact execution sequence is reflected in OpenQASM.');}
   byId('qc-left').addEventListener('click',()=>move(-1));byId('qc-right').addEventListener('click',()=>move(1));
   byId('qc-run').addEventListener('click',()=>{if(!synced){info('Diagram and QASM differ. Import the current QASM or create a new circuit first.',true);return;}byId('run').click();});
   byId('qc-download').addEventListener('click',()=>{const s=source.value;if(!s.trim())return;const link=document.createElement('a'),url=URL.createObjectURL(new Blob([s],{type:'text/plain;charset=utf-8'}));link.href=url;link.download='DSIQ-circuit.qasm';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)});

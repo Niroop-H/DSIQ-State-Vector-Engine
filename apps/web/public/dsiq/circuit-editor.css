@@ -21,7 +21,7 @@
 .qc-note{color:#bababa;font-size:11px;line-height:1.6;margin:0}
 .qc-error{color:#ffb3b3!important}
 .qc-chip{font:10px ui-monospace,Consolas,monospace;color:#aaa;letter-spacing:.05em}
-.qc-canvas-wrap{max-width:100%;overflow-x:auto;border-top:1px solid #2a2a2a;border-bottom:1px solid #2a2a2a;background:#000;padding:14px 0 13px}
+.qc-canvas-wrap{max-width:100%;max-height:565px;overflow:auto;overscroll-behavior:contain;border-top:1px solid #2a2a2a;border-bottom:1px solid #2a2a2a;background:#000;padding:14px 0 13px}
 .qc-board{display:flex;align-items:flex-start;width:max-content;min-width:100%;padding:0 12px}
 .qc-labels{display:flex;flex-direction:column;position:sticky;left:0;z-index:3;background:#000;box-shadow:6px 0 0 #000}
 .qc-wire-label{height:52px;width:94px;display:flex;align-items:center;border:0;background:#000;color:#dedede;text-align:left;padding:0 6px;font:11px ui-monospace,Consolas,monospace;white-space:nowrap}
@@ -48,3 +48,15 @@
 .qc-primary{background:#fff!important;color:#000!important;border-color:#fff!important;font-weight:700}
 .qc-primary:hover{background:#ddd!important}
 @media(max-width:740px){.qc-body{padding:11px}.qc-tools .field{width:92px}.qc-category{min-width:100%;padding-top:7px}.qc-header{padding:12px}.qc-palette{gap:5px}.qc-palette button{padding:9px}}
+
+/* 100-qubit scientific navigation. Only twelve operation columns are rendered per page. */
+.qc-navigation{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:9px 0 14px;border-top:1px solid #282828}
+.qc-nav-field{display:flex;flex-wrap:wrap;align-items:center;gap:7px;color:#a6a6a6;font:11px ui-monospace,Consolas,monospace}
+.qc-nav-field label{color:#b1b1b1;font-size:11px}
+.qc-nav-field input{width:63px;height:32px;padding:5px 7px;font:12px ui-monospace,Consolas,monospace}
+.qc-nav-field button{background:#050505;color:#eee;border:1px solid #444;padding:7px 9px;min-height:32px;font-size:11px}
+.qc-nav-field button:hover:not(:disabled){background:#191919;border-color:#aaa}
+#qc-page-info{min-width:130px;text-align:center;color:#e4e4e4}
+.qc-labels{z-index:5}
+.qc-step{contain:layout style}
+@media(max-width:740px){.qc-canvas-wrap{max-height:440px}.qc-navigation{gap:14px}.qc-nav-field{width:100%}}
