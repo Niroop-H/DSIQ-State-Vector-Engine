@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
-import {newCircuit,addGate,toQasm,fromQasm,validateAngle,MAX_VISUAL_QUBITS,MAX_VISUAL_GATES,VISIBLE_GATE_COLUMNS} from '../apps/web/public/dsiq/circuit-editor.mjs';
+import {newCircuit,addGate,toQasm,fromQasm,validateAngle,MAX_VISUAL_QUBITS,MAX_VISUAL_GATES,VISIBLE_GATE_COLUMNS,nextAppendScrollLeft} from '../apps/web/public/dsiq/circuit-editor.mjs';
+// Auto-advance keeps the next gate insertion column visible without moving vertically.
+assert.equal(nextAppendScrollLeft({scrollLeft:0,scrollWidth:1600,clientWidth:500,appendRight:370}),0);
+assert.equal(nextAppendScrollLeft({scrollLeft:0,scrollWidth:1600,clientWidth:500,appendRight:600}),116);
+assert.equal(nextAppendScrollLeft({scrollLeft:700,scrollWidth:1600,clientWidth:500,appendRight:590}),806);
+assert.equal(nextAppendScrollLeft({scrollLeft:1050,scrollWidth:1600,clientWidth:500,appendRight:590}),1100);
+assert.equal(nextAppendScrollLeft({scrollLeft:0,scrollWidth:320,clientWidth:500,appendRight:320}),0);
+console.log('PASS automatic next-gate scroll geometry and boundary limits');
+
 let s=addGate(addGate(newCircuit(2),'h',[0]),'cx',[0,1]);
 assert.equal(toQasm(s),'OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[2];\nh q[0];\ncx q[0],q[1];\n');
 assert.deepEqual(fromQasm(toQasm(s)),s);

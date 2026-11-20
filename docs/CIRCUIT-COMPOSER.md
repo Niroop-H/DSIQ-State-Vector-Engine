@@ -34,3 +34,7 @@ The interface is pure black (`#000000`) with grayscale scientific notation. It d
 The circuit editor regression tests check OpenQASM serialization and import, valid and invalid register/gate/angle inputs, and true worker results for Bell entanglement, phase interference, and SWAP. Browser-level automation is recommended before considering the interface production qualified.
 
 The **100Q GHZ** reference composer button builds `h q[0]` followed by 99 nearest-neighbor `cx` gates, sets the amplitude query to `ones`, the Pauli observable to 100 X symbols, and disables sampling by setting shots to zero. The worker computes the outputs; no values are fabricated in the UI.
+
+### Automatic gate insertion follow
+
+When a placed gate completes, the editor advances the operation timeline horizontally just far enough to keep the following ADD column in view. This applies when the next operation extends beyond the viewport and when the circuit transitions to another 12-column page. Existing vertical wire scroll position is retained, so operators placing gates on q[99] can continue without returning to the top. Users who manually navigate or inspect other gates retain control of their viewport. Smooth motion honors the operating-system reduced-motion preference.

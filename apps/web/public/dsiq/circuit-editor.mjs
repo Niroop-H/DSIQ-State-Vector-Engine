@@ -5,6 +5,17 @@
  */
 export const MAX_VISUAL_QUBITS = 100;
 export const VISIBLE_GATE_COLUMNS = 12;
+
+// Horizontal position needed to keep the next ADD column fully in view.
+// Inputs are measured relative to the current scroll viewport, not the page.
+export function nextAppendScrollLeft({scrollLeft,scrollWidth,clientWidth,appendRight,padding=16}){
+  const values=[scrollLeft,scrollWidth,clientWidth,appendRight,padding];
+  if(!values.every(Number.isFinite)||clientWidth<=0)return scrollLeft;
+  const maximum=Math.max(0,scrollWidth-clientWidth);
+  const desired=scrollLeft+appendRight-clientWidth+padding;
+  return Math.min(maximum,Math.max(0,scrollLeft,desired));
+}
+
 export const MAX_VISUAL_GATES = 2048;
 export const GATE_SPEC = Object.freeze({
   h:{arity:1},x:{arity:1},y:{arity:1},z:{arity:1},s:{arity:1},sdg:{arity:1},t:{arity:1},tdg:{arity:1},sx:{arity:1},
@@ -77,16 +88,16 @@ function setupComposer(){
     const pauli=byId('pauli');if(pauli.value.trim().length!==state.n)pauli.value='';
     const query=byId('query');if(!['zeros','ones'].includes(query.value)&&query.value.length!==state.n)query.value='zeros';
   }
-  function commit(next,message){save();state=next;selected=-1;waiting=[];page=Math.floor(Math.max(0,state.steps.length-1)/VISIBLE_GATE_COLUMNS);sync();render();info(message||'Circuit compiled into OpenQASM. Execute to calculate numerical results.');}
+  function commit(next,message,followAppend=false){save();state=next;selected=-1;waiting=[];page=Math.floor(Math.max(0,state.steps.length-1)/VISIBLE_GATE_COLUMNS);sync();render(followAppend);info(message||'Circuit compiled into OpenQASM. Execute to calculate numerical results.');}
   function apply(newState){state=newState;selected=-1;waiting=[];page=Math.floor(Math.max(0,state.steps.length-1)/VISIBLE_GATE_COLUMNS);render();}
   function importSource(silent=false){try{const imported=fromQasm(source.value);state=imported;selected=-1;waiting=[];page=0;undoStack=[];redoStack=[];synced=true;lastWritten=source.value;render();byId('qc-code-state').textContent='VISUAL MODEL MATCHES SOURCE';if(!silent)info(`Imported ${state.steps.length} gates on ${state.n} qubits. The executable source has not been changed.`);return true;}catch(e){synced=false;render();byId('qc-code-state').textContent='SOURCE-ONLY MODE';info(`Visual import: ${e.message} The source editor and execution remain available.`,!silent);return false;}}
   function selectGate(name){if(!GATE_SPEC[name])return;picked=name;waiting=[];render();info(`Selected ${name.toUpperCase()}. ${GATE_SPEC[name].arity===1?'Click a wire in the + column.':`Click ${GATE_SPEC[name].arity} distinct wires in order: ${name==='ccx'?'control 1, control 2, target':name==='swap'?'first and second wire':'control, then target'}.`}`);}
   function place(wire){if(!synced){info('Source has unsynchronized edits. Select “Import QASM” or “New circuit” before editing the diagram.',true);return;}if(!selectable()){info('Finish or cancel the current computation before modifying the circuit.',true);return;}
     if(waiting.includes(wire)){waiting=[];render();info('Selection cleared. Choose distinct wires.');return;}
     const next=[...waiting,wire],spec=GATE_SPEC[picked];if(next.length<spec.arity){waiting=next;render();info(`Selected q[${wire}]. Choose ${spec.arity-next.length} more wire(s) to place ${picked.toUpperCase()}.`);return;}
-    try{const nextState=addGate(state,picked,next,byId('qc-angle').value);commit(nextState,`Placed ${picked.toUpperCase()} at step ${nextState.steps.length}. Ready for numerical execution.`);}catch(e){waiting=[];render();info(e.message,true)}
+    try{const nextState=addGate(state,picked,next,byId('qc-angle').value);commit(nextState,`Placed ${picked.toUpperCase()} at step ${nextState.steps.length}. Ready for numerical execution.`,true);}catch(e){waiting=[];render();info(e.message,true)}
   }
-  function render(){
+  function render(followAppend=false){
     const pages=Math.max(1,Math.ceil(state.steps.length/VISIBLE_GATE_COLUMNS));page=Math.max(0,Math.min(page,pages-1));
     byId('qc-page-info').textContent=`${page+1} / ${pages} · steps ${state.steps.length?String(page*VISIBLE_GATE_COLUMNS+1)+'–'+String(Math.min((page+1)*VISIBLE_GATE_COLUMNS,state.steps.length)):'0'}`;
     byId('qc-page-prev').disabled=page===0;byId('qc-page-next').disabled=page>=pages-1;
@@ -98,7 +109,7 @@ function setupComposer(){
     byId('qc-remove').disabled=selected<0;byId('qc-left').disabled=selected<=0;byId('qc-right').disabled=selected<0||selected>=state.steps.length-1;
     for(const b of host.querySelectorAll('[data-qc-gate]'))b.classList.toggle('active',b.dataset.qcGate===picked);
     byId('qc-angle-wrap').classList.toggle('hidden',!GATE_SPEC[picked].angle);
-    const board=byId('qc-board'),scroller=byId('qc-scroll'),scrollY=scroller.scrollTop;board.replaceChildren();
+    const board=byId('qc-board'),scroller=byId('qc-scroll'),scrollY=scroller.scrollTop,scrollX=scroller.scrollLeft;board.replaceChildren();
     const labels=make('div','qc-labels');labels.append(make('div','qc-step-cap','QUBIT'));
     for(let q=0;q<state.n;q++){const b=make('button','qc-wire-label',`q[${q}]  |0⟩`);b.type='button';b.title=`Append ${picked.toUpperCase()} to q[${q}]`;b.addEventListener('click',()=>place(q));labels.append(b)}board.append(labels);
     const timeline=make('div','qc-timeline');
@@ -127,7 +138,18 @@ function setupComposer(){
       cell.addEventListener('click',()=>place(q));cell.addEventListener('dragover',e=>{if(e.dataTransfer?.types?.includes('text/plain'))e.preventDefault()});cell.addEventListener('drop',e=>{e.preventDefault();const name=e.dataTransfer?.getData('text/plain');if(GATE_SPEC[name])selectGate(name);place(q)});
       extra.append(cell);
     }
-    timeline.append(extra);board.append(timeline);scroller.scrollTop=scrollY;
+    timeline.append(extra);board.append(timeline);
+    // Rebuilding the diagram must never reset the operator's qubit position.
+    scroller.scrollTop=scrollY;scroller.scrollLeft=scrollX;
+    if(followAppend){
+      const viewport=scroller.getBoundingClientRect();
+      const right=extra.getBoundingClientRect().right-viewport.left;
+      const target=nextAppendScrollLeft({scrollLeft:scroller.scrollLeft,scrollWidth:scroller.scrollWidth,clientWidth:scroller.clientWidth,appendRight:right});
+      if(target>scroller.scrollLeft+1){
+        const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
+        scroller.scrollTo({left:target,top:scrollY,behavior:reducedMotion?'auto':'smooth'});
+      }
+    }
     byId('qc-board-caption').textContent=`${state.n} wires · ${state.steps.length} ordered operations · page ${page+1}/${pages} · 100-qubit circuit authoring`; 
   }
   function applyHistory(stack,opposite,message){if(!stack.length)return;if(!synced){info('Import or reset manually edited source first.',true);return;}opposite.push(clone(state));apply(stack.pop());sync();render();info(message);}
