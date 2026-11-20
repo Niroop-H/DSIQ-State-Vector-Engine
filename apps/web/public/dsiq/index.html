@@ -119,6 +119,7 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
   </style>
 <link rel="stylesheet" href="./circuit-editor.css">
+<link rel="stylesheet" href="./workbench.css">
 </head>
 <body>
   <div class="app">
@@ -134,11 +135,12 @@
     </aside>
     <main class="work">
       <div class="top"><div class="top-path">MAH QUANTUM / RESEARCH COMPUTATION / <strong>DSIQ WORKSPACE</strong></div><div class="top-right"><span class="live">LOCAL WORKER READY</span><span>v0.16 / SCIENTIFIC INTERFACE</span></div></div>
-      <div class="intro"><div><div class="eyebrow">COMPUTATIONAL PHYSICS / QUANTUM SYSTEMS</div><h1>DSIQ State Vector Engine</h1><p class="lead">A scientific environment for circuit execution, complex amplitude interrogation, Pauli observables, measurement statistics and reproducible numerical records.</p></div><div class="release">RESEARCH CANDIDATE&nbsp; / &nbsp;PUBLIC WORKSPACE</div></div>
+      <div class="intro"><div><div class="eyebrow">COMPUTATIONAL PHYSICS / QUANTUM SYSTEMS</div><h1>DSIQ State Vector Engine</h1><p class="lead">A scientific environment for circuit execution, complex amplitude interrogation, Pauli observables, measurement statistics and reproducible numerical records.</p></div><div class="release">SCIENTIFIC COMPUTATION &nbsp; / &nbsp; LOCAL CPU</div></div>
       <section id="workspace" class="pane active" aria-label="Experiment workspace">
+        <div class="workflow-band"><div><strong>01 / Circuit design and execution</strong><span>Full-width workspace · 100-qubit circuit composer · deterministic OpenQASM compilation</span></div><a href="#execution-results">View execution record ↓</a></div>
         <div class="workspace-grid">
           <div class="sheet">
-            <div class="sheet-head"><h2>Experiment specification</h2><div class="head-note">OPENQASM / LOCAL EXECUTION</div></div>
+            <div class="sheet-head"><h2>Circuit design workbench</h2><div class="head-note">EDITOR / EXECUTION / EVIDENCE</div></div>
             <div class="sheet-body">
 <section id="qc-editor" aria-label="Interactive quantum circuit composer">
   <div class="qc-header"><div><h3>Quantum circuit composer</h3><p>Place real gates on wires. Operations are compiled into the engine's executable OpenQASM input.</p></div><span class="head-note">VISUAL / UNITARY</span></div>
@@ -153,17 +155,19 @@
       <span id="qc-angle-wrap" class="qc-angle hidden"><input id="qc-angle" value="pi/2" aria-label="Rotation angle in radians" title="Use pi, pi/2, -pi/4 or a decimal number"></span>
       <span class="qc-category">CONTROLLED</span><button type="button" data-qc-gate="cx">CX</button><button type="button" data-qc-gate="cy">CY</button><button type="button" data-qc-gate="cz">CZ</button><button type="button" data-qc-gate="cp">CP</button><button type="button" data-qc-gate="swap">SWAP</button><button type="button" data-qc-gate="ccx">CCX</button>
     </div>
-    <div class="qc-navigation" aria-label="Circuit navigation"><div class="qc-nav-field"><label for="qc-wire-jump">Go to qubit</label><input id="qc-wire-jump" type="number" min="0" max="1" step="1" value="0"><button id="qc-wire-go" type="button">Show wire</button></div><div class="qc-nav-field"><button id="qc-page-prev" type="button">Previous steps</button><span id="qc-page-info" aria-live="polite">1 / 1</span><button id="qc-page-next" type="button">Next steps</button><label for="qc-page-index">Page</label><input id="qc-page-index" type="number" min="1" max="1" value="1"><button id="qc-page-go" type="button">Go</button></div></div>
+    <div class="qc-navigation" aria-label="Circuit navigation"><div class="qc-nav-field"><label for="qc-wire-jump">Go to qubit</label><input id="qc-wire-jump" type="number" min="0" max="1" step="1" value="0"><button id="qc-wire-go" type="button">Show wire</button></div><div class="qc-nav-field"><button id="qc-expand" type="button" aria-pressed="false">Expand workspace</button><button id="qc-page-prev" type="button">Previous steps</button><span id="qc-page-info" aria-live="polite">1 / 1</span><button id="qc-page-next" type="button">Next steps</button><label for="qc-page-index">Page</label><input id="qc-page-index" type="number" min="1" max="1" value="1"><button id="qc-page-go" type="button">Go</button></div></div>
     <div class="qc-editor-status"><p id="qc-message" class="qc-note" aria-live="polite">Choose a gate and then select a wire in the ADD column.</p><span id="qc-code-state" class="qc-chip">SYNCHRONIZING</span></div>
   </div>
   <div class="qc-canvas-wrap" id="qc-scroll" role="region" aria-label="Quantum circuit operations, scroll vertically for qubits and horizontally for steps" tabindex="0"><div id="qc-board" class="qc-board"></div></div>
   <div class="qc-bottom"><div><div class="qc-metrics"><span id="qc-qubits">2</span> QUBITS / <span id="qc-gates">0</span> GATES</div><p id="qc-board-caption">Sequential unitary circuit, up to 100 wires. Scroll vertically; use page controls for longer circuits.</p></div><div class="qc-tool-actions"><button id="qc-undo" type="button">Undo</button><button id="qc-redo" type="button">Redo</button><button id="qc-left" type="button">←</button><button id="qc-right" type="button">→</button><button id="qc-remove" type="button">Remove gate</button><button id="qc-download" type="button">Download .qasm</button><button id="qc-run" class="qc-primary" type="button">Execute circuit</button></div></div>
 </section>
 
+              <details class="qasm-fold" id="source-pane"><summary>OpenQASM source editor and reference experiments <span>Expand to inspect, edit or import source</span></summary><div class="qasm-inner">
+              <div class="qasm-import"><label for="qasm-file">Open a local .qasm file</label><input id="qasm-file" type="file" accept=".qasm,.txt,text/plain"></div>
               <div class="template-row"><div class="field"><label for="template" class="field-label">Reference experiment</label><select id="template"><option value="bell">Bell pair / 2 qubits</option><option value="ghz50">GHZ chain / 50 qubits</option><option value="ghz100">GHZ chain / 100 qubits</option><option value="interference">Phase interference / 1 qubit</option><option value="product100">Product rotations / 100 qubits</option></select></div><button id="load-template" class="btn">Load experiment</button></div>
               <div class="editor-meta"><label class="field-label" for="source" style="margin:0">Quantum circuit source</label><span class="meta-mono" id="editor-lines">0 lines</span></div>
               <textarea id="source" spellcheck="false" aria-label="OpenQASM circuit source"></textarea>
-              <p class="micro" style="margin:9px 0 0">Restricted OpenQASM 2.0/3.0 subset. Qubit 0 is the least significant bit. Changes run only when explicitly executed.</p>
+              <p class="micro" style="margin:9px 0 0">Restricted OpenQASM 2.0/3.0 subset. Qubit 0 is the least significant bit. Changes run only when explicitly executed.</p></div></details>
               <hr class="rule">
               <div class="form-grid">
                 <div class="field wide"><label for="query" class="field-label">Computational basis amplitude</label><input id="query" value="ones" autocomplete="off" spellcheck="false"><p class="micro" style="margin:7px 0 0">Use <code>zeros</code>, <code>ones</code>, or a register-width binary string.</p></div>
@@ -175,17 +179,30 @@
               </div>
               <details style="margin:19px 0 0;border-top:1px solid #292929;padding-top:16px"><summary style="cursor:pointer;color:#dedede;font-size:12px">Advanced execution bounds</summary><div class="form-grid" style="padding-top:16px"><div class="field"><label for="budget" class="field-label">Max DAG nodes</label><input id="budget" type="number" min="2" max="1000000" value="32768"></div><div class="field"><label for="visits" class="field-label">Max contraction/replay work</label><input id="visits" type="number" min="1" max="1000000000" value="10000000"></div><div class="field"><label for="tensorbytes" class="field-label">Max coefficient bytes</label><input id="tensorbytes" type="number" min="256" max="536870912" value="67108864"></div><div class="field"><label for="slices" class="field-label">Maximum slices</label><input id="slices" type="number" min="1" max="65536" value="256"></div><div class="field wide"><label for="ordering" class="field-label">Contraction ordering</label><select id="ordering"><option value="degree">Minimum degree</option><option value="fill">Minimum fill</option><option value="search">Multi-start forecast</option><option value="pair">Pair contraction forecast</option></select></div></div><p class="micro">Coefficient-byte budgets are not process-wide memory guarantees. All execution methods reject unsupported requests or signal explicit resource limits.</p></details>
               <hr class="rule">
-              <div class="btn-row"><button id="run" class="btn btn-primary">Execute circuit</button><button id="observable" class="btn">Pauli only</button><button id="contraction" class="btn">Amplitude only</button><button id="cancel" class="btn" disabled>Cancel</button></div>
+              <div class="btn-row command-row"><button id="run" class="btn btn-primary">Execute circuit</button><button id="observable" class="btn">Pauli only</button><button id="contraction" class="btn">Amplitude only</button><button id="inspect" class="btn" type="button">Validate and inspect</button><button id="cancel" class="btn" disabled>Cancel</button><a class="btn link-btn" href="#execution-results">View results ↓</a></div>
+              <div class="preflight-inline" aria-live="polite"><span class="eyebrow">SOURCE PREFLIGHT</span><strong id="inspect-status">Not inspected</strong><span id="inspect-summary">Run validation to inspect syntax, operation counts and circuit dependencies.</span></div>
               <p class="micro" id="method-note" style="margin:14px 0 0">Adaptive execution supports measured amplitudes, observables and sampling when representation and budgets permit.</p>
             </div>
           </div>
-          <div class="sheet" aria-label="Measured results">
-            <div class="sheet-head"><h2>Execution record</h2><span id="run-id" class="head-note">NO EXECUTION</span></div>
+          <div class="sheet results-sheet" id="execution-results" aria-label="Measured results">
+            <div class="sheet-head"><h2>02 / Execution record</h2><span id="run-id" class="head-note">NO EXECUTION</span></div>
             <div class="execution"><div style="min-width:0;flex:1"><div id="status" class="status-main" role="status" aria-live="polite">Ready for a new experiment</div><div id="status-sub" class="status-sub">Results will be populated from the DSIQ worker, never generated as examples.</div><div id="progress" class="status-progress" aria-hidden="true"><span></span></div></div><button id="export" class="btn" disabled>Export JSON</button></div>
             <dl class="metric-grid" style="margin:0"><div class="metric"><dt>LOGICAL QUBITS</dt><dd id="n">—</dd></div><div class="metric"><dt>EXPANDED OPERATIONS</dt><dd id="gates">—</dd></div><div class="metric"><dt>EXECUTION TIME</dt><dd id="elapsed">—</dd></div><div class="metric"><dt>ACTIVE REPRESENTATION</dt><dd id="mode" class="small-value">—</dd></div></dl>
-            <div class="data-section"><div class="data-title"><h3>Complex amplitude</h3><span class="head-note">⟨x|ψ⟩</span></div><table class="field-table"><tbody><tr><td>Queried bitstring</td><td id="query-out">Not evaluated</td></tr><tr><td>Real component</td><td id="amp-real">Not evaluated</td></tr><tr><td>Imaginary component</td><td id="amp-imag">Not evaluated</td></tr><tr><td>Log2 magnitude</td><td id="amp-log">Not evaluated</td></tr><tr><td>Absolute error enclosure</td><td id="amp-bound">Not available</td></tr></tbody></table></div>
-            <div class="data-section"><div class="data-title"><h3>Scientific observables</h3><span class="head-note">MEASURED OUTPUT</span></div><table class="field-table"><tbody><tr><td>State norm</td><td id="norm">Not evaluated</td></tr><tr><td>Pauli expectation</td><td id="expectation">Not evaluated</td></tr><tr><td>Peak representation</td><td id="peak">Not evaluated</td></tr><tr><td>Shots completed</td><td id="shots-out">Not evaluated</td></tr></tbody></table><p id="science-note" class="micro">No numerical results yet.</p></div>
+            <div class="result-details"><div class="data-section"><div class="data-title"><h3>Complex amplitude</h3><span class="head-note">⟨x|ψ⟩</span></div><table class="field-table"><tbody><tr><td>Queried bitstring</td><td id="query-out">Not evaluated</td></tr><tr><td>Real component</td><td id="amp-real">Not evaluated</td></tr><tr><td>Imaginary component</td><td id="amp-imag">Not evaluated</td></tr><tr><td>Basis probability P(x)</td><td id="amp-prob">Not evaluated</td></tr><tr><td>Log2 magnitude</td><td id="amp-log">Not evaluated</td></tr><tr><td>Absolute error enclosure</td><td id="amp-bound">Not available</td></tr></tbody></table></div>
+            <div class="data-section"><div class="data-title"><h3>Scientific observables</h3><span class="head-note">MEASURED OUTPUT</span></div><table class="field-table"><tbody><tr><td>State norm</td><td id="norm">Not evaluated</td></tr><tr><td>Pauli expectation</td><td id="expectation">Not evaluated</td></tr><tr><td>Peak representation</td><td id="peak">Not evaluated</td></tr><tr><td>Shots completed</td><td id="shots-out">Not evaluated</td></tr></tbody></table><p id="science-note" class="micro">No numerical results yet.</p></div></div>
             <div class="data-section"><div class="data-title"><h3>Measurement distribution</h3><span id="sample-count" class="head-note">NO DATA</span></div><div id="histogram" class="hist"><p class="inline-note">Execute a circuit with measurement shots to view observed frequencies.</p></div><p class="micro" style="margin:13px 0 0">Bars display actual sampled counts. No synthetic data or extrapolated probabilities.</p></div>
+            <div class="data-section"><div class="data-title"><h3>Circuit preflight report</h3><span class="head-note">ACTUAL DSIQ PARSER</span></div>
+              <div class="inspect-grid" id="inspect-metrics"><span>Run validation to inspect the currently supplied circuit.</span></div>
+              <div id="inspect-inventory" class="inventory" aria-live="polite"></div>
+              <p class="micro">Preflight reports structural data and input validity. Numerical outputs above are populated only from completed engine executions.</p>
+            </div>
+          </div>
+          <div class="sheet history-sheet" id="session-results">
+            <div class="sheet-head"><h2>03 / Session experiment records</h2><span class="head-note">LOCAL MEMORY / UP TO 12 COMPLETED RUNS</span></div>
+            <div class="sheet-body"><p class="micro">Completed computations from this browser tab are recorded in memory for comparison and reproducibility. These are not server-side audit logs or signed records.</p>
+              <div class="btn-row history-actions"><button id="history-export" class="btn" disabled>Export session evidence</button><button id="history-clear" class="btn" disabled>Clear session</button><button id="history-repeat" class="btn" disabled>Re-execute selected run</button></div>
+              <div class="history-table-scroll"><table class="history-table"><thead><tr><th scope="col">Select</th><th scope="col">UTC</th><th scope="col">Circuit SHA-256</th><th scope="col">Qubits</th><th scope="col">Method</th><th scope="col">Query</th><th scope="col">Elapsed</th></tr></thead><tbody id="history-rows"><tr><td colspan="7" class="history-empty">No executions in this session.</td></tr></tbody></table></div>
+            </div>
           </div>
         </div>
       </section>
@@ -196,5 +213,6 @@
   </div>
   <script type="module" src="./ui.mjs"></script>
 <script type="module" src="./circuit-editor.mjs"></script>
+<script type="module" src="./workbench-ui.mjs"></script>
 </body>
 </html>

@@ -83,7 +83,7 @@ function status(message,sub='',error=false){byId('status').textContent=message;b
 function progress(value){const bar=byId('progress');const fill=bar.firstElementChild;if(value===null){bar.classList.add('indeterminate');fill.style.width='40%';return}bar.classList.remove('indeterminate');fill.style.width=`${Math.max(0,Math.min(100,value*100))}%`}
 function resetRunFields(){
   for(const id of ['n','gates','elapsed','mode'])byId(id).textContent='—';
-  for(const id of ['query-out','amp-real','amp-imag','amp-log','amp-bound','norm','expectation','peak','shots-out'])byId(id).textContent='Not evaluated';
+  for(const id of ['query-out','amp-real','amp-imag','amp-log','amp-bound','amp-prob','norm','expectation','peak','shots-out'])byId(id).textContent='Not evaluated';
   byId('sample-count').textContent='NO DATA';byId('science-note').textContent='Waiting for numerical execution.';
   byId('histogram').replaceChildren();const note=document.createElement('p');note.className='inline-note';note.textContent='No sampled outcomes yet.';byId('histogram').append(note);
 }
@@ -119,6 +119,8 @@ function renderResult(d){
   byId('amp-imag').textContent=scalar(a.imag);
   byId('amp-log').textContent=scalar(a.log2Magnitude);
   byId('amp-bound').textContent=Number.isFinite(a.absoluteErrorBound)?scalar(a.absoluteErrorBound):'Not reported for this method';
+  const probability=Number.isFinite(a.log2Magnitude)?2**(2*a.log2Magnitude):Number.isFinite(a.real)&&Number.isFinite(a.imag)?a.real*a.real+a.imag*a.imag:null;
+  byId('amp-prob').textContent=scalar(probability);
   const s=d.science||{};
   byId('norm').textContent=scalar(s.norm);
   byId('expectation').textContent=scalar(s.pauliExpectation);
@@ -144,7 +146,9 @@ function submit(kind){
     if(msg.result){completed=true;worker.terminate();mainWorker=null;const result=msg.result;renderResult(result);
       lastEvidence={schema:'DSIQ-scientific-workspace-v1',browserEngine:'DSIQ JavaScript research worker',timestampUTC:new Date().toISOString(),parameters:{...data},result};
       try{lastEvidence.sourceSHA256=await sourceHash(data.source)}catch(e){lastEvidence.digestError=String(e)}
-      setBusy(false);return;
+      setBusy(false);
+      window.dispatchEvent(new CustomEvent('dsiq:completed',{detail:lastEvidence}));
+      return;
     }
     if(msg.stage==='compile'){const total=Number(msg.total)||0;const done=Number(msg.completed)||0;progress(total?done/total:null);status('Executing circuit',total?`${done.toLocaleString()} / ${total.toLocaleString()} expanded operations`:'Preparing state representation');return}
     if(msg.stage==='contraction-boundary'){progress(null);status('Evaluating fallback representation',String(msg.reason||'Resource boundary reached'));return}
@@ -153,6 +157,11 @@ function submit(kind){
   };
   worker.onerror=e=>{if(mainWorker!==worker||completed)return;completed=true;worker.terminate();mainWorker=null;progress(0);status('Worker error',e.message||'Module execution failed',true);setBusy(false)};
   worker.postMessage(data);
+  const results=byId('execution-results');
+  if(results){
+    const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
+    results.scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});
+  }
 }
 byId('run').addEventListener('click',()=>submit('full'));
 byId('observable').addEventListener('click',()=>submit('pauli'));
