@@ -7,9 +7,9 @@ OPENBLAS_NUM_THREADS=1 python benchmarks/global/wide_statevector.py
 OPENBLAS_NUM_THREADS=1 python benchmarks/global/excitation_check.py > excitation-results.json
 ```
 
-The first command writes wide-results.json. It runs the existing native untruncated MPS backend in separate processes on alternating nearest-neighbor CZ layers with arbitrary local RY and phase gates. A separate spatial path sum checks eight amplitudes at each width/depth, including relative errors on tiny outputs. A dense causal-cone calculation checks a central X observable. There is one seed per width/depth. Each engine process has a 120-second timeout and 2 GiB address-space limit.
+The first command writes wide-results.json. It runs the existing native untruncated MPS backend in separate processes on alternating nearest-neighbor CZ layers with arbitrary local RY and phase gates. A separate spatial path sum checks eight amplitudes at each width/depth, including relative errors on tiny outputs. A dense causal-cone calculation checks a central X observable. The release-candidate checks use three deterministic seeds per width and depth. Each engine process has a 120-second timeout and 2 GiB address-space limit.
 
-The second command exercises the native direct excitation-sector state vector. It compares every reachable coefficient in two-excitation circuits against a separately implemented two-particle coordinate calculation. It cross-checks with a full dense simulation at eight qubits and exercises additional excitation sectors at six qubits. The two references were authored with these tests. External blind validation remains open. Timings in the JSON files are individual observations.
+The second command exercises the native direct excitation-sector state vector. For each of three deterministic seeds it compares every reachable coefficient in two-excitation circuits against a separately implemented two-particle coordinate calculation. It cross-checks with a full dense simulation at eight qubits and exercises additional excitation sectors at six qubits. The two references were authored with these tests. External blind validation remains open. Timings in the JSON files are individual observations.
 
 ## Direct engine entry point
 

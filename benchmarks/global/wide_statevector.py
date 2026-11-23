@@ -97,8 +97,7 @@ def limit_worker():
     resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
 
-def run_case(n, depth):
-    seed = 87001 + 100 * n + depth
+def run_case(n, depth, seed):
     angles, gates, bits = fixture(n, depth, seed)
     center = n // 2
     query = dict(n=n, gates=gates, queries=bits, paulis=["I"*(n-1-center)+"X"+"I"*center])
@@ -132,12 +131,15 @@ def run_case(n, depth):
 
 if __name__ == "__main__":
     report = dict(python=platform.python_version(), numpy=np.__version__, cases=[])
-    for n, depth in [(8, 2), (8, 4)] + [(n, d) for n in (50, 100) for d in (2, 4, 6)]:
-        try:
-            row = run_case(n, depth)
-        except Exception as exc:
-            row = dict(qubits=n, entangling_layers=depth, passed=False, error=repr(exc))
-        report["cases"].append(row)
-        print(n, depth, row["passed"], row.get("max_relative"), row.get("error"), flush=True)
+    widths_depths = [(8, 2), (8, 4)] + [(n, d) for n in (50, 100) for d in (2, 4, 6)]
+    for base in (87001, 34213, 99041):
+        for n, depth in widths_depths:
+            seed = base + 100 * n + depth
+            try:
+                row = run_case(n, depth, seed)
+            except Exception as exc:
+                row = dict(qubits=n, entangling_layers=depth, seed=seed, passed=False, error=repr(exc))
+            report["cases"].append(row)
+            print(n, depth, seed, row["passed"], row.get("max_relative"), row.get("error"), flush=True)
     Path("wide-results.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n")
     sys.exit(any(not c["passed"] for c in report["cases"]))

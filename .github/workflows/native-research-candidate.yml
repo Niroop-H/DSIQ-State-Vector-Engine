@@ -1,0 +1,52 @@
+name: Verify native research package
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'native/**'
+      - 'benchmarks/global/**'
+      - 'scripts/build_research_candidate.py'
+      - 'docs/NATIVE-RESEARCH-CANDIDATE.md'
+      - '.github/workflows/native-research-candidate.yml'
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and inspect the extracted package
+        run: |
+          mkdir delivery replay
+          python scripts/build_research_candidate.py delivery/dsiq-native-research.zip > delivery/archive.sha256
+          (cd delivery && sha256sum -c archive.sha256)
+          unzip -q delivery/dsiq-native-research.zip -d replay
+          cd replay
+          sha256sum -c SHA256SUMS
+          python -m pip install -r requirements.txt
+      - name: Run scientific checks from the package
+        working-directory: replay
+        run: |
+          python benchmarks/global/wide_statevector.py
+          python benchmarks/global/excitation_check.py > excitation-results.json
+      - name: Collect run metadata and measurements
+        if: always()
+        run: |
+          mkdir -p delivery
+          cp -t delivery replay/*-results.json || true
+          printf '%s\n' "$GITHUB_SHA" > delivery/commit.txt
+          lscpu > delivery/cpu.txt
+          python -VV > delivery/python.txt
+          python -m pip freeze > delivery/environment.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-research-candidate
+          path: delivery/

@@ -19,8 +19,8 @@ def run(request):
     return result.returncode, json.loads(result.stdout)
 
 
-def fixture(n):
-    rng = random.Random(4083+n)
+def fixture(n, seed=None):
+    rng = random.Random(4083+n if seed is None else seed)
     gates = [dict(name="x",q=q,controls=[]) for q in (0,n//2)]
     for layer in range(14):
         wires = list(range(n))
@@ -87,8 +87,8 @@ def particle_oracle(n,gates):
     return a
 
 
-def compare(n):
-    gates = fixture(n)
+def compare(n, seed):
+    gates = fixture(n, seed)
     pairs = list(itertools.combinations(range(n),2))
     words = [(1<<i)|(1<<j) for i,j in pairs]
     queries = [format(w,f"0{n}b") for w in words]+["0"*n,"1"*n]
@@ -106,8 +106,8 @@ def compare(n):
     delta = abs(actual-expected)
     significant = abs(expected)>1e-14
     relative = max(delta[significant]/abs(expected[significant]))
-    passed = max(delta)<=1e-13 and relative<=1e-9 and abs(1-r["norm"])<=1e-12
-    return dict(qubits=n,seed=4083+n,gates=len(gates),mixing_layers=14,coefficients=len(words),
+    passed = np.all(actual[-2:] == 0) and max(delta)<=1e-13 and relative<=1e-9 and abs(1-r["norm"])<=1e-12
+    return dict(qubits=n,seed=seed,gates=len(gates),mixing_layers=14,coefficients=len(words),
                 queries=len(queries),max_abs=float(max(delta)),max_relative=float(relative),
                 peak_rss_kib=r["peak_rss_kib"],norm=r["norm"],engine_seconds=r["elapsed_seconds"],process_seconds=elapsed,
                 passed=bool(passed))
@@ -126,6 +126,6 @@ if __name__ == "__main__":
         if code: raise RuntimeError(r)
         out = np.array(r["amplitudes"])
         np.testing.assert_allclose(out[:,0]+1j*out[:,1],dense(6,gates),rtol=1e-12,atol=1e-14)
-    rows = [compare(n) for n in (8,50,100)]
+    rows = [compare(n, base+n) for base in (4083, 12071, 73519) for n in (8,50,100)]
     print(json.dumps(rows,indent=2,allow_nan=False))
     sys.exit(any(not row["passed"] for row in rows))
