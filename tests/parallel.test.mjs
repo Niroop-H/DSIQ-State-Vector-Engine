@@ -1,3 +1,4 @@
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync,rmSync} from 'node:fs';
@@ -7,6 +8,6 @@ import {createHash} from 'node:crypto';
 import {randomBlocks,compareBlocks,near} from './factor.test.mjs';
 import {factorPlan} from '../apps/web/public/dsiq/factor.mjs';
 import {rng} from '../apps/web/public/dsiq/worker.mjs';
-const source=new URL('../native/dsiq_parallel.c',import.meta.url).pathname;
+const source=fileURLToPath(new URL('../native/dsiq_parallel.c',import.meta.url));
 export function parallelEvolution(){const temp=mkdtempSync(join(tmpdir(),'dsiq-parallel-')),exe=join(temp,'dsiq-p'),cc=spawnSync('gcc',['-std=c11','-O3','-Wall','-Wextra','-Werror','-ffp-contract=off','-pthread',source,'-lm','-o',exe],{encoding:'utf8'});try{assert.equal(cc.status,0,cc.stderr);const n=100,p=randomBlocks(n,5,100,613),d=compareBlocks(p).d,plan=factorPlan(n,p.gates),r=rng(9137),qs=Array.from({length:128},()=>Array.from({length:n},()=>r()<.5?'0':'1').join('')),data=['DSIQ1 '+n+' '+plan.groups.length,...plan.groups.map(a=>a.length+' '+a.join(' ')),p.gates.length,...p.gates.map(g=>[g.name,g.q,g.controls.length,...g.controls,g.theta??0,g.phi??0,g.lambda??0].join(' ')),qs.length,...qs].join('\n')+'\n';let baseline,out=[];for(const threads of [1,8,32,128]){const res=spawnSync(exe,[String(threads)],{input:data,encoding:'utf8',timeout:60000,maxBuffer:4*1024*1024});assert.equal(res.status,0,res.stderr||String(res.error));const lines=res.stdout.trim().split('\n'),stats=JSON.parse(lines.pop()),payload=lines.join('\n');if(baseline!==undefined)assert.equal(payload,baseline);else baseline=payload;assert.equal(stats.threads,threads);assert.equal(stats.gates,p.gates.length);assert.equal(lines.length,qs.length+plan.groups.length);for(let i=0;i<qs.length;i++){const x=JSON.parse(lines[i]),y=d.amplitude(qs[i]);near(x.log2Magnitude,y.log2Magnitude,1e-10);near(Math.hypot(x.real-y.real,x.imag-y.imag),0,1e-13)}near(stats.norm,1,1e-12);out.push({...stats,sha256:createHash('sha256').update(payload).digest('hex')})}return {programWidth:n,gates:p.gates.length,fullLocalComplexCoefficients:plan.bytes/16,queries:qs.length,deterministic:true,results:out,scope:'disjoint components, complete native state evolution; no MPI implementation'}}finally{rmSync(temp,{recursive:true,force:true})}}
-if(process.argv[1]===new URL(import.meta.url).pathname)console.log(JSON.stringify(parallelEvolution()));
+if(process.argv[1]===fileURLToPath(import.meta.url))console.log(JSON.stringify(parallelEvolution()));

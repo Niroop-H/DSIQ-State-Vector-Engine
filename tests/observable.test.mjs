@@ -1,3 +1,4 @@
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {ScientificDSIQ as D} from '../apps/web/public/dsiq/scientific.mjs';
 import {compileObservableCircuit as compile,evaluateObservable as evaluate} from '../apps/web/public/dsiq/observable.mjs';
@@ -7,4 +8,4 @@ export function verifyObservables(){const r=rng(1562);let max=0;for(let k=0;k<60
 export function qaoaSweep(){const n=50,rows=[];let max=0,peak=1;for(const degree of [2,3]){const links=[];for(let q=0;q<n;q++)links.push([q,(q+1)%n]);if(degree===3)for(let q=0;q<n/2;q++)links.push([q,q+n/2]);
  for(const [gamma,beta] of [[.1,.15],[.7,.2],[1.1,-.31],[-.43,.51],[2.2,.82]]){const gs=[];for(let q=0;q<n;q++)gs.push(gate('h',q));for(const [u,v] of links){gs.push(gate('cx',v,[u]),gate('rz',v,[],{theta:-gamma}),gate('cx',v,[u]))}for(let q=0;q<n;q++)gs.push(gate('rx',q,[],{theta:2*beta}));const t=performance.now(),c=compile(n,gs);let energy=0;
  for(const [u,v] of links){const p=Array(n).fill('I');p[n-1-u]=p[n-1-v]='Z';const result=evaluate(c,p.join(''));peak=Math.max(peak,result.peakTerms);const cost=(1-result.value)/2;const ref=.5+.5*Math.sin(4*beta)*Math.sin(gamma)*Math.cos(gamma)**(degree-1);near(cost,ref,1e-12);max=Math.max(max,Math.abs(cost-ref));energy+=cost}rows.push({degree,edges:links.length,gamma,beta,energy,ms:performance.now()-t})}}return {nodes:n,graphs:['cycle','cycle + antipodal matching'],peakTerms:peak,maxEdgeError:max,rows}}
-if(process.argv[1]===new URL(import.meta.url).pathname){console.log(verifyObservables());console.log(JSON.stringify(qaoaSweep()))}
+if(process.argv[1]===fileURLToPath(import.meta.url)){console.log(verifyObservables());console.log(JSON.stringify(qaoaSweep()))}

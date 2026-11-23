@@ -1,3 +1,4 @@
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync,rmSync} from 'node:fs';
@@ -5,7 +6,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomBlocks,compareBlocks,near} from './factor.test.mjs';
 import {factorPlan} from '../apps/web/public/dsiq/factor.mjs';
-const source=new URL('../native/dsiq_factor.c',import.meta.url).pathname;
+const source=fileURLToPath(new URL('../native/dsiq_factor.c',import.meta.url));
 function input(n,gs,qs){const p=factorPlan(n,gs);return ['DSIQ1 '+n+' '+p.groups.length,...p.groups.map(a=>a.length+' '+a.join(' ')),gs.length,...gs.map(g=>[g.name,g.q,g.controls.length,...g.controls,g.theta??0,g.phi??0,g.lambda??0].join(' ')),qs.length,...qs].join('\n')+'\n'}
 export function nativeAudit(){const dir=mkdtempSync(join(tmpdir(),'dsiq-native-')),exe=join(dir,'dsiq'),cc=spawnSync('gcc',['-std=c11','-O3','-Wall','-Wextra','-Werror','-ffp-contract=off',source,'-lm','-o',exe],{encoding:'utf8'});try{assert.equal(cc.status,0,cc.stderr);const p=randomBlocks(1024,8,8,613),a=compareBlocks(p),bits=['0'.repeat(1024),'1'.repeat(1024),('01').repeat(512)],r=spawnSync(exe,[],{input:input(1024,p.gates,bits),encoding:'utf8',maxBuffer:4*1024*1024});assert.equal(r.status,0,r.stderr);const list=r.stdout.trim().split('\n').map(JSON.parse),m=list.pop();for(let i=0;i<bits.length;i++){const x=a.d.amplitude(bits[i]);near(list[i].log2Magnitude,x.log2Magnitude,1e-9);const scale=2**x.log2Magnitude;if(scale>0)near(Math.hypot(list[i].real-x.real,list[i].imag-x.imag)/scale,0,1e-9)}near(m.norm,1,1e-11);assert.equal(m.coefficientBytes,524288);assert.equal(m.arenaBytes,4194304);if(process.platform==='linux'){assert.equal(m.socketDenied,1);assert.equal(m.swapKiB,0)}const small=randomBlocks(100,5,2,23),job=input(100,small.gates,['0'.repeat(100)]),st=spawnSync(exe,[],{input:job.repeat(1000),encoding:'utf8',maxBuffer:4*1024*1024});assert.equal(st.status,0,st.stderr);const stats=st.stdout.trim().split('\n').map(JSON.parse).filter(x=>x.qubits);assert.equal(stats.length,1000);for(const v of stats){near(v.norm,1,1e-12);assert.equal(v.coefficientBytes,10240);if(process.platform==='linux')assert.equal(v.swapKiB,0)}const late=stats.slice(100),lo=Math.min(...late.map(x=>x.rssKiB)),hi=Math.max(...late.map(x=>x.rssKiB));return {large:m,sequential:{programs:stats.length,firstRssKiB:stats[0].rssKiB,lastRssKiB:stats.at(-1).rssKiB,steadyStateMinKiB:lo,steadyStateMaxKiB:hi,peakKiB:Math.max(...stats.map(x=>x.hwmKiB))},nativeBoundary:spawnSync(exe,[],{input:'DSIQ1 19 1\n19\n',encoding:'utf8'}).status===2}}finally{rmSync(dir,{recursive:true,force:true})}}
-if(process.argv[1]===new URL(import.meta.url).pathname)console.log(JSON.stringify(nativeAudit(),null,2));
+if(process.argv[1]===fileURLToPath(import.meta.url))console.log(JSON.stringify(nativeAudit(),null,2));
