@@ -8,7 +8,7 @@ import sys
 import numpy as np
 
 
-def check(n, root):
+def make_circuit(n):
     adjacency=np.random.default_rng(10).integers(0,2,(n,n))
     edges=[(i,j) for i in range(n) for j in range(i+1,n) if adjacency[i,j]]
     gates=[dict(name='h',q=i,controls=[]) for i in range(n)]
@@ -17,6 +17,11 @@ def check(n, root):
             cx=dict(name='cx',q=j,controls=[i])
             gates.extend([cx,dict(name='rz',q=j,controls=[],theta=2*(.317+.241*(2+layer))),cx])
         gates.extend(dict(name='rx',q=i,controls=[],theta=2*(.317+.241*layer)) for i in range(n))
+    return edges, gates
+
+
+def check(n, root):
+    edges, gates = make_circuit(n)
     payload=dict(n=n,gates=gates,queries=['0'*n])
     p=subprocess.run([sys.executable,str(root/'native/mps_exact.py')],input=json.dumps(payload),
                      text=True,capture_output=True,timeout=120,env=dict(os.environ,OPENBLAS_NUM_THREADS='1'))
