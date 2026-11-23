@@ -9,3 +9,20 @@ const small=new DSIQ(5,6);small.apply({name:'h',q:0,controls:[]});small.apply({n
 const product=new DSIQ(1024);for(let q=0;q<1024;q++){product.apply({name:'ry',q,controls:[],theta:Math.PI/3});product.apply({name:'t',q,controls:[]})}assert.equal(product.mode,'dag');const pv=product.amplitude('1'.repeat(1024));assert.ok(Math.abs(pv.log2Magnitude+1024)<1e-9);assert.ok(Math.abs(pv.phase)<1e-9);console.log('1024-qubit product amplitude log2:',pv.log2Magnitude);
 const {parse}=await import('../apps/web/public/dsiq/worker.mjs');assert.equal(parse('OPENQASM 2.0; qreg q[4]; ry(pi/3) q; swap q[0],q[3];').gates.length,7);assert.throws(()=>parse('OPENQASM 2.0; qreg q[2]; reset q[0];'));console.log('QASM subset validation passed');
 const pairs=new DSIQ(1024);for(let q=0;q<1024;q+=2){pairs.apply({name:'ry',q,controls:[],theta:Math.PI/3});pairs.apply({name:'cx',q:q+1,controls:[q]});pairs.apply({name:'t',q:q+1,controls:[]})}assert.equal(pairs.mode,'dag');assert.ok(Math.abs(pairs.amplitude('1'.repeat(1024)).log2Magnitude+512)<1e-8);assert.ok(Math.abs(pairs.amplitude('0'.repeat(1024)).log2Magnitude-512*Math.log2(Math.sqrt(3)/2))<1e-8);for(let k=0;k<16;k++){const sample=pairs.sample(rand);for(let q=0;q<1024;q+=2)assert.equal(sample[q],sample[q+1])}console.log('512 entangled non-Clifford pairs:',JSON.stringify(pairs.stats()));
+
+{
+  const header = 'OPENQASM 2.0; include "qelib1.inc"; qreg q[2]; ';
+  const imported = parse(header + 'u2(0,pi) q[0]; u1(pi/4) q[0]; cu1(pi/4) q[0],q[1];');
+  const canonical = parse(header + 'u3(pi/2,0,pi) q[0]; p(pi/4) q[0]; cp(pi/4) q[0],q[1];');
+  assert.deepEqual(imported.gates, canonical.gates);
+  const controlled = parse(header + 'h q[0]; cu(pi,0,0,pi/2) q[0],q[1];');
+  const d = new DSIQ(2);
+  for (const gate of controlled.gates) d.apply(gate);
+  for (const [bits, re, im] of [['00', Math.SQRT1_2, 0], ['01', 0, 0],
+                                ['10', 0, 0], ['11', 0, Math.SQRT1_2]]) {
+    const a = d.amplitude(bits);
+    assert.ok(Math.hypot(a.real-re, a.imag-im) < 1e-13);
+  }
+  assert.throws(() => parse(header + 'cu(0,0,0) q[0],q[1];'));
+  assert.throws(() => parse(header + 'u2(0) q[0];'));
+}

@@ -14,8 +14,21 @@ def stim_audit():
  for p in x['paulis']:
   # Stim uses q0 first; DSIQ textual Pauli strings use q0 last.
   actual=s.peek_observable_expectation(stim.PauliString(p['s'][::-1]));errors.append(abs(actual-p['value']))
- if max(errors)!=0 or x['stabilizerWitnesses']!=100:raise AssertionError('Stim discrepancy')
- return dict(test=57,reference='Stim',version=version('stim'),qubits=x['n'],gates=len(x['gates']),observableComparisons=len(errors),maxError=max(errors),globalPhase='Not determined by stabilizer tableau; internal affine global-phase comparisons separate')
+ # Independent commuting witnesses must span all n generators to specify a pure stabilizer state.
+ basis={}
+ for witness in x['paulis'][:x['stabilizerWitnesses']]:
+  assert abs(witness['value'])==1
+  row=0
+  for axis in witness['s']:
+   row=(row<<2)|{'I':0,'X':1,'Z':2,'Y':3}[axis]
+  while row:
+   pivot=row.bit_length()-1
+   if pivot not in basis:
+    basis[pivot]=row
+    break
+   row^=basis[pivot]
+ if max(errors)!=0 or len(basis)!=x['n']:raise AssertionError('Stim discrepancy or incomplete state witnesses')
+ return dict(test=57,reference='Stim',version=version('stim'),qubits=x['n'],gates=len(x['gates']),observableComparisons=len(errors),independentStabilizers=len(basis),maxError=max(errors),globalPhase='Not determined by stabilizer tableau; internal affine global-phase comparisons separate')
 def quimb_audit():
  import quimb.tensor as qtn
  x=fixture('quimb');c=qtn.Circuit(x['n'],gate_contract=False)
