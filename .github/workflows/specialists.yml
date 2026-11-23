@@ -1,0 +1,61 @@
+name: Specialist simulator comparison
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'benchmarks/specialists/**'
+      - '.github/workflows/specialists.yml'
+permissions:
+  contents: read
+env:
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  RAYON_NUM_THREADS: '1'
+jobs:
+  dense:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [qaoa, qft, grover]
+        n: [12, 16, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'mqt.bench==2.3.0' 'qiskit-aer==0.17.2' 'qsimcirq==0.22.1' 'qulacs==0.6.12'
+      - name: Build double-precision QuEST
+        run: |
+          git clone -q --depth 1 -b v3.7.0 https://github.com/QuEST-Kit/QuEST "$RUNNER_TEMP/quest"
+          test "$(git -C "$RUNNER_TEMP/quest" rev-parse HEAD)" = d4f75f724993b4af8e43a796e3c09ce24ae11670
+          cmake -S "$RUNNER_TEMP/quest" -B "$RUNNER_TEMP/build" -DCMAKE_BUILD_TYPE=Release -DPRECISION=2 -DDISTRIBUTED=OFF -DMULTITHREADED=OFF -DGPUACCELERATED=OFF -DUSER_SOURCE="$PWD/benchmarks/specialists/quest.c"
+          cmake --build "$RUNNER_TEMP/build" --parallel 2
+          echo "QUEST_BIN=$RUNNER_TEMP/build/demo" >> "$GITHUB_ENV"
+      - run: python benchmarks/specialists/dense.py ${{ matrix.family }} ${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.family }}-${{ matrix.n }}
+          path: result.json
+      - run: python -c "import json; d=json.load(open('result.json')); assert all(v.get('passed') for v in d['engines'].values())"
+  sector:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [4183, 12171, 73619]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'quspin==1.0.0'
+      - run: python benchmarks/specialists/sector.py 100 ${{ matrix.seed }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sector-${{ matrix.seed }}
+          path: result.json
+      - run: python -c "import json; d=json.load(open('result.json')); assert all(v.get('passed') for v in d['engines'].values())"
