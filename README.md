@@ -2,6 +2,8 @@
 
 DSIQ is a native CPU quantum circuit simulation research project from MAH Quantum. The [native candidate guide](docs/NATIVE-RESEARCH-CANDIDATE.md) describes the supported workloads, installation and reproducible checks. The [package verification workflow](.github/workflows/native-research-candidate.yml) builds a source archive and exercises its public entry points in an extracted directory.
 
+[View the simulator comparison and the 1–100 qubit accuracy results](benchmarks/evidence/simulator-standings.md)
+
 | Scientific question | Available evidence |
 |---|---|
 | Can DSIQ evolve an entire occupied state-vector sector at 100 qubits? | [Direct excitation-sector tests](benchmarks/evidence/excitation-results.json) compare all 4,950 reachable amplitudes on a two-excitation circuit. |
