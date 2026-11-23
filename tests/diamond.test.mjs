@@ -23,7 +23,7 @@ const n=100,z=n=>'0'.repeat(n),o=n=>'1'.repeat(n),bit=(n,q)=>'0'.repeat(n-q-1)+'
 test(1,'analytic RX every wire, both nonzero amplitudes',()=>{let max=0;for(let q=0;q<n;q++){const d=new D(n),t=Math.sqrt(2)+q/100;g(d,'rx',q,[],{theta:t});for(const [b,v] of [[z(n),[Math.cos(t/2),0]],[bit(n,q),[0,-Math.sin(t/2)]]]){const a=amp(d,b);max=Math.max(max,Math.hypot(a[0]-v[0],a[1]-v[1]));cx(a,v)}}return {max}});
 mark(2,'BLOCKED','FP32 not implemented');
 test(3,'100-qubit uniform and GHZ norm contraction',()=>{near(uniform().norm(),1,1e-12);near(ghz().norm(),1,1e-12)},'PARTIAL');
-test(4,'controlled and unconditional RZ(2π): relative/global phase',()=>{let d=new D(n);g(d,'h',0);g(d,'crz',99,[0],{theta:2*Math.PI});cx(amp(d,z(n)),[Math.SQRT1_2,0]);cx(amp(d,bit(n,0)),[-Math.SQRT1_2,0]);d=new D(n);g(d,'rz',0,[],{theta:2*Math.PI});cx(amp(d,z(n)),[-1,0])});
+test(4,'controlled and unconditional RZ(2�): relative/global phase',()=>{let d=new D(n);g(d,'h',0);g(d,'crz',99,[0],{theta:2*Math.PI});cx(amp(d,z(n)),[Math.SQRT1_2,0]);cx(amp(d,bit(n,0)),[-Math.SQRT1_2,0]);d=new D(n);g(d,'rz',0,[],{theta:2*Math.PI});cx(amp(d,z(n)),[-1,0])});
 test(5,'H-P-H interference at 101 angles',()=>{for(let i=0;i<=100;i++){const t=i*Math.PI/50,d=new D(1);g(d,'h',0);g(d,'p',0,[],{theta:t});g(d,'h',0);near(d.probability({0:0}),Math.cos(t/2)**2);near(d.probability({0:1}),Math.sin(t/2)**2)}});
 test(6,'H twice on each wire, zero amplitude tolerance 1e-15',()=>{const d=new D(n);for(let q=0;q<n;q++){g(d,'h',q);g(d,'h',q);cx(amp(d,bit(n,q)),[0,0],1e-15)}});
 test(7,'1024-qubit tiny log magnitude, inverse rotations; replay underflow unverified',()=>{const d=new D(1024);for(let q=0;q<1024;q++)g(d,'ry',q,[],{theta:Math.PI/3});near(d.amplitude(o(1024)).log2Magnitude,-1024,1e-9);for(let q=0;q<1024;q++)g(d,'ry',q,[],{theta:-Math.PI/3});near(d.amplitude(z(1024)).real,1,1e-10)},'PARTIAL');
@@ -34,7 +34,7 @@ test(12,'all 100 wires: X amplitude and deterministic sampling',()=>{for(let q=0
 test(13,'1000 random H^100 basis queries, relative error',()=>{const d=uniform(),r=rng(83);for(let i=0;i<1000;i++)cx(amp(d,rb(n,r)),[2**-50,0],2**-50*1e-12)});
 test(14,'1000 analytic product amplitude queries, latency',()=>{const d=uniform(),r=rng(5),t=performance.now();for(let i=0;i<1000;i++)cx(amp(d,rb(n,r)),[2**-50,0],2**-50*1e-12);return {ms:performance.now()-t}},'PARTIAL');
 test(16,'X,Y,Z each of 100 wires',()=>{for(let q=0;q<n;q++){const d=new D(n);g(d,'y',q);cx(amp(d,bit(n,q)),[0,1]);g(d,'z',q);cx(amp(d,bit(n,q)),[0,-1]);g(d,'x',q);cx(amp(d,z(n)),[0,-1])}});
-test(17,'H²=I, SX²=X, SY²=Y each wire',()=>{for(let q=0;q<n;q++)for(const [a,b,v] of [['h',z(n),[1,0]],['sx',bit(n,q),[1,0]],['sy',bit(n,q),[0,1]]]){const d=new D(n);g(d,a,q);g(d,a,q);cx(amp(d,b),v)}});
+test(17,'H�=I, SX�=X, SY�=Y each wire',()=>{for(let q=0;q<n;q++)for(const [a,b,v] of [['h',z(n),[1,0]],['sx',bit(n,q),[1,0]],['sy',bit(n,q),[0,1]]]){const d=new D(n);g(d,a,q);g(d,a,q);cx(amp(d,b),v)}});
 test(18,'S/SDG each wire',()=>{for(let q=0;q<n;q++){const d=new D(n);g(d,'h',q);g(d,'s',q);cx(amp(d,bit(n,q)),[0,Math.SQRT1_2]);g(d,'sdg',q);cx(amp(d,bit(n,q)),[Math.SQRT1_2,0])}});
 test(19,'500 T + 500 TDG gates on uniform state',()=>{const d=uniform();for(let i=0;i<500;i++)g(d,'t',i%n);for(let i=0;i<500;i++)g(d,'tdg',i%n);near(d.amplitude(o(n)).log2Magnitude,-50,1e-12)},'PARTIAL');
 test(20,'RX/RY/RZ irrational angles on every wire',()=>{for(let q=0;q<n;q++)for(const t of [Math.sqrt(2),Math.PI/7,Math.E]){const d=new D(n);g(d,'ry',q,[],{theta:t});g(d,'rz',q,[],{theta:t});cx(amp(d,bit(n,q)),[Math.sin(t/2)*Math.cos(t/2),Math.sin(t/2)**2]);const a=new D(n);g(a,'rx',q,[],{theta:t});cx(amp(a,bit(n,q)),[0,-Math.sin(t/2)])}});
@@ -106,8 +106,8 @@ const referenceChecks = [
   [57, 'Stim state comparison on the 10,000-gate Clifford circuit', ['external-oracle.py', 'stim']],
 ];
 if (process.env.DSIQ_QUEST_VECTOR) {
-  referenceChecks.push([54, 'QuEST full 30-qubit statevector',
-    ['connected-frame-audit.py', '30', 'quest']]);
+  referenceChecks.push([54, 'All 30-qubit coefficients vs exactly recombined QuEST subcircuits',
+    ['connected-frame-audit.py', '30', 'quest-cut']]);
 }
 for (const [id, label, [script, ...args]] of referenceChecks) {
   // A named oracle supplements a successful narrower check. Preserve earlier failures.
@@ -121,7 +121,7 @@ for (const [id, label, [script, ...args]] of referenceChecks) {
     const evidence = JSON.parse(output);
     assert.equal(evidence.qubits, id === 53 ? 25 : id === 54 ? 30 : 100);
     if (id === 53 || id === 54) {
-      assert.equal(evidence.reference, id === 54 ? 'quest' : 'aer');
+      assert.equal(evidence.reference, id === 54 ? 'quest-cut' : 'aer');
       assert.equal(evidence.coefficientsCompared, 2 ** evidence.qubits);
       assert.ok(evidence.maxAbsoluteError <= 1e-13);
     } else if (id === 56) {

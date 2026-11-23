@@ -5,7 +5,7 @@ permissions:
 jobs:
   validation:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +44,15 @@ jobs:
           python -B tests/mps-deep-audit.py
           python -B tests/mps-random-uncompute.py
           python -B tests/sliced-bond-audit.py
+      - name: Build pinned QuEST CPU reference
+        run: |
+          git clone --depth 1 --branch v3.7.0 https://github.com/QuEST-Kit/QuEST "$RUNNER_TEMP/quest-src"
+          test "$(git -C "$RUNNER_TEMP/quest-src" rev-parse HEAD)" = d4f75f724993b4af8e43a796e3c09ce24ae11670
+          cmake -S "$RUNNER_TEMP/quest-src" -B "$RUNNER_TEMP/quest-build" -DCMAKE_BUILD_TYPE=Release -DPRECISION=2 -DDISTRIBUTED=OFF -DMULTITHREADED=OFF -DGPUACCELERATED=OFF -DUSER_SOURCE="$PWD/tests/quest-vector.c"
+          cmake --build "$RUNNER_TEMP/quest-build" --parallel 2
+          echo "DSIQ_QUEST_VECTOR=$RUNNER_TEMP/quest-build/demo" >> "$GITHUB_ENV"
+      - name: Verify uncompute diagnostics
+        run: OPENBLAS_NUM_THREADS=1 python -B tests/echo-projection.py
       - name: Diamond 105 (must fail closed)
         run: DSIQ_AUDIT_SEED=2738912009 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
       - name: Preserve evidence even for rejected builds

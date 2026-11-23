@@ -28,6 +28,14 @@ int main(void) {
             q < 0 || q >= (int)n || c < -1 || c >= (int)n || c == q || !isfinite(angle)) return 2;
         if (c < 0 && !strcmp(name, "ry")) rotateY(reg, q, angle);
         else if (c < 0 && !strcmp(name, "rz")) rotateZ(reg, q, angle);
+        else if (c < 0 && !strcmp(name, "x")) pauliX(reg,q);
+        else if (c < 0 && !strcmp(name, "z")) pauliZ(reg,q);
+        else if (c < 0 && (!strcmp(name,"project0") || !strcmp(name,"project1"))) {
+            ComplexMatrix2 projector = {0};
+            int outcome = name[7]-'0';
+            projector.real[outcome][outcome] = 1;
+            applyMatrix2(reg,q,projector);
+        }
         else if (c < 0 && !strcmp(name, "s")) sGate(reg, q);
         else if (c >= 0 && !strcmp(name, "cx")) controlledNot(reg, c, q);
         else if (c >= 0 && !strcmp(name, "cz")) controlledPhaseFlip(reg, c, q);

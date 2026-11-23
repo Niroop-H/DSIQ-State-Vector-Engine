@@ -48,6 +48,11 @@ def aer_dense(n,gs):
 
 @contextmanager
 def reference_reader(n, gates, oracle):
+    if oracle == 'quest-cut':
+        from quest_cut import cut_reader
+        reader, _ = cut_reader(n,gates)
+        yield reader
+        return
     if oracle != 'quest':
         if oracle not in ('aer','local'):raise ValueError('Unknown reference')
         vector = aer_dense(n,gates) if oracle=='aer' else local_dense(n,gates)
@@ -91,5 +96,5 @@ def audit(n=25,oracle='local'):
         for i in range(0,total,block.size):
             k=min(block.size,total-i);args[1:3]=[i,k];assert f(*args)==0;v=block[:k];ref=read_ref(i,k);ref_norm+=float(np.vdot(ref,ref).real);e=np.abs(v-ref);mx=max(mx,float(e.max()));l2+=float(np.dot(e,e));norm+=float(np.vdot(v,v).real);nonzero+=int(np.count_nonzero(ref));seen+=k
         if not (math.isfinite(l2) and mx<=1e-13 and abs(norm-1)<1e-12 and abs(ref_norm-1)<1e-11 and seen==total):raise AssertionError((mx,norm,seen))
-        return dict(qubits=n,gates=len(gs),coefficientsCompared=seen,nonzeroReference=nonzero,maxAbsoluteError=mx,l2Error=math.sqrt(l2),norm=norm,referenceNorm=ref_norm,reference=oracle,connected=n>1,coefficientBytes=coeff.nbytes,streamBufferBytes=block.nbytes,referenceDenseBytes=16*total,totalSeconds=time.monotonic()-t,streamSeconds=time.monotonic()-start,peakProcessRssKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if resource else None)
+        return dict(qubits=n,gates=len(gs),coefficientsCompared=seen,nonzeroReference=nonzero,maxAbsoluteError=mx,l2Error=math.sqrt(l2),norm=norm,referenceNorm=ref_norm,reference=oracle,connected=n>1,coefficientBytes=coeff.nbytes,streamBufferBytes=block.nbytes,logicalVectorBytes=16*total,referenceDenseBytes=None if oracle=='quest-cut' else 16*total,totalSeconds=time.monotonic()-t,streamSeconds=time.monotonic()-start,peakProcessRssKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if resource else None)
 if __name__=='__main__':print(json.dumps(audit(int(sys.argv[1]) if len(sys.argv)>1 else 25,sys.argv[2] if len(sys.argv)>2 else 'local'),allow_nan=False))
