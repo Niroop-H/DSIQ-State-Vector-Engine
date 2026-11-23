@@ -69,4 +69,18 @@
         (br_if $pairs (i32.lt_u (local.get $i) (i32.add (local.get $base) (local.get $stride)))))
       (local.set $base (i32.add (local.get $base) (i32.shl (local.get $stride) (i32.const 1))))
       (br_if $blocks (i32.lt_u (local.get $base) (local.get $end)))))
+  (func (export "uniform") (param $end i32) (param $value f64)
+    (local $i i32)
+    (loop $fill
+      (f64.store (local.get $i) (local.get $value))
+      (local.set $i (i32.add (local.get $i) (i32.const 16)))
+      (br_if $fill (i32.lt_u (local.get $i) (local.get $end)))))
+  (func (export "mirror") (param $half i32)
+    (local $src i32) (local $dst i32)
+    (local.set $dst (i32.shl (local.get $half) (i32.const 1)))
+    (loop $copy
+      (local.set $dst (i32.sub (local.get $dst) (i32.const 16)))
+      (v128.store (local.get $dst) (v128.load (local.get $src)))
+      (local.set $src (i32.add (local.get $src) (i32.const 16)))
+      (br_if $copy (i32.lt_u (local.get $src) (local.get $half)))))
 )

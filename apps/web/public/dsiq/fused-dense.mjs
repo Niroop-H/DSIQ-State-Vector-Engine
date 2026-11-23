@@ -1,6 +1,6 @@
 // FP64 connected dense state, |0...0> input. The factor planner validates
 // gate signatures, wire mapping and allocation before this executor runs.
-import {complementEligible,evolveComplement} from './complement.mjs';
+import {complementSchedule,evolveComplement} from './complement.mjs';
 import {matrix} from './engine.mjs';
 
 const hadamard = matrix({name:'h'}).flat();
@@ -30,7 +30,7 @@ function compose(after, before) {
 }
 
 // Generated from native/fused-dense.wat with wat2wasm, then base64.
-const kernelBytes = "AGFzbQEAAAABHANgCn9/fHx8fHx8fHwAYAN/f38AYAV/f398fAACDwEDZW52Bm1lbW9yeQIAAQMEAwABAgcTAwVsb2NhbAAAAmN4AAECcngAAgrgAwPFAQIDfwR8A0AgCiELA0AgCyABaiEMIAsrAwAhDSALKwMIIQ4gDCsDACEPIAwrAwghECALIAIgDaIgAyAOoqEgBCAPoiAFIBCioaA5AwAgCyACIA6iIAMgDaKgIAQgEKIgBSAPoqCgOQMIIAwgBiANoiAHIA6ioSAIIA+iIAkgEKKhoDkDACAMIAYgDqIgByANoqAgCCAQoiAJIA+ioKA5AwggC0EQaiELIAsgCiABakkNAAsgCiABQQF0aiEKIAogAEkNAAsLYAICfwJ+A0AgAyABcUUgAyACcUEAR3EEQCADIAFyIQQgAykDACEFIAMpAwghBiADIAQpAwA3AwAgAyAEKQMINwMIIAQgBTcDACAEIAY3AwgLIANBEGohAyADIABJDQALC7UBAgN/BHsgACEFIAP9FCEKIAT9FCAEmv0iASELA0AgBSEGA0AgBiACaiEHIAb9AAQAIQggB/0ABAAhCSAGIAogCP3yASALIAkgCf0NCAkKCwwNDg8AAQIDBAUGB/3yAf3wAf0LBAAgByAKIAn98gEgCyAIIAj9DQgJCgsMDQ4PAAECAwQFBgf98gH98AH9CwQAIAZBEGohBiAGIAUgAmpJDQALIAUgAkEBdGohBSAFIAFJDQALCw==";
+const kernelBytes = "AGFzbQEAAAABJQVgCn9/fHx8fHx8fHwAYAN/f38AYAV/f398fABgAn98AGABfwACDwEDZW52Bm1lbW9yeQIAAQMGBQABAgMEByYFBWxvY2FsAAACY3gAAQJyeAACB3VuaWZvcm0AAwZtaXJyb3IABAqtBAXFAQIDfwR8A0AgCiELA0AgCyABaiEMIAsrAwAhDSALKwMIIQ4gDCsDACEPIAwrAwghECALIAIgDaIgAyAOoqEgBCAPoiAFIBCioaA5AwAgCyACIA6iIAMgDaKgIAQgEKIgBSAPoqCgOQMIIAwgBiANoiAHIA6ioSAIIA+iIAkgEKKhoDkDACAMIAYgDqIgByANoqAgCCAQoiAJIA+ioKA5AwggC0EQaiELIAsgCiABakkNAAsgCiABQQF0aiEKIAogAEkNAAsLYAICfwJ+A0AgAyABcUUgAyACcUEAR3EEQCADIAFyIQQgAykDACEFIAMpAwghBiADIAQpAwA3AwAgAyAEKQMINwMIIAQgBTcDACAEIAY3AwgLIANBEGohAyADIABJDQALC7UBAgN/BHsgACEFIAP9FCEKIAT9FCAEmv0iASELA0AgBSEGA0AgBiACaiEHIAb9AAQAIQggB/0ABAAhCSAGIAogCP3yASALIAkgCf0NCAkKCwwNDg8AAQIDBAUGB/3yAf3wAf0LBAAgByAKIAn98gEgCyAIIAj9DQgJCgsMDQ4PAAECAwQFBgf98gH98AH9CwQAIAZBEGohBiAGIAUgAmpJDQALIAUgAkEBdGohBSAFIAFJDQALCxwBAX8DQCACIAE5AwAgAkEQaiECIAIgAEkNAAsLLwECfyAAQQF0IQIDQCACQRBrIQIgAiAB/QAEAP0LBAAgAUEQaiEBIAEgAEkNAAsL";
 let compiled;
 export function denseStorage(length, budget) {
   const pages = Math.ceil(length*8/65536);
@@ -62,8 +62,9 @@ function multiControlledX(a, target, controls) {
 }
 
 export function* evolveFusedDense(state, gates) {
-  if (complementEligible(state.n,gates)) {
-    yield* evolveComplement(state,gates);
+  const scheduled=complementSchedule(state.n,gates);
+  if (scheduled) {
+    yield* evolveComplement(state,scheduled);
     return;
   }
   const a=state.groups[0].a, pending=Array(state.n).fill(null);

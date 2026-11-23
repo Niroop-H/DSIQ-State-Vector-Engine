@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {FactorDSIQ} from '../apps/web/public/dsiq/factor.mjs';
 import {executeAdaptive} from '../apps/web/public/dsiq/adaptive.mjs';
-import {complementEligible} from '../apps/web/public/dsiq/complement.mjs';
+import {complementSchedule} from '../apps/web/public/dsiq/complement.mjs';
 
 for(const n of [8,9,10]){
   const gates=Array.from({length:n},(_,q)=>({name:'h',q:n-1-q,controls:[]}));
@@ -13,8 +13,16 @@ for(const n of [8,9,10]){
     }
     for(let q=0;q<n;q++)gates.push({name:'rx',q,controls:[],theta:0.19*(q+1)});
   }
-  assert.ok(complementEligible(n,gates));
-  assert.ok(!complementEligible(n,[...gates,{name:'z',q:0,controls:[]}]));
+  // Move independent gates across each other, as a DAG topological sort may.
+  for (let pass=0;pass<3;pass++) for(let i=0;i+1<gates.length;i++){
+    const a=gates[i], b=gates[i+1], wires=[a.q,...a.controls];
+    if (![b.q,...b.controls].some(q=>wires.includes(q))) {
+      gates[i]=b; gates[i+1]=a;
+    }
+  }
+  for(const gate of gates) if(gate.name==='rz') gate.theta+=19;
+  assert.ok(complementSchedule(n,gates));
+  assert.ok(!complementSchedule(n,[...gates,{name:'z',q:0,controls:[]}]));
   const ref=new FactorDSIQ(n,gates);
   for(const gate of gates) ref.apply(gate);
   const it=executeAdaptive(n,gates);let step;

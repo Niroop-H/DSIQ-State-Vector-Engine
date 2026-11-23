@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'benchmarks/specialists/**'
+      - 'apps/web/public/dsiq/complement.mjs'
       - '.github/workflows/specialists.yml'
 permissions:
   contents: read

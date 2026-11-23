@@ -6,19 +6,48 @@ function zzAt(gates, i) {
     a.q===b.q && a.q===c.q && a.controls[0]===c.controls[0];
 }
 
-export function complementEligible(n,gates) {
-  if (n<2 || n>24 || gates.length<=n) return false;
-  const seen=new Set();
-  for (let i=0;i<n;i++) {
-    if (gates[i].name!=='h' || seen.has(gates[i].q)) return false;
-    seen.add(gates[i].q);
+export function complementSchedule(n,gates) {
+  if (n<2 || n>24 || gates.length<=n) return null;
+  // Read the next gate touching each wire. A CNOT sandwich may have
+  // unrelated operations on other wires between its three gates.
+  const next=new Int32Array(n).fill(-1);
+  const nextTarget=new Int32Array(gates.length), nextControl=new Int32Array(gates.length);
+  for (let i=gates.length-1;i>=0;i--) {
+    const {name,q,controls}=gates[i];
+    if (!['h','rx','rz','cx'].includes(name)) return null;
+    nextTarget[i]=next[q]; next[q]=i;
+    if (name==='cx') {
+      const c=controls[0]; nextControl[i]=next[c]; next[c]=i;
+    }
   }
-  for (let i=n;i<gates.length;) {
-    if (gates[i].name==='rx') i++;
-    else if (zzAt(gates,i) && Math.abs(gates[i+1].theta)<=2*Math.PI) i+=3;
-    else return false;
+  const prefix=[], used=new Uint8Array(gates.length);
+  for (const i of next) {
+    if (i<0 || gates[i].name!=='h') return null;
+    used[i]=1; prefix.push(gates[i]);
   }
-  return true;
+  const last=new Int32Array(n), layers=[];
+  for (let i=0;i<gates.length;i++) {
+    if (used[i]) continue;
+    const g=gates[i], q=g.q;
+    let level=last[q], block;
+    if (g.name==='rx') {
+      level|=1;
+      block=[g];
+    } else if (g.name==='cx') {
+      const c=g.controls[0], j=nextTarget[i], k=nextControl[i];
+      if (j<0 || k<0 || gates[j].name!=='rz' || nextTarget[j]!==k ||
+          gates[k].name!=='cx' || gates[k].q!==q || gates[k].controls[0]!==c) return null;
+      level=Math.max(level,last[c]); level+=level%2;
+      used[j]=used[k]=1;
+      last[c]=level;
+      block=[g,gates[j],gates[k]];
+    } else return null;
+    last[q]=level;
+    (layers[level]??=[]).push(...block);
+  }
+  // Even layers contain commuting ZZ interactions, odd layers commuting RXs.
+  for (const layer of layers) if (layer) for (const gate of layer) prefix.push(gate);
+  return prefix;
 }
 
 function popcount(x) {
@@ -31,9 +60,19 @@ function rotateZZ(a,half,neighbors,count,angle) {
   // Gray order changes one bit at a time. The number of cut edges changes
   // by the number of equal neighbors minus the number of unequal neighbors.
   const re=new Float64Array(count+1), im=new Float64Array(count+1);
+  // Build integer powers from the same half-angle as the elementary RZ.
+  // This avoids multiplying an arbitrarily large angle before reduction.
+  const phaseRe=new Float64Array(count+1), phaseIm=new Float64Array(count+1);
+  phaseRe[0]=1;
+  const c=Math.cos(angle/2), s=Math.sin(angle/2);
+  for (let k=1;k<=count;k++) {
+    phaseRe[k]=phaseRe[k-1]*c-phaseIm[k-1]*s;
+    phaseIm[k]=phaseRe[k-1]*s+phaseIm[k-1]*c;
+  }
   for (let k=0;k<=count;k++) {
-    const t=angle*(k-count/2);
-    re[k]=Math.cos(t); im[k]=Math.sin(t);
+    const power=2*k-count;
+    re[k]=phaseRe[Math.abs(power)];
+    im[k]=Math.sign(power)*phaseIm[Math.abs(power)];
   }
   const degree=neighbors.map(popcount);
   let bits=0,cut=0;
@@ -66,7 +105,7 @@ function rotateX(a,half,target,angle) {
 export function* evolveComplement(state,gates) {
   const a=state.groups[0].a, n=state.n, half=2**(n-1);
   const scale=2**(-n/2);
-  for (let i=0;i<half;i++) a[2*i]=scale;
+  state.denseKernel.uniform(16*half,scale);
   let pos=n;
   while (pos<gates.length) {
     if (gates[pos].name==='rx') {
@@ -99,8 +138,5 @@ export function* evolveComplement(state,gates) {
     state.operations=pos;
     yield pos;
   }
-  for (let i=0;i<half;i++) {
-    const j=2*(2*half-1-i);
-    a[j]=a[2*i]; a[j+1]=a[2*i+1];
-  }
+  state.denseKernel.mirror(16*half);
 }
