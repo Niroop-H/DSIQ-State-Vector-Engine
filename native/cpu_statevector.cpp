@@ -2,6 +2,9 @@
 // dense coefficients on first nontrivial controlled operation. Wire 0 is LSB.
 #include <algorithm>
 #include <array>
+#include <cstdint>
+#include <map>
+#include <optional>
 #include <bit>
 #include <chrono>
 #include <cmath>
@@ -166,6 +169,91 @@ void evolve(State& state,const std::vector<Gate>& stream,unsigned n) {
         else for(size_t j=begin;j<i;++j)state.apply(stream[j]);
     }
 }
+// A real linear combination of products of |0>, |1>, |+>, and |->.
+// A controlled X is I - 2P, with P projecting its controls onto |1>
+// and its target onto |->. Each projection produces at most one new product.
+// No nonzero term is discarded. If the term budget is exceeded the caller
+// replays the original gates using the product-to-dense executor.
+using Key=std::uint64_t;
+using Terms=std::map<Key,long double>;
+unsigned symbol(Key key,unsigned q) {return (key>>(2*q))&3u;}
+Key replace_symbol(Key key,unsigned q,unsigned value) {
+    return key^(Key(symbol(key,q)^value)<<(2*q));
+}
+long double overlap_weight(unsigned halves) {
+    return std::ldexp((halves&1)?std::sqrt(0.5L):1.L,-int(halves/2));
+}
+void add_term(Terms& dest,Key key,long double weight) {
+    auto [it,inserted]=dest.try_emplace(key,weight);
+    if(!inserted) {
+        it->second+=weight;
+        if(it->second==0)dest.erase(it);
+    }
+}
+void product_gate(Terms& next,Key key,long double weight,const Gate& g) {
+    const unsigned target=symbol(key,g.q);
+    if(g.op==Op::H) {add_term(next,replace_symbol(key,g.q,target^2),weight);return;}
+    if(g.op==Op::Swap) {
+        const unsigned c=std::countr_zero(g.mask);
+        add_term(next,replace_symbol(replace_symbol(key,g.q,symbol(key,c)),c,target),weight);
+        return;
+    }
+    if(target==2){add_term(next,key,weight);return;}
+    Key projected=replace_symbol(key,g.q,3);
+    unsigned uncertain=0;
+    int sign=1;
+    for(unsigned mask=g.mask;mask;mask&=mask-1) {
+        const unsigned c=std::countr_zero(mask),v=symbol(key,c);
+        if(v==0){add_term(next,key,weight);return;}
+        if(v>=2) {
+            ++uncertain;
+            if(v==3)sign=-sign;
+            projected=replace_symbol(projected,c,1);
+        }
+    }
+    if(!uncertain) {
+        add_term(next,target<2?replace_symbol(key,g.q,target^1):key,target==3?-weight:weight);
+        return;
+    }
+    add_term(next,key,weight);
+    if(target==1)sign=-sign;
+    add_term(next,projected,-2*sign*weight*overlap_weight(uncertain+(target<2)));
+}
+std::optional<Terms> evolve_products(const std::vector<Gate>& stream) {
+    if(!std::all_of(stream.begin(),stream.end(),[](const Gate& g) {
+        return g.op==Op::H || g.op==Op::X || g.op==Op::Swap;
+    }))return std::nullopt;
+    Terms terms={{0,1}};
+    for(const Gate& g:stream) {
+        Terms next;
+        for(const auto& [key,weight]:terms)product_gate(next,key,weight,g);
+        if(next.size()>128)return std::nullopt;
+        // Large cancelling coefficients make this representation ill-conditioned.
+        // Recompute in the dense basis instead of pruning or rescaling terms.
+        long double magnitude=0;
+        for(const auto& term:next)magnitude+=std::abs(term.second);
+        if(!std::isfinite(magnitude) || magnitude>16)return std::nullopt;
+        terms.swap(next);
+    }
+    return terms;
+}
+double product_amplitude(const Terms& terms,unsigned n,unsigned index) {
+    long double sum=0,compensation=0;
+    for(const auto& [key,weight]:terms) {
+        unsigned halves=0;
+        int sign=1;
+        for(unsigned q=0;q<n;++q) {
+            const unsigned bit=(index>>q)&1,v=symbol(key,q);
+            if(v<2 && v!=bit){sign=0;break;}
+            if(v>=2)++halves;
+            if(v==3 && bit)sign=-sign;
+        }
+        const long double y=sign*weight*overlap_weight(halves)-compensation;
+        const long double updated=sum+y;
+        compensation=(updated-sum)-y; sum=updated;
+    }
+    return static_cast<double>(sum);
+}
 int main() {
     try {
         std::ios::sync_with_stdio(false); std::cin.tie(nullptr);
@@ -176,12 +264,14 @@ int main() {
         std::vector<Gate> stream;
         stream.reserve(gates);
         for(unsigned i=0;i<gates;++i)stream.push_back(read_gate(n));
-        evolve(state,stream,n);
+        const auto products=evolve_products(stream);
+        if(!products)evolve(state,stream,n);
         std::vector<Z> values;
         for(unsigned j=0;j<probes;++j) {
             unsigned i;
             if(!(std::cin>>i))return 2;
-            values.push_back(state.amplitude(i));
+            if(i>=(1u<<n))return 2;
+            values.push_back(products?Z(product_amplitude(*products,n,i)):state.amplitude(i));
         }
         double ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();
         std::cout<<std::setprecision(17)<<"{\"ms\":"<<ms<<",\"values\":[";

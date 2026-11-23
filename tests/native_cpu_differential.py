@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 
-def check(exe, n, seed):
+def check(exe, n, seed, real_products=False):
     rng=random.Random(seed)
     gates=[]
     # Known zero/one controls, nontrivial local phases, and two kinds of SWAP.
@@ -26,6 +26,9 @@ def check(exe, n, seed):
     if n>=3:
         for q,c in [(1,0),(1,2),(0,2),(0,2),(2,1)]:
             gates.extend([('cx',q,0,[c]),('rz',q,1.31,[]),('cx',q,0,[c])])
+    if real_products:
+        gates=[(k if k in ('h','x','cx','mcx','swap') else 'h',q,0,
+                c if k in ('cx','mcx','swap') else []) for k,q,_,c in gates]
     ref=np.zeros(1<<n,complex);ref[0]=1
     idx=np.arange(len(ref))
     for name,q,t,c in gates:
@@ -57,8 +60,8 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('executable',type=Path)
     exe=parser.parse_args().executable.resolve()
-    rows=[check(exe,n,126743+100*n+seed) for n in range(1,13) for seed in range(10)]
+    rows=[check(exe,n,126743+100*n+seed,real) for n in range(1,13) for seed in range(10) for real in (False,True)]
     err,norm=np.max(rows,axis=0)
-    print(json.dumps(dict(circuits=len(rows),coefficients=10*sum(2**n for n in range(1,13)),
+    print(json.dumps(dict(circuits=len(rows),coefficients=20*sum(2**n for n in range(1,13)),
                           max_abs=err,max_norm_error=norm)))
     if err>1e-13 or norm>1e-12:raise SystemExit(1)
