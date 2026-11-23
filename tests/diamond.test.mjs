@@ -1,6 +1,7 @@
 // DSIQ release gate: every missing or failing test blocks certification.
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {gpuParity} from './gpu-parity.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {ScientificDSIQ as D} from '../apps/web/public/dsiq/scientific.mjs';
@@ -133,5 +134,8 @@ for (const [id, label, [script, ...args]] of referenceChecks) {
     }
     return evidence;
   }, ['PASS', 'PARTIAL'].includes(prior) ? 'PASS' : prior);
+}
+if (process.env.DSIQ_D3D11_FACTOR) {
+  test(77, 'FP64 hardware execution of the same 50-qubit circuit on CPU and GPU', gpuParity);
 }
 const counts=Object.fromEntries(['PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN'].map(s=>[s,results.filter(r=>r.status===s).length]));const report={engine:'DSIQ v0.12 research',runtime:process.version,platform:process.platform,arch:process.arch,processMaxRssKiB:process.resourceUsage().maxRSS,counts,releaseEligible:counts.PASS===105,results};writeFileSync(process.argv[2]||'diamond-results.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({counts,maxRssKiB:report.processMaxRssKiB,releaseEligible:report.releaseEligible}));if(!report.releaseEligible)process.exitCode=1;
