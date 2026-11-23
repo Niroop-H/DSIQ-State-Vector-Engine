@@ -10,6 +10,8 @@ DSIQ is a native CPU quantum circuit simulation research project from MAH Quantu
 
 **Full-engine scientific release gate: closed.** The [November 23 release-gate run](https://github.com/Niroop-H/DSIQ-State-Vector-Engine/actions/runs/45161076880) recorded 87 pass, 13 partial, one fail and four blocked. The native package is a research candidate for reproduction. Fresh blind circuits and separate-team replication remain open under the [independent-review protocol](docs/INDEPENDENT-REVIEW.md). Public distribution terms are pending an owner decision.
 
+[Packaged candidate verification](benchmarks/evidence/native-candidate-45163019894.json) records 33 passed cases including 24 wide cases across three seeds. [Download the verified candidate and raw outputs](https://github.com/Niroop-H/DSIQ-State-Vector-Engine/actions/runs/45163019894/artifacts/14812701658).
+
 ## Earlier engineering reports and Studio documentation
 
 The following sections describe versioned milestones and the inherited Studio. Some installation instructions and file references apply to its larger upstream checkout.
