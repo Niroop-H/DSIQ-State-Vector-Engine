@@ -87,7 +87,8 @@ def compare(case):
                                         text=True,capture_output=True,timeout=150)
                     wall=1000*(time.perf_counter()-t)
                     if proc.returncode:raise RuntimeError(proc.stderr[-1200:])
-                    obs=json.loads(proc.stdout);v=np.asarray(obs['values'])
+                    # Qibo may print its backend banner to stdout.
+                    obs=json.loads(proc.stdout.strip().splitlines()[-1]);v=np.asarray(obs['values'])
                     if v.shape!=(len(ref),2) or not np.isfinite(v).all():raise ValueError('Invalid output')
                     delta=abs(v[:,0]+1j*v[:,1]-ref);mask=abs(ref)>1e-14
                     rows[k].append(dict(ms=obs['ms'],process_ms=wall,max_abs=float(max(delta)),
@@ -107,6 +108,9 @@ if __name__=='__main__':
     if sys.argv[1]=='worker':
         worker(sys.argv[2],json.loads(Path(sys.argv[3]).read_text()))
     else:
+        # qibojit chooses its initial thread count from the affinity mask.
+        # Bind the parent and all five child adapters to the same single CPU.
+        os.sched_setaffinity(0,{min(os.sched_getaffinity(0))})
         result=compare(CASES[int(sys.argv[1])])
         Path('result.json').write_text(json.dumps(result,indent=2))
         raise SystemExit(any(not e.get('passed') for e in result['engines'].values()))

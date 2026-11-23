@@ -38,7 +38,7 @@ jobs:
         with: {node-version: '22'}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install 'qibo>=0.2.20,<0.4' 'qibojit' 'qiskit==2.2.3' 'qiskit-aer==0.17.2'
+      - run: python -m pip install 'qibo==0.3.7' 'qibojit==0.1.18' 'qiskit==2.2.3' 'qiskit-aer==0.17.2'
       - run: |
           g++ -std=c++20 -O3 -march=native native/cpu_statevector.cpp -o "$RUNNER_TEMP/dsiq-native"
           DSIQ_NATIVE_BIN="$RUNNER_TEMP/dsiq-native" python benchmarks/global/qibo_compare.py ${{ matrix.case }}
