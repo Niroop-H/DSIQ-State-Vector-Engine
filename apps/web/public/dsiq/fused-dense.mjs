@@ -45,6 +45,21 @@ export function denseStorage(length, budget) {
   }
 }
 
+// Visit only pairs whose controls are all one. The remaining free bits
+// enumerate disjoint swaps, so in-place updates preserve every coefficient.
+function multiControlledX(a, target, controls) {
+  const mask=controls.reduce((m,c)=>m | (1<<c),0);
+  const free=(a.length/2-1) ^ (mask | (1<<target));
+  let subset=free;
+  for (;;) {
+    const i=2*(mask | subset), j=i+2*(1<<target);
+    const re=a[i], im=a[i+1];
+    a[i]=a[j]; a[i+1]=a[j+1]; a[j]=re; a[j+1]=im;
+    if (subset===0) break;
+    subset=(subset-1)&free;
+  }
+}
+
 export function* evolveFusedDense(state, gates) {
   const a=state.groups[0].a, pending=Array(state.n).fill(null);
   const possiblyOne=new Uint8Array(state.n);
@@ -55,7 +70,14 @@ export function* evolveFusedDense(state, gates) {
   }
   for (const gate of gates) {
     const {q,name}=gate;
-    if (name==='cx') {
+    if (name==='mcx'||name==='ccx') {
+      if (gate.controls.every(c=>possiblyOne[c])) {
+        for (const c of gate.controls) flush(c);
+        flush(q);
+        multiControlledX(a,q,gate.controls);
+        possiblyOne[q]=1;
+      }
+    } else if (name==='cx') {
       const c=gate.controls[0];
       if (possiblyOne[c]) {
         flush(c); flush(q);

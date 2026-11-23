@@ -17,7 +17,13 @@ export class PhaseProductDSIQ {
  if(name==='i'){}else if(name==='x')x();else if(name==='h'){if(v.b!==undefined)this.v[q]={p:v.b?one:zero};else if(eq(v.p,zero))this.v[q]={b:0};else if(eq(v.p,one))this.v[q]={b:1};else throw new PhaseUnsupported('Hadamard creates general local state')}
  else if(['z','s','sdg','t','tdg','p'].includes(name))phase(q,({z:one,s:half,sdg:neg(half),t:quarter,tdg:neg(quarter)})[name]??p());
  else if(name==='swap'){[this.v[q],this.v[c[0]]]=[this.v[c[0]],this.v[q]]}
- else if(name==='cz'||name==='cp'){const u=this.v[c[0]],a=name==='cz'?one:p();if(eq(a,zero)||u.b===0||v.b===0){}else if(u.b===1)phase(q,a);else if(v.b===1)phase(c[0],a);else throw new PhaseUnsupported('Controlled phase creates non-product state')}
+ else if(name==='cz'||name==='cp'){const u=this.v[c[0]];
+ // A diagonal controlled phase acts as identity on support with either bit
+ // fixed at zero, for every finite angle. No angle approximation is needed.
+ if(name==='cp' && g.piTheta===undefined && Number.isFinite(g.theta) && (u.b===0||v.b===0)){
+   this.operations++;return;
+ }
+ const a=name==='cz'?one:p();if(eq(a,zero)||u.b===0||v.b===0){}else if(u.b===1)phase(q,a);else if(v.b===1)phase(c[0],a);else throw new PhaseUnsupported('Controlled phase creates non-product state')}
  else if(name==='cx'){const u=this.v[c[0]];if(u.b===1)x();else if(u.b!==0){if(v.b===undefined&&eq(v.p,zero)){}else if(v.b===undefined&&eq(v.p,one))phase(c[0],one);else throw new PhaseUnsupported('CNOT creates non-product state')}}else throw new PhaseUnsupported('Unsupported symbolic gate '+name);this.operations++}
  amplitude(bits){this.check(bits);let p=this.global,count=0;for(let q=0;q<this.n;q++){const x=Number(bits[this.n-1-q]),v=this.v[q];if(v.b!==undefined){if(v.b!==x)return {real:0,imag:0,phase:0,log2Magnitude:null}}else{count++;if(x)p=add(p,v.p)}}const a=cis(p),m=2**(-count/2);return {real:a[0]*m,imag:a[1]*m,phase:Math.atan2(a[1],a[0]),log2Magnitude:-count/2}}
  norm(){return 1}
@@ -26,3 +32,4 @@ export class PhaseProductDSIQ {
  sample(random=Math.random){return this.v.map(v=>{if(v.b!==undefined)return String(v.b);const r=random();if(!(r>=0&&r<1))throw Error('Invalid RNG');return r<.5?'0':'1'}).reverse().join('')}
  stats(){return {mode:this.mode,qubits:this.n,gates:this.operations,phaseFactors:this.n,precision:'Exact rational pi phases; Float64 conversion only at output'}}
 }
+

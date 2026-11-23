@@ -63,22 +63,41 @@ def execute(n, gates, queries, max_states=50000, max_work=100_000_000):
     index = {word:i for i,word in enumerate(basis)}
     state = np.zeros(size, dtype=np.complex128)
     state[index[prepared]] = 1
+    # In low-occupancy sectors, indexed updates touch only coefficients with
+    # an occupied target. Bound auxiliary storage to eight indices per state.
+    sparse_sites = 0 < weight <= 8 and weight <= n//2
+    if sparse_sites:
+        occupied_lists = [[] for _ in range(n)]
+        for i, word in enumerate(basis):
+            while word:
+                bit = word & -word
+                occupied_lists[bit.bit_length()-1].append(i)
+                word ^= bit
+        by_site = [np.asarray(rows, dtype=np.intp) for rows in occupied_lists]
+        del occupied_lists
+    global_phase = 1 + 0j
     for gate in operations:
         name, q = gate["name"], 1 << gate["q"]
         theta = gate.get("theta",0)
         if name in ("p","rz"):
-            occupied = np.fromiter((bool(word & q) for word in basis),bool,count=size)
+            occupied = by_site[gate['q']] if sparse_sites else np.fromiter((bool(word & q) for word in basis),bool,count=size)
             if name == "rz":
-                state *= np.exp(-0.5j*theta)
+                global_phase *= np.exp(-0.5j*theta)
             state[occupied] *= np.exp(1j*theta)
             continue
         c = 1 << gate["controls"][0]
         if name in ("cz","cp","fsim"):
-            both = np.fromiter((word & (c|q) == (c|q) for word in basis),bool,count=size)
+            if sparse_sites:
+                both = [i for i in by_site[gate['controls'][0]] if basis[i] & q]
+            else:
+                both = np.fromiter((word & (c|q) == (c|q) for word in basis),bool,count=size)
             phase = -1 if name == "cz" else np.exp(1j*(theta if name == "cp" else -gate["phi"]))
             state[both] *= phase
         if name in ("fsim","swap"):
-            left = np.fromiter((i for i,word in enumerate(basis) if word & c and not word & q),int)
+            if sparse_sites:
+                left = np.fromiter((i for i in by_site[gate['controls'][0]] if not basis[i] & q),np.intp)
+            else:
+                left = np.fromiter((i for i,word in enumerate(basis) if word & c and not word & q),int)
             right = np.fromiter((index[basis[i] ^ c ^ q] for i in left),int)
             a,b = state[left],state[right]
             if name == "swap":
@@ -86,6 +105,7 @@ def execute(n, gates, queries, max_states=50000, max_work=100_000_000):
             else:
                 cos, mix = math.cos(theta), -1j*math.sin(theta)
                 state[left],state[right] = cos*a + mix*b, mix*a + cos*b
+    state *= global_phase
     values = []
     for bits in queries:
         i = index.get(int(bits,2))

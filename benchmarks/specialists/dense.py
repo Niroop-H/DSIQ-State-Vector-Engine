@@ -101,7 +101,8 @@ def worker(engine,path):
                 for control in c:gate.add_control_qubit(control,1)
                 qc.add_gate(gate)
         # Light optimizer avoids exponential gate matrices for high-control Grover.
-        QuantumCircuitOptimizer().optimize_light(qc)
+        if max((len(g['controls']) for g in d['gates']),default=0)<=5:
+            QuantumCircuitOptimizer().optimize_light(qc)
         qc.update_quantum_state(state);vals=[state.get_amplitude(i) for i in ids]
     print(json.dumps(dict(ms=1000*(time.perf_counter()-t),values=[[z.real,z.imag] for z in vals])))
 
