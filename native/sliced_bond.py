@@ -3,7 +3,11 @@ All binary assignments are evaluated. Float64 tensor arithmetic with scaled
 outputs; summation of represented slice contributions uses exact rationals.
 The projected array model excludes allocator, Python, and BLAS workspaces.
 """
-import math, time, json, sys, resource, itertools
+import math, time, json, sys, itertools
+try:
+    import resource
+except ImportError:
+    resource = None
 from fractions import Fraction
 import numpy as np
 from bond_contract import compile_compact, eliminate_affine, hyperplan, Boundary
@@ -31,6 +35,25 @@ def choose_slices(scopes,steps,itemsize,max_bytes,max_slices,max_products):
     count=1<<len(cut);total=stats['productsPerSlice']*count
     if total>max_products:raise Boundary(f'Sliced total work {total} exceeds {max_products}')
     return sorted(cut),{k:v for k,v in stats.items() if k!='heavy'}|dict(slices=count,totalProducts=total)
+
+def multiply_tensors(a, sa, b, sb, out):
+    """Group binary axes for a batched matrix product; preserve shared output axes."""
+    common = set(sa) & set(sb)
+    batch = sorted(common.intersection(out))
+    summed = sorted(common.difference(out))
+    left = [v for v in sa if v not in common]
+    right = [v for v in sb if v not in common]
+    # A one-sided reduction needs the general contraction rule.
+    if set(left + right + batch) != set(out):
+        return None
+    def reshape(array, axes, groups):
+        order = [axes.index(v) for group in groups for v in group]
+        return array.transpose(order).reshape(tuple(1 << len(group) for group in groups))
+    x = reshape(a, sa, [batch, left, summed])
+    y = reshape(b, sb, [batch, summed, right])
+    result = (x @ y).reshape((2,) * len(out))
+    order = batch + left + right
+    return result.transpose([order.index(v) for v in out])
 
 def scaled_contract(raw,steps,assignment):
     fs={};scale=0;scalar=complex(1.)
@@ -60,7 +83,8 @@ def scaled_contract(raw,steps,assignment):
         if len(u)>52:raise Boundary('Einsum label limit')
         args=[a,[ids[v] for v in sa]]
         if b is not None:args.extend([b,[ids[v] for v in sb]])
-        c=np.einsum(*args,[ids[v] for v in out],optimize=True)
+        c=multiply_tensors(a,sa,b,sb,out) if b is not None else None
+        if c is None:c=np.einsum(*args,[ids[v] for v in out],optimize=True)
         del args,a,b
         c,e=normalize(c);e+=ea+eb
         if out0:fs[k]=(out,c,e)
@@ -91,7 +115,7 @@ def execute(n,gates,bits,*,max_bytes=512*2**20,max_slices=64,max_products=2**42,
     else:log=None;phase=0.
     a=float(re);b=float(im)
     if not math.isfinite(a) or not math.isfinite(b):raise Boundary('Nonfinite output')
-    return dict(info,completedSlices=completed,real=a,imag=b,log2Magnitude=log,phase=phase,componentUnderflow=bool(re and a==0 or im and b==0),elapsedSeconds=time.monotonic()-start,peakRSSKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    return dict(info,completedSlices=completed,real=a,imag=b,log2Magnitude=log,phase=phase,componentUnderflow=bool(re and a==0 or im and b==0),elapsedSeconds=time.monotonic()-start,peakRSSKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if resource else None)
 
 if __name__=='__main__':
     try:print(json.dumps(execute(**json.load(sys.stdin)),allow_nan=False))
