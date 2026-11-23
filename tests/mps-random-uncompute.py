@@ -1,10 +1,10 @@
 """Original random-matching topology at reduced width; never promotes #70.
 The full 100-wire fixture is planned with the same seed and gates as Diamond #70.
 """
-import json, math, sys, time, resource
+import json, math, sys, time
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'native'))
-from mps_exact import ExactMPS, Boundary, compile_ops, plan
+from mps_exact import ExactMPS, Boundary, prepare
 import random
 import numpy as np
 
@@ -50,8 +50,30 @@ def main():
         a=recovered.amplitude(format(j,f'0{n}b'));v[j]=complex(a['real'],a['imag'])
     target=np.zeros_like(ref);target[0]=1;err=float(np.max(np.abs(v-target)));norm=float(recovered.expectation('I'*n));assert err<1e-12 and abs(norm-1)<1e-12,(err,norm)
     full=make(100,8377);reason=None
-    try:plan(100,compile_ops(100,full+inverse(full)),1024*2**20,2**42)
+    prefix=ExactMPS(100,full[:300])
+    prefix_norm=prefix.expectation('I'*100)
+    assert abs(prefix_norm-1)<1e-12
+    # First random matching has independent two-wire factors. Probe every wire.
+    first=ExactMPS(100,full[:150])
+    assert first.order!=list(range(100))
+    for cx in full[100:150]:
+        c,q=cx['controls'][0],cx['q']
+        for wire,value in [(c,math.cos(full[c]['theta'])),
+                           (q,math.cos(full[c]['theta'])*math.cos(full[q]['theta']))]:
+            obs=['I']*100;obs[99-wire]='Z'
+            assert abs(first.expectation(''.join(obs))-value)<1e-12
+    # Choose a basis state with non-negligible weight for a relative phase/amplitude check.
+    bits=first.sample(random.Random(983))
+    expected=1.
+    for cx in full[100:150]:
+        c,q=cx['controls'][0],cx['q']
+        cb,tb=int(bits[-1-c]),int(bits[-1-q])
+        for wire,bit in ((c,cb),(q,tb^cb)):
+            expected*=(math.sin if bit else math.cos)(full[wire]['theta']/2)
+    amp=first.amplitude(bits)
+    assert expected!=0 and abs(complex(amp['real'],amp['imag'])/expected-1)<1e-11
+    try:prepare(100,full+inverse(full),1024*2**20,2**42)
     except Boundary as e:reason=str(e)
     assert reason is not None,'Full-width plan admitted; execute separately before claiming completion'
-    return dict(qubits=n,depth=100,forwardGates=len(gs),fullGateOperations=len(gs+inv),forwardAllAmplitudes=len(ref),inverseAllAmplitudes=len(ref),forwardMaxAbsoluteError=max_error,forwardL2Error=l2,recoveredMaxAbsoluteError=err,recoveredNorm=norm,forwardStats=d.stats(),inverseStats=recovered.stats(),original100QubitGates=len(full)*2,original100QubitPreflightRefusal=reason,scope='Reduced-width random matching stress; original 100-qubit workload remains FAIL; no cancellation or truncation.',elapsedSeconds=time.monotonic()-start,peakRSSKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    return dict(qubits=n,depth=100,forwardGates=len(gs),fullGateOperations=len(gs+inv),forwardAllAmplitudes=len(ref),inverseAllAmplitudes=len(ref),forwardMaxAbsoluteError=max_error,forwardL2Error=l2,recoveredMaxAbsoluteError=err,recoveredNorm=norm,fullWidthPrefixGates=300,fullWidthPrefixNorm=prefix_norm,forwardStats=d.stats(),inverseStats=recovered.stats(),original100QubitGates=len(full)*2,original100QubitPreflightRefusal=reason,scope='Reduced-width random matching stress; original 100-qubit workload remains FAIL; no cancellation or truncation.',elapsedSeconds=time.monotonic()-start,peakRSSKiB=__import__('resource').getrusage(0).ru_maxrss if sys.platform=='linux' else None)
 if __name__=='__main__':print(json.dumps(main(),allow_nan=False))

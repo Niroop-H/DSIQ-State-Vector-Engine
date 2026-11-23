@@ -2,7 +2,11 @@
 No singular-value cutoff, approximate low-rank compression or benchmark templates.
 All reduced QR columns are retained, including columns associated with zero rank.
 """
-import json, math, sys, time, resource
+import json, math, sys, time
+try:
+    import resource
+except ImportError:
+    resource = None
 import numpy as np
 from bond_contract import Boundary, gate_matrix
 
@@ -62,9 +66,53 @@ def plan(n,ops,max_bytes,max_work):
     if peak>max_bytes:raise Boundary('MPS transfer scratch exceeds budget')
     return dict(predictedExplicitArrayBytes=peak,finalCoefficientBytes=live,maxBond=maxrank,plannedWorkUnits=work,routedOperations=len(ops))
 
+def interaction_order(n, gates):
+    # Embed the longest initial degree-two interaction graph as paths and cycles.
+    neighbors = [[] for _ in range(n)]
+    for gate in gates:
+        if not gate['controls']:
+            continue
+        a, b = gate['q'], gate['controls'][0]
+        if b in neighbors[a]:
+            continue
+        if len(neighbors[a]) == 2 or len(neighbors[b]) == 2:
+            break
+        neighbors[a].append(b)
+        neighbors[b].append(a)
+    order, seen = [], set()
+    for start in sorted(range(n), key=lambda q: len(neighbors[q])):
+        if start in seen:
+            continue
+        chain, q = [], start
+        while q is not None:
+            chain.append(q)
+            seen.add(q)
+            q = next((b for b in neighbors[q] if b not in seen), None)
+        if len(chain) > 2 and start in neighbors[chain[-1]]:
+            # Alternating ends makes every edge span at most two sites.
+            chain = [chain[i//2] if i % 2 == 0 else chain[-(i//2+1)]
+                     for i in range(len(chain))]
+        order.extend(chain)
+    return order
+
+def prepare(n, gates, max_bytes, max_work):
+    ops = compile_ops(n, gates)
+    try:
+        return ops, plan(n, ops, max_bytes, max_work), list(range(n))
+    except Boundary:
+        order = interaction_order(n, gates)
+        if order == list(range(n)):
+            raise
+    del ops
+    site = {q:i for i,q in enumerate(order)}
+    remapped = [dict(g, q=site[g['q']], controls=[site[c] for c in g['controls']]) for g in gates]
+    ops = compile_ops(n, remapped)
+    return ops, plan(n, ops, max_bytes, max_work), order
+
 class ExactMPS:
     def __init__(self,n,gates,max_bytes=64*2**20,max_work=2**36):
-        self.n=n;self.ops=compile_ops(n,gates);self.max_work=max_work;self.used_work=0;self.info=plan(n,self.ops,max_bytes,max_work);self.a=[np.array([[[1.],[0.]]],complex) for _ in range(n)];self.max_live=sum(x.nbytes for x in self.a);self.live=self.max_live
+        self.ops,self.info,self.order=prepare(n,gates,max_bytes,max_work)
+        self.n=n;self.max_work=max_work;self.used_work=0;self.a=[np.array([[[1.],[0.]]],complex) for _ in range(n)];self.max_live=sum(x.nbytes for x in self.a);self.live=self.max_live
         for q,m in self.ops:
             x=self.a[q];dl,_,dm=x.shape
             if m.shape==(2,2):self.a[q]=np.einsum('uv,avb->aub',m,x,optimize=True)
@@ -83,7 +131,7 @@ class ExactMPS:
     def amplitude(self,bits):
         if not isinstance(bits,str) or len(bits)!=self.n or set(bits)-set('01'):raise ValueError('Invalid basis index')
         v=np.ones(1,complex);e=0
-        for a,b in zip(self.a,bits[::-1]):
+        for a,b in zip(self.a,(bits[-1-q] for q in self.order)):
             self.charge(a.shape[0]*a.shape[2]*4);v=v@a[:,int(b),:];m=float(np.max(np.abs(v)))
             if not math.isfinite(m):raise Boundary('Nonfinite amplitude')
             if not m:return dict(real=0.,imag=0.,log2Magnitude=None,phase=0.,componentUnderflow=False)
@@ -95,7 +143,7 @@ class ExactMPS:
     def expectation(self,pauli):
         if not isinstance(pauli,str) or len(pauli)!=self.n or set(pauli)-set('IXYZ'):raise ValueError('Invalid Pauli')
         mats={'I':I,'X':np.array([[0,1],[1,0]]),'Y':np.array([[0,-1j],[1j,0]]),'Z':np.diag([1,-1])};env=np.ones((1,1),complex)
-        for a,p in zip(self.a,pauli[::-1]):
+        for a,p in zip(self.a,(pauli[-1-q] for q in self.order)):
             l,_,r=a.shape;self.charge(16*(l*l*r+l*r*r));o=mats[p];env=np.einsum('ab,asx,st,bty->xy',env,a.conj(),o,a,optimize=True)
         z=complex(env[0,0]);
         if not math.isfinite(z.real) or not math.isfinite(z.imag) or abs(z.imag)>1e-9:raise Boundary('Observable lost numerical validity')
@@ -110,16 +158,18 @@ class ExactMPS:
             b=int(rng.random()*total>=p[0]);prob=float(p[b]);
             if prob<=0:raise Boundary('Zero sample branch')
             v=w[b]/math.sqrt(prob);bits.append(str(b))
-        return ''.join(reversed(bits))
+        logical = ['0']*self.n
+        for q, bit in zip(self.order,bits): logical[-1-q] = bit
+        return ''.join(logical)
     def stats(self):return dict(self.info,coefficientBytes=self.live,peakLiveCoefficientBytes=self.max_live,actualMaxBond=max(a.shape[2] for a in self.a),workUnitsCharged=self.used_work,mode='untruncated-mps',precision='FP64 QR; all dimensional columns retained; no SVD cutoff; LAPACK scratch and total RSS separate')
 
 def execute(n,gates,queries=None,paulis=None,shots=0,seed=0,max_bytes=64*2**20,max_work=2**36,plan_only=False):
     import random
     queries=[] if queries is None else queries;paulis=[] if paulis is None else paulis
     if not isinstance(queries,list) or len(queries)>10000 or not isinstance(paulis,list) or len(paulis)>1000 or type(shots)!=int or not 0<=shots<=10000:raise ValueError('Invalid query limits')
-    if plan_only:return plan(n,compile_ops(n,gates),max_bytes,max_work)
+    if plan_only:return prepare(n,gates,max_bytes,max_work)[1]
     start=time.monotonic();d=ExactMPS(n,gates,max_bytes,max_work);norm=d.expectation('I'*n);a=[d.amplitude(b) for b in queries];p=[d.expectation(s) for s in paulis];rng=random.Random(seed);samples=[d.sample(rng) for _ in range(shots)]
-    return dict(amplitudes=a,observables=p,norm=norm,samples=samples,stats=d.stats(),elapsedSeconds=time.monotonic()-start,processPeakRSSKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    return dict(amplitudes=a,observables=p,norm=norm,samples=samples,stats=d.stats(),elapsedSeconds=time.monotonic()-start,processPeakRSSKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if resource else None)
 if __name__=='__main__':
     try:print(json.dumps(execute(**json.load(sys.stdin)),allow_nan=False))
     except (ValueError,Boundary,OverflowError,MemoryError) as e:print(json.dumps({'error':str(e)}));sys.exit(2)
