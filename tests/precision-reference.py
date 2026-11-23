@@ -1,9 +1,11 @@
 """Independent high-precision and exact-rational path-scatter oracles."""
-import sys,json,mpmath as mp
+import sys,json
 from fractions import Fraction as F
-mp.mp.dps=100
+
 
 def high_case(case):
+    import mpmath as mp
+    mp.mp.dps=100
     n=case['n'];a=[mp.mpc(int(j==0)) for j in range(2**n)]
     for g in case['gates']:
         q=g['q'];cs=g['controls'];name=g['name'];t=mp.mpf(g.get('theta',0));c=mp.cos(t/2);s=mp.sin(t/2)

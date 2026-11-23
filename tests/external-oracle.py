@@ -23,7 +23,9 @@ def quimb_audit():
   name=g['name'].upper();args=([g['theta']] if 'theta' in g else [])+g['controls']+[g['q']];c.apply_gate(name,*args)
  errors=[];rel=[];logs=[]
  for q in x['queries']:
-  a=complex(c.amplitude(q['bits'][::-1],optimize='greedy',simplify_sequence='R',simplify_atol=0.0,dtype='complex128'));d=complex(q['real'],q['imag']);e=abs(a-d);errors.append(e)
+  a=complex(c.amplitude(q['bits'][::-1],optimize='greedy',simplify_sequence='R',simplify_atol=0.0,dtype='complex128'));d=complex(q['real'],q['imag']);e=abs(a-d);
+  if not all(math.isfinite(z) for z in (a.real,a.imag,d.real,d.imag,e)):raise AssertionError('Nonfinite amplitude')
+  errors.append(e)
   if a==0 or d==0:
    if a!=d:raise AssertionError('Zero/nonzero mismatch')
   else:rel.append(e/abs(a));logs.append(abs(math.log2(abs(a))-q['log2Magnitude']))

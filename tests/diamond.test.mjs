@@ -1,4 +1,6 @@
 // DSIQ release gate: every missing or failing test blocks certification.
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {ScientificDSIQ as D} from '../apps/web/public/dsiq/scientific.mjs';
@@ -96,4 +98,36 @@ v08(test);
 v09(test);
 v10(test);
 v12(test);
+
+const referenceChecks = [
+  [53, 'Qiskit Aer full 25-qubit statevector', ['connected-frame-audit.py', '25', 'aer']],
+  [56, 'quimb exact contraction on the 100-qubit grid', ['external-oracle.py', 'quimb']],
+  [57, 'Stim state comparison on the 10,000-gate Clifford circuit', ['external-oracle.py', 'stim']],
+];
+for (const [id, label, [script, ...args]] of referenceChecks) {
+  // A named oracle supplements a successful narrower check. Preserve earlier failures.
+  const prior = results[id - 1].status;
+  test(id, label, () => {
+    const path = fileURLToPath(new URL(script, import.meta.url));
+    const output = execFileSync('python', ['-B', path, ...args], {
+      encoding: 'utf8', timeout: 600000, stdio: ['ignore', 'pipe', 'pipe'],
+      env: {...process.env, OPENBLAS_NUM_THREADS: '1', OMP_NUM_THREADS: '1'},
+    });
+    const evidence = JSON.parse(output);
+    assert.equal(evidence.qubits, id === 53 ? 25 : 100);
+    if (id === 53) {
+      assert.equal(evidence.reference, 'aer');
+      assert.equal(evidence.coefficientsCompared, 2 ** 25);
+      assert.ok(evidence.maxAbsoluteError <= 1e-13);
+    } else if (id === 56) {
+      assert.equal(evidence.amplitudeComparisons, 16);
+      assert.ok(evidence.maxAbsoluteError <= 1e-13 && evidence.maxRelativeError <= 1e-9);
+    } else {
+      assert.equal(evidence.gates, 10000);
+      assert.equal(evidence.observableComparisons, 1100);
+      assert.equal(evidence.maxError, 0);
+    }
+    return evidence;
+  }, ['PASS', 'PARTIAL'].includes(prior) ? 'PASS' : prior);
+}
 const counts=Object.fromEntries(['PASS','PARTIAL','FAIL','BLOCKED','NOT_RUN'].map(s=>[s,results.filter(r=>r.status===s).length]));const report={engine:'DSIQ v0.12 research',runtime:process.version,platform:process.platform,arch:process.arch,processMaxRssKiB:process.resourceUsage().maxRSS,counts,releaseEligible:counts.PASS===105,results};writeFileSync(process.argv[2]||'diamond-results.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({counts,maxRssKiB:report.processMaxRssKiB,releaseEligible:report.releaseEligible}));if(!report.releaseEligible)process.exitCode=1;

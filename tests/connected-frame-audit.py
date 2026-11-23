@@ -57,6 +57,6 @@ def audit(n=25,oracle='local'):
         mx=0.;l2=0.;norm=0.;nonzero=0;seen=0;start=time.monotonic()
         for i in range(0,r.size,block.size):
             k=min(block.size,r.size-i);args[1:3]=[i,k];assert f(*args)==0;v=block[:k];ref=r[i:i+k];e=np.abs(v-ref);mx=max(mx,float(e.max()));l2+=float(np.dot(e,e));norm+=float(np.vdot(v,v).real);nonzero+=int(np.count_nonzero(ref));seen+=k
-        if not (mx<=1e-13 and abs(norm-1)<1e-12 and seen==r.size):raise AssertionError((mx,norm,seen))
+        if not (math.isfinite(l2) and mx<=1e-13 and abs(norm-1)<1e-12 and seen==r.size):raise AssertionError((mx,norm,seen))
         return dict(qubits=n,gates=len(gs),coefficientsCompared=seen,nonzeroReference=nonzero,maxAbsoluteError=mx,l2Error=math.sqrt(l2),norm=norm,referenceNorm=float(np.vdot(r,r).real),reference=oracle,connected=n>1,coefficientBytes=coeff.nbytes,streamBufferBytes=block.nbytes,referenceDenseBytes=r.nbytes,denseSeconds=dense_seconds,streamSeconds=time.monotonic()-start,peakProcessRssKiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 if __name__=='__main__':print(json.dumps(audit(int(sys.argv[1]) if len(sys.argv)>1 else 25,sys.argv[2] if len(sys.argv)>2 else 'local'),allow_nan=False))
