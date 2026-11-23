@@ -1,0 +1,49 @@
+name: QASMBench CPU backend comparison
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/qasmb-cpu.yml'
+      - 'benchmarks/global/qibo_compare.py'
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [0, 1, 2, 3, 4]
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMBA_NUM_THREADS: '1'
+      QASMBENCH_ROOT: corpus
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: pnnl/QASMBench
+          ref: 357b942396d5c2b7cbc1c229c585a6ef5ccaebac
+          path: corpus
+          sparse-checkout: |
+            small/ising_n10
+            medium/multiplier_n15
+            medium/qft_n18
+            medium/bv_n19
+            medium/cat_state_n22
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'qibo>=0.2.20,<0.4' 'qibojit' 'qiskit==2.2.3' 'qiskit-aer==0.17.2'
+      - run: |
+          g++ -std=c++20 -O3 -march=native native/cpu_statevector.cpp -o "$RUNNER_TEMP/dsiq-native"
+          DSIQ_NATIVE_BIN="$RUNNER_TEMP/dsiq-native" python benchmarks/global/qibo_compare.py ${{ matrix.case }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qasm-${{ matrix.case }}
+          path: result.json

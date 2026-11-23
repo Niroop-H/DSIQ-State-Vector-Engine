@@ -28,7 +28,13 @@ def baseline(doc, probes):
 def prepare(path):
     name=path.split('/')[-1]
     url=f'https://raw.githubusercontent.com/pnnl/QASMBench/{REV}/{path}/{name}.qasm'
-    raw=urllib.request.urlopen(url,timeout=30).read()
+    root=os.environ.get('QASMBENCH_ROOT')
+    if root:
+        if subprocess.check_output(['git','-C',root,'rev-parse','HEAD'],text=True).strip()!=REV:
+            raise ValueError('QASMBench checkout does not match the pinned revision')
+        raw=(pathlib.Path(root)/path/(name+'.qasm')).read_bytes()
+    else:
+        raw=urllib.request.urlopen(url,timeout=30).read()
     circuit=qasm2.loads(raw.decode(),custom_instructions=qasm2.LEGACY_CUSTOM_INSTRUCTIONS)
     clean=circuit.remove_final_measurements(inplace=False)
     gates=[]
