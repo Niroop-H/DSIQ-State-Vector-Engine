@@ -1,0 +1,49 @@
+{
+  "engine_commit": "1c98791a4baba52a504f1c99c466417c2ebbdda1",
+  "workflow_run": 45163281654,
+  "scope": "Project-run external library comparisons on known fixtures",
+  "results": [
+    {
+      "test": 57,
+      "reference": "Stim",
+      "version": "1.15.0",
+      "qubits": 100,
+      "gates": 10000,
+      "observableComparisons": 1100,
+      "independentStabilizers": 100,
+      "maxError": 0,
+      "globalPhase": "Not determined by stabilizer tableau; internal affine global-phase comparisons separate"
+    },
+    {
+      "qubits": 25,
+      "gates": 120,
+      "coefficientsCompared": 33554432,
+      "nonzeroReference": 33554432,
+      "maxAbsoluteError": 3.273069708340169e-17,
+      "l2Error": 7.742947899609159e-16,
+      "norm": 1,
+      "referenceNorm": 0.9999999999999988,
+      "reference": "aer",
+      "connected": true,
+      "coefficientBytes": 800,
+      "streamBufferBytes": 4194304,
+      "logicalVectorBytes": 536870912,
+      "referenceDenseBytes": 536870912,
+      "totalSeconds": 15.926893218999993,
+      "streamSeconds": 4.135875886000008,
+      "peakProcessRssKiB": 640024
+    },
+    {
+      "test": 56,
+      "reference": "quimb",
+      "version": "1.11.0",
+      "qubits": 100,
+      "gates": 480,
+      "amplitudeComparisons": 16,
+      "maxAbsoluteError": 4.5940595335075306e-33,
+      "maxRelativeError": 9.005132878901158e-15,
+      "maxLogError": 1.4210854715202004e-14,
+      "scope": "Exact low-depth 10x10 grid amplitude comparison; all controlled gates kept, no SVD cutoff"
+    }
+  ]
+}
