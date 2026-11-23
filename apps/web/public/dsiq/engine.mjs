@@ -11,7 +11,22 @@ const unit= (n,g)=>{if(!Number.isInteger(g.q)||g.q<0||g.q>=n||!Array.isArray(g.c
 export class NodeBudget extends Error {constructor(){super('Compressed node budget reached; switching to amplitude replay.')}}
 export class DSIQ {
  constructor(n,maxNodes=32768){if(!Number.isInteger(n)||n<0||n>4096||!Number.isInteger(maxNodes)||maxNodes<n+1||maxNodes>1000000)throw Error('Invalid qubits or node budget');this.n=n;this.maxNodes=maxNodes;this.nodes=new Map();this.keys=new Map();this.next=1;this.peak=0;this.gates=[];this.mode='dag';this.root=[0,O];for(let q=n-1;q>=0;q--)this.root=this.make(q,this.root,E)}
- make(q,a,b){const na=abs(a[1]),nb=abs(b[1]);if(na===0&&nb===0)return E;const norm=Math.hypot(na,nb),pivot=na>=nb?a[1]:b[1],pm=abs(pivot),p=[pivot[0]/pm,pivot[1]/pm],w=[p[0]*norm,p[1]*norm];const x=edge(a[0],div(a[1],w)),y=edge(b[0],div(b[1],w));const key=JSON.stringify([q,x,y]);let id=this.keys.get(key);if(id===undefined){if(this.nodes.size>=this.maxNodes)throw new NodeBudget();id=this.next++;this.keys.set(key,id);this.nodes.set(id,{q,a:x,b:y,key});this.peak=Math.max(this.peak,this.nodes.size)}return [id,w]}
+ make(q,a,b){
+  let w,x,y;
+  // A single nonzero branch factors into its original complex weight
+  // and a unit edge without a round trip through polar normalization.
+  if(zero(a[1])){
+   if(zero(b[1]))return E;
+   w=b[1];x=E;y=[b[0],O];
+  }else if(zero(b[1])){
+   w=a[1];x=[a[0],O];y=E;
+  }else{
+   const na=abs(a[1]),nb=abs(b[1]),norm=Math.hypot(na,nb);
+   const pivot=na>=nb?a[1]:b[1],pm=abs(pivot);
+   w=[(pivot[0]/pm)*norm,(pivot[1]/pm)*norm];
+   x=edge(a[0],div(a[1],w));y=edge(b[0],div(b[1],w));
+  }
+  const key=JSON.stringify([q,x,y]);let id=this.keys.get(key);if(id===undefined){if(this.nodes.size>=this.maxNodes)throw new NodeBudget();id=this.next++;this.keys.set(key,id);this.nodes.set(id,{q,a:x,b:y,key});this.peak=Math.max(this.peak,this.nodes.size)}return [id,w]}
  children(e){const n=this.nodes.get(e[0]);return [scale(n.a,e[1]),scale(n.b,e[1])]}
  sum(a,b,memo){if(zero(a[1]))return b;if(zero(b[1]))return a;if(a[0]===b[0])return edge(a[0],add(a[1],b[1]));const key=JSON.stringify([a,b]);if(memo.has(key))return memo.get(key);const [al,ar]=this.children(a),[bl,br]=this.children(b),q=this.nodes.get(a[0]).q;const r=this.make(q,this.sum(al,bl,memo),this.sum(ar,br,memo));if(memo.size<this.maxNodes)memo.set(key,r);return r}
  one(e,q,m,controls=[]){const memo=new Map(),sums=new Map(),active=new Set(controls);const rec=id=>{if(memo.has(id))return memo.get(id);const n=this.nodes.get(id);let r;if(n.q===q)r=this.make(q,this.sum(scale(n.a,m[0]),scale(n.b,m[1]),sums),this.sum(scale(n.a,m[2]),scale(n.b,m[3]),sums));else r=this.make(n.q,active.has(n.q)?n.a:walk(n.a),walk(n.b));memo.set(id,r);return r};const walk=a=>zero(a[1])?E:scale(rec(a[0]),a[1]);return walk(e)}
