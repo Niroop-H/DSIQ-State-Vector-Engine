@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'benchmarks/global/**'
+      - 'apps/web/public/dsiq/adaptive.mjs'
       - '.github/workflows/global-cpu.yml'
 permissions:
   contents: read
