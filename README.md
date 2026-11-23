@@ -6,7 +6,7 @@ DSIQ is a native CPU quantum circuit simulation research project from MAH Quantu
 |---|---|
 | Can DSIQ evolve an entire occupied state-vector sector at 100 qubits? | [Direct excitation-sector tests](benchmarks/evidence/excitation-results.json) compare all 4,950 reachable amplitudes on a two-excitation circuit. |
 | Can it answer queries on circuits with gates that change excitation count? | [Connected-chain tests](benchmarks/evidence/wide-results.json) compare selected amplitudes, norm and an observable on 50- and 100-qubit circuits. |
-| How does the adaptive engine perform against dense Qiskit Aer? | [Five public QASMBench circuits](benchmarks/evidence/global-cpu-45160826893.json), 10–22 qubits. The two engines return the same requested amplitudes; the faster engine varies by circuit. |
+| How does the adaptive engine perform against dense Qiskit Aer? | The adaptive engine had lower median execution times on all five pinned 10–22-qubit circuits in [run 1](benchmarks/evidence/global-cpu-45169460566.json) and [run 2](benchmarks/evidence/global-cpu-45169706987.json), with matched amplitude probes on single-threaded AMD EPYC 7763 runners. The [earlier engine](benchmarks/evidence/global-cpu-45160826893.json) won three of five. |
 
 **Full-engine scientific release gate: closed.** The [November 23 release-gate run](https://github.com/Niroop-H/DSIQ-State-Vector-Engine/actions/runs/45161076880) recorded 87 pass, 13 partial, one fail and four blocked. The native package is a research candidate for reproduction. Fresh blind circuits and separate-team replication remain open under the [independent-review protocol](docs/INDEPENDENT-REVIEW.md). Public distribution terms are pending an owner decision.
 
