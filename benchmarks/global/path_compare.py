@@ -23,8 +23,13 @@ def worker(engine,doc):
             args=([g['theta']] if 'theta' in g else [])+g['controls']+[g['q']]
             circuit.apply_gate(name,*args)
         state=circuit.psi
-        values=[complex(state.amplitude(bits[::-1])) for bits in doc['queries']]
-        norm=float(abs(state.norm())**2)
+        if doc['n']==1:
+            vector=np.asarray(state.to_dense()).reshape(2)
+            values=[complex(vector[int(bits,2)]) for bits in doc['queries']]
+            norm=float(np.vdot(vector,vector).real)
+        else:
+            values=[complex(state.amplitude(bits[::-1])) for bits in doc['queries']]
+            norm=float(abs(state.norm())**2)
     else:
         sys.path.insert(0,str(ROOT/'native'))
         from mps_exact import execute

@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'benchmarks/global/accuracy_widths.py'
+      - 'benchmarks/global/path_compare.py'
       - '.github/workflows/accuracy-widths.yml'
       - 'apps/web/public/dsiq/engine.mjs'
       - 'benchmarks/global/accuracy_browser_widths.mjs'
