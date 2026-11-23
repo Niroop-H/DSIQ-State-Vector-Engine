@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        family: [qaoa, qft, grover]
+        family: [qaoa, qaoa-fresh, qft, grover]
         n: [12, 16, 20]
     steps:
       - uses: actions/checkout@v4
@@ -47,13 +47,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        seed: [4183, 12171, 73619]
+        include:
+          - {n: 100, seed: 4183}
+          - {n: 100, seed: 12171}
+          - {n: 100, seed: 73619}
+          - {n: 50, seed: 945173}
+          - {n: 75, seed: 945198}
+          - {n: 100, seed: 945223}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: python -m pip install 'quspin==1.0.0'
-      - run: python benchmarks/specialists/sector.py 100 ${{ matrix.seed }}
+      - run: python benchmarks/specialists/sector.py ${{ matrix.n }} ${{ matrix.seed }}
       - uses: actions/upload-artifact@v4
         with:
           name: sector-${{ matrix.seed }}

@@ -22,7 +22,12 @@ REPS=3
 
 def build(name,n):
     from mqt.bench import get_benchmark, BenchmarkLevel
-    qc=get_benchmark(name,BenchmarkLevel.ALG,n).remove_final_measurements(inplace=False)
+    if name=='qaoa-fresh':
+        from mqt.bench.benchmarks.qaoa import create_circuit
+        qc=create_circuit(n,seed=932719+n)
+    else:
+        qc=get_benchmark(name,BenchmarkLevel.ALG,n)
+    qc=qc.remove_final_measurements(inplace=False)
     qc=qc.assign_parameters({p:0.317+0.241*i for i,p in enumerate(qc.parameters)})
     gates=[]
     def add(name,q,controls=(),angle=None):

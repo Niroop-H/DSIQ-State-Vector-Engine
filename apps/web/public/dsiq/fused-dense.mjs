@@ -1,5 +1,6 @@
 // FP64 connected dense state, |0...0> input. The factor planner validates
 // gate signatures, wire mapping and allocation before this executor runs.
+import {complementEligible,evolveComplement} from './complement.mjs';
 import {matrix} from './engine.mjs';
 
 const hadamard = matrix({name:'h'}).flat();
@@ -29,7 +30,7 @@ function compose(after, before) {
 }
 
 // Generated from native/fused-dense.wat with wat2wasm, then base64.
-const kernelBytes = "AGFzbQEAAAABFAJgCn9/fHx8fHx8fHwAYAN/f38AAg8BA2VudgZtZW1vcnkCAAEDAwIAAQcOAgVsb2NhbAAAAmN4AAEKqQICxQECA38EfANAIAohCwNAIAsgAWohDCALKwMAIQ0gCysDCCEOIAwrAwAhDyAMKwMIIRAgCyACIA2iIAMgDqKhIAQgD6IgBSAQoqGgOQMAIAsgAiAOoiADIA2ioCAEIBCiIAUgD6KgoDkDCCAMIAYgDaIgByAOoqEgCCAPoiAJIBCioaA5AwAgDCAGIA6iIAcgDaKgIAggEKIgCSAPoqCgOQMIIAtBEGohCyALIAogAWpJDQALIAogAUEBdGohCiAKIABJDQALC2ACAn8CfgNAIAMgAXFFIAMgAnFBAEdxBEAgAyABciEEIAMpAwAhBSADKQMIIQYgAyAEKQMANwMAIAMgBCkDCDcDCCAEIAU3AwAgBCAGNwMICyADQRBqIQMgAyAASQ0ACws=";
+const kernelBytes = "AGFzbQEAAAABHANgCn9/fHx8fHx8fHwAYAN/f38AYAV/f398fAACDwEDZW52Bm1lbW9yeQIAAQMEAwABAgcTAwVsb2NhbAAAAmN4AAECcngAAgrgAwPFAQIDfwR8A0AgCiELA0AgCyABaiEMIAsrAwAhDSALKwMIIQ4gDCsDACEPIAwrAwghECALIAIgDaIgAyAOoqEgBCAPoiAFIBCioaA5AwAgCyACIA6iIAMgDaKgIAQgEKIgBSAPoqCgOQMIIAwgBiANoiAHIA6ioSAIIA+iIAkgEKKhoDkDACAMIAYgDqIgByANoqAgCCAQoiAJIA+ioKA5AwggC0EQaiELIAsgCiABakkNAAsgCiABQQF0aiEKIAogAEkNAAsLYAICfwJ+A0AgAyABcUUgAyACcUEAR3EEQCADIAFyIQQgAykDACEFIAMpAwghBiADIAQpAwA3AwAgAyAEKQMINwMIIAQgBTcDACAEIAY3AwgLIANBEGohAyADIABJDQALC7UBAgN/BHsgACEFIAP9FCEKIAT9FCAEmv0iASELA0AgBSEGA0AgBiACaiEHIAb9AAQAIQggB/0ABAAhCSAGIAogCP3yASALIAkgCf0NCAkKCwwNDg8AAQIDBAUGB/3yAf3wAf0LBAAgByAKIAn98gEgCyAIIAj9DQgJCgsMDQ4PAAECAwQFBgf98gH98AH9CwQAIAZBEGohBiAGIAUgAmpJDQALIAUgAkEBdGohBSAFIAFJDQALCw==";
 let compiled;
 export function denseStorage(length, budget) {
   const pages = Math.ceil(length*8/65536);
@@ -61,6 +62,10 @@ function multiControlledX(a, target, controls) {
 }
 
 export function* evolveFusedDense(state, gates) {
+  if (complementEligible(state.n,gates)) {
+    yield* evolveComplement(state,gates);
+    return;
+  }
   const a=state.groups[0].a, pending=Array(state.n).fill(null);
   const possiblyOne=new Uint8Array(state.n);
   function flush(q) {

@@ -46,4 +46,27 @@
           (i64.store offset=8 (local.get $y) (local.get $imag))))
       (local.set $x (i32.add (local.get $x) (i32.const 16)))
       (br_if $scan (i32.lt_u (local.get $x) (local.get $end)))))
+  ;; Apply an RX mixer to interleaved complex128 pairs. The two lanes
+  ;; carry the real and imaginary part of one amplitude.
+  (func (export "rx") (param $start i32) (param $end i32) (param $stride i32)
+    (param $cos f64) (param $sin f64)
+    (local $base i32) (local $i i32) (local $j i32)
+    (local $x v128) (local $y v128) (local $c v128) (local $s v128)
+    (local.set $base (local.get $start))
+    (local.set $c (f64x2.splat (local.get $cos)))
+    (local.set $s (f64x2.replace_lane 1 (f64x2.splat (local.get $sin)) (f64.neg (local.get $sin))))
+    (loop $blocks
+      (local.set $i (local.get $base))
+      (loop $pairs
+        (local.set $j (i32.add (local.get $i) (local.get $stride)))
+        (local.set $x (v128.load (local.get $i)))
+        (local.set $y (v128.load (local.get $j)))
+        (v128.store (local.get $i) (f64x2.add (f64x2.mul (local.get $c) (local.get $x))
+          (f64x2.mul (local.get $s) (i8x16.shuffle 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 (local.get $y) (local.get $y)))))
+        (v128.store (local.get $j) (f64x2.add (f64x2.mul (local.get $c) (local.get $y))
+          (f64x2.mul (local.get $s) (i8x16.shuffle 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 (local.get $x) (local.get $x)))))
+        (local.set $i (i32.add (local.get $i) (i32.const 16)))
+        (br_if $pairs (i32.lt_u (local.get $i) (i32.add (local.get $base) (local.get $stride)))))
+      (local.set $base (i32.add (local.get $base) (i32.shl (local.get $stride) (i32.const 1))))
+      (br_if $blocks (i32.lt_u (local.get $base) (local.get $end)))))
 )
