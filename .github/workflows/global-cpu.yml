@@ -5,6 +5,9 @@ on:
     paths:
       - 'benchmarks/global/**'
       - 'apps/web/public/dsiq/adaptive.mjs'
+      - 'apps/web/public/dsiq/factor.mjs'
+      - 'apps/web/public/dsiq/fused-dense.mjs'
+      - 'tests/fused-dense.test.mjs'
       - '.github/workflows/global-cpu.yml'
 permissions:
   contents: read
@@ -25,6 +28,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install qiskit==2.2.3 qiskit-aer==0.17.2 numpy==2.2.6
+      - run: node tests/fused-dense.test.mjs
       - run: python benchmarks/global/run.py
       - if: always()
         uses: actions/upload-artifact@v4
