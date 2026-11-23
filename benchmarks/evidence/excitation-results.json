@@ -1,0 +1,47 @@
+[
+  {
+    "qubits": 8,
+    "seed": 4091,
+    "gates": 174,
+    "mixing_layers": 14,
+    "coefficients": 28,
+    "queries": 30,
+    "max_abs": 4.577566798522237e-16,
+    "max_relative": 1.024793028267574e-14,
+    "peak_rss_kib": 28228,
+    "norm": 1.0000000000000009,
+    "engine_seconds": 0.0020906610002384696,
+    "process_seconds": 0.0930580799999916,
+    "passed": true
+  },
+  {
+    "qubits": 50,
+    "seed": 4133,
+    "gates": 1056,
+    "mixing_layers": 14,
+    "coefficients": 1225,
+    "queries": 1227,
+    "max_abs": 2.0490308144984482e-16,
+    "max_relative": 6.98799132725946e-14,
+    "peak_rss_kib": 28740,
+    "norm": 1.0000000000000004,
+    "engine_seconds": 0.1329904039998837,
+    "process_seconds": 0.21847949899984087,
+    "passed": true
+  },
+  {
+    "qubits": 100,
+    "seed": 4183,
+    "gates": 2106,
+    "mixing_layers": 14,
+    "coefficients": 4950,
+    "queries": 4952,
+    "max_abs": 1.4898437035160061e-16,
+    "max_relative": 3.2771163520947207e-13,
+    "peak_rss_kib": 30788,
+    "norm": 1.0000000000000013,
+    "engine_seconds": 0.973809287000222,
+    "process_seconds": 1.0843953669996154,
+    "passed": true
+  }
+]
