@@ -19,7 +19,7 @@ def freeze():
     for d in ('apps/web/public/dsiq','native','tests'):
         paths.extend(p for p in (ROOT/d).rglob('*') if p.is_file() and '__pycache__' not in p.parts and not p.name.endswith('.pyc'))
     paths.extend(ROOT/'docs'/x for x in ('diamond-105.json','COMPLEXITY.md','INDEPENDENT-REVIEW.md','REVIEWER-ATTESTATION.md'))
-    manifest={str(p.relative_to(ROOT)):sha(p.read_bytes()) for p in sorted(paths)}
+    manifest={p.relative_to(ROOT).as_posix():sha(p.read_bytes()) for p in sorted(paths)}
     return {'files':manifest,'sourceSHA256':sha(encode(manifest))}
 def finite(x):return type(x) in (int,float) and math.isfinite(x)
 def validate_suite(challenge,strict=True):
@@ -57,13 +57,29 @@ def validate_reference(cs,reference,strict=False):
 def commit(challenge,reference,out,reveal,strict):
     raw=read(challenge);c=load(challenge);cs=validate_suite(c,strict);r=load(reference);validate_reference(cs,r,strict);require(r['suiteId']==c['suiteId'],'Suite ID mismatch');salt=secrets.token_hex(32);secret={'schema':'DSIQ-blind-reveal-v1','salt':salt,'reference':r};public={'schema':'DSIQ-blind-commit-v1','suiteId':c['suiteId'],'challengeSHA256':sha(raw),'referenceCommitmentSHA256':sha(encode(secret)),'strict':strict};write(reveal,secret);write(out,public);return public
 
+def audited_case(request, timeout, limit_mib):
+    digest = sha(request)
+    command = [sys.executable, '-B', str(ROOT/'native/scientific-audit.py'),
+               '--timeout', str(timeout), '--limit-mib', str(limit_mib)]
+    try:
+        proc = subprocess.run(command, input=request, capture_output=True, timeout=timeout+20)
+    except subprocess.TimeoutExpired:
+        return {'status':'FAILED', 'inputSHA256':digest, 'error':'Audit wrapper timed out',
+                'timeoutSeconds':timeout+20}
+    try:
+        audit = json.loads(proc.stdout)
+        require(isinstance(audit, dict), 'Invalid worker report')
+    except (ValueError, UnicodeError):
+        return {'status':'FAILED', 'inputSHA256':digest, 'error':'Invalid worker report',
+                'stderr':proc.stderr.decode(errors='replace')[-2000:]}
+    if audit.get('inputSHA256') != digest or proc.returncode != 0 or audit.get('status') != 'COMPLETED':
+        audit['status'] = 'FAILED'
+    return audit
+
 def execute(challenge,commitment,out,expected_source,timeout,limit_mib):
     c=load(challenge);raw=read(challenge);p=load(commitment);require(p['schema']=='DSIQ-blind-commit-v1' and p['suiteId']==c['suiteId'] and p['challengeSHA256']==sha(raw) and type(p['strict'])==bool and re.fullmatch('[0-9a-f]{64}',p['referenceCommitmentSHA256']),'Challenge commitment mismatch');cs=validate_suite(c,p['strict']);manifest=freeze();require(manifest['sourceSHA256']==expected_source,'Frozen source hash mismatch');dir=pathlib.Path(out);dir.mkdir(parents=True,exist_ok=False);write(dir/'source-manifest.json',manifest);results={}
     for cse in cs:
-        req=encode(cse['request']);proc=subprocess.run([sys.executable,'-B',str(ROOT/'native/scientific-audit.py'),'--timeout',str(timeout),'--limit-mib',str(limit_mib)],input=req,capture_output=True,timeout=timeout+20)
-        try:audit=json.loads(proc.stdout)
-        except (ValueError,UnicodeError):audit={'status':'FAILED','error':'Invalid worker report','stderr':proc.stderr.decode(errors='replace')[-2000:]}
-        if audit.get('inputSHA256')!=sha(req) or proc.returncode!=0:audit['status']='FAILED'
+        audit=audited_case(encode(cse['request']),timeout,limit_mib)
         name=cse['id']+'.json';write(dir/name,audit);results[cse['id']]={'sha256':sha(read(dir/name)),'status':audit['status'],'file':name};print(cse['id'],audit['status'],file=sys.stderr)
     unchanged=freeze()==manifest;report={'schema':'DSIQ-blind-output-v1','suiteId':c['suiteId'],'challengeSHA256':sha(raw),'commitmentSHA256':sha(read(commitment)),'sourceSHA256':expected_source,'sourceUnchanged':unchanged,'circuits':results,'independentAttestationVerified':False};write(dir/'output-manifest.json',report);return {'outputManifestSHA256':sha(read(dir/'output-manifest.json')),'allCompleted':unchanged and all(x['status']=='COMPLETED' for x in results.values())}
 
@@ -72,7 +88,7 @@ def score(challenge,commitment,reveal,out,recorded_output_hash):
     for cse in cs:
         ident=cse['id'];m=manifest['circuits'][ident];name=ident+'.json';require(m['file']==name and m['sha256']==sha(read(dir/name)),'Result hash mismatch');aud=load(dir/name);w=aud.get('workerReport') or {};qmap={v['id']:v for v in w.get('outputs',[])};expected_ids={q['id'] for q in cse['request']['queries']};complete=aud.get('status')==m['status']==w.get('status')=='COMPLETED' and aud.get('workerExitCode')==0 and aud.get('inputSHA256')==w.get('inputSHA256')==sha(encode(cse['request'])) and set(qmap)==expected_ids and len(qmap)==len(w.get('outputs',[]));errors=[]
         for q in cse['request']['queries']:
-            v=qmap.get(q['id'],{});x=v.get('value',{});t=refs[ident][q['id']];ok=v.get('kind')==q['kind'] and v.get('prefix')==q['prefix'] and finite(x.get('real')) and finite(x.get('imag',0));delta=math.hypot(x['real']-t['real'],x.get('imag',0)-t['imag']) if ok else None;rel=delta/math.hypot(t['real'],t['imag']) if ok and 'relativeTolerance' in t else None;errors.append({'id':q['id'],'error':delta,'tolerance':t['absoluteTolerance'],'relativeError':rel,'relativeTolerance':t.get('relativeTolerance'),'pass':bool(ok and delta<=t['absoluteTolerance'] and (rel is None or rel<=t['relativeTolerance']))})
+            v=qmap.get(q['id'],{});x=v.get('value',{});t=refs[ident][q['id']];ok=v.get('kind')==q['kind'] and v.get('prefix')==q['prefix'] and finite(x.get('real')) and finite(x.get('imag') if q['kind']=='amplitude' else x.get('imag',0));delta=math.hypot(x['real']-t['real'],x.get('imag',0)-t['imag']) if ok else None;rel=delta/math.hypot(t['real'],t['imag']) if ok and 'relativeTolerance' in t else None;errors.append({'id':q['id'],'error':delta,'tolerance':t['absoluteTolerance'],'relativeError':rel,'relativeTolerance':t.get('relativeTolerance'),'pass':bool(ok and delta<=t['absoluteTolerance'] and (rel is None or rel<=t['relativeTolerance']))})
         rows.append({'id':ident,'family':cse['family'],'pass':complete and all(x['pass'] for x in errors),'queries':errors})
     return {'schema':'DSIQ-blind-score-v1','suiteId':c['suiteId'],'strict':p['strict'],'sourceSHA256':manifest['sourceSHA256'],'outputManifestSHA256':recorded_output_hash,'numericalPass':all(row['pass'] for row in rows),'independentAttestationVerified':False,'test100Certified':False,'referenceMethod':r['referenceMethod'],'results':rows,'scope':'Reviewer must independently confirm authorship, circuit-family/depth adequacy, prior commitment exchange and external reference correctness. Hashes do not prove independence.'}
 
