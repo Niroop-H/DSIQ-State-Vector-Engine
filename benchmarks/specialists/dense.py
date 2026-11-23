@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import platform
 import random
-import resource
+import signal
 import statistics
 import subprocess
 import sys
@@ -22,7 +22,13 @@ REPS=3
 
 def build(name,n):
     from mqt.bench import get_benchmark, BenchmarkLevel
-    if name=='qaoa-fresh':
+    if name=='qft-input':
+        from qiskit import QuantumCircuit
+        prep=QuantumCircuit(n)
+        for q in range(n):prep.ry((q+1)*0.173,q)
+        for q in range(n-1):prep.cx(q,q+1)
+        qc=prep.compose(get_benchmark('qft',BenchmarkLevel.ALG,n).remove_final_measurements(inplace=False))
+    elif name=='qaoa-fresh':
         from mqt.bench.benchmarks.qaoa import create_circuit
         qc=create_circuit(n,seed=932719+n)
     else:
@@ -89,6 +95,34 @@ def worker(engine,path):
             qc.append(op)
         sim=qsimcirq.QSimSimulator(qsim_options=qsimcirq.QSimOptions(cpu_threads=1))
         vals=sim.compute_amplitudes(qc,bitstrings=ids,qubit_order=w[::-1])
+    elif engine=='lightning':
+        import pennylane as qml
+        t=time.perf_counter()
+        dev=qml.device('lightning.qubit',wires=n,c_dtype=np.complex128)
+        @qml.qnode(dev,diff_method=None)
+        def simulate():
+            for g in d['gates']:
+                wires=[n-1-i for i in [*g['controls'],g['q']]]
+                k=g['name']
+                op={'h':qml.Hadamard,'x':qml.PauliX,'rx':qml.RX,'ry':qml.RY,'rz':qml.RZ,
+                    'p':qml.PhaseShift,'cp':qml.ControlledPhaseShift,'cx':qml.CNOT,
+                    'mcx':qml.MultiControlledX,'swap':qml.SWAP}[k]
+                op(*([g['theta']] if 'theta' in g else []),wires=wires)
+            return qml.state()
+        vals=simulate()[ids]
+    elif engine=='ddsim':
+        from qiskit import QuantumCircuit
+        from mqt.ddsim import DDSIMProvider
+        t=time.perf_counter()
+        qc=QuantumCircuit(n)
+        for g in d['gates']:
+            q=g['q'];c=g['controls'];name=g['name']
+            if name=='mcx':qc.mcx(c,q)
+            else:getattr(qc,name)(*([g['theta']] if 'theta' in g else []),*c,q)
+        sim=DDSIMProvider().get_backend('statevector_simulator')
+        res=sim.run(qc,shots=0).result()
+        if not res.success:raise ValueError(res.status)
+        vals=np.asarray(res.get_statevector(qc))[ids]
     else:
         from qulacs import QuantumState,QuantumCircuit
         from qulacs.gate import DenseMatrix
@@ -113,14 +147,22 @@ def worker(engine,path):
 
 def trial(engine,doc,path,text_input):
     if engine=='quest': cmd=[os.environ['QUEST_BIN']]
+    elif engine=='dsiq-native': cmd=[os.environ['DSIQ_NATIVE_BIN']]
     elif engine=='dsiq': cmd=['node',str(HERE.parent/'global/dsiq.mjs'),str(path)]
     else:cmd=[sys.executable,__file__,'worker',engine,str(path)]
     rss=path.with_suffix('.rss')
     t=time.perf_counter()
-    p=subprocess.run(['/usr/bin/time','-f','%M','-o',str(rss),*cmd],input=text_input if engine=='quest' else '',text=True,capture_output=True,timeout=75)
+    with subprocess.Popen(['/usr/bin/time','-f','%M','-o',str(rss),*cmd],stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True) as p:
+        try:
+            stdout,stderr=p.communicate(text_input if engine in ('quest','dsiq-native') else '',timeout=75)
+        except subprocess.TimeoutExpired:
+            os.killpg(p.pid,signal.SIGKILL)
+            p.communicate()
+            raise
     elapsed=1000*(time.perf_counter()-t)
-    if p.returncode:raise RuntimeError((p.stderr or p.stdout)[-900:])
-    row=json.loads(p.stdout);row.update(process_ms=elapsed,rss_kib=int(rss.read_text()));return row
+    if p.returncode:raise RuntimeError((stderr or stdout)[-900:])
+    row=json.loads(stdout);row.update(process_ms=elapsed,rss_kib=int(rss.read_text()));return row
 
 def compare(name,n):
     d=build(name,n);encoded=json.dumps(d);rows={k:[] for k in ENGINES};errors={};values={}
@@ -151,10 +193,15 @@ def compare(name,n):
 
 if __name__=='__main__':
     if sys.argv[1]=='worker':worker(sys.argv[2],Path(sys.argv[3]));sys.exit()
+    extended='--extended' in sys.argv[3:]
+    if extended:ENGINES=ENGINES+['dsiq-native','lightning','ddsim']
     name=sys.argv[1];n=int(sys.argv[2]);out=Path('result.json')
     try:r=compare(name,n)
     except Exception as exc:r=dict(family=name,n=n,error=repr(exc))
     r['cpu']=next(s.strip() for s in Path('/proc/cpuinfo').read_text().splitlines() if s.startswith('model name'))
     r['versions']={p:importlib.metadata.version(p) for p in ('mqt.bench','qiskit','qiskit-aer','qsimcirq','qulacs','numpy')}
+    if extended:
+        r['versions'].update({p:importlib.metadata.version(p) for p in ('pennylane','pennylane-lightning','mqt.ddsim')})
+        r['reference_agreement']=all(r.get('engines',{}).get(k,{}).get('passed',False) for k in ('quest','aer'))
     out.write_text(json.dumps(r,indent=2))
     print(name,n,{k:(v.get('ms'),v.get('passed'),v.get('error')) for k,v in r.get('engines',{}).items()},r.get('error'),flush=True)
