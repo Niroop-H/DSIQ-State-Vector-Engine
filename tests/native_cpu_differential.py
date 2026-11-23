@@ -23,6 +23,9 @@ def check(exe, n, seed):
         count=(rng.randrange(1,n) if name=='mcx' else int(name in ('cx','cp','swap')))
         controls=rng.sample([i for i in range(n) if i!=q],count)
         gates.append((name,q,rng.uniform(-8,8),controls))
+    if n>=3:
+        for q,c in [(1,0),(1,2),(0,2),(0,2),(2,1)]:
+            gates.extend([('cx',q,0,[c]),('rz',q,1.31,[]),('cx',q,0,[c])])
     ref=np.zeros(1<<n,complex);ref[0]=1
     idx=np.arange(len(ref))
     for name,q,t,c in gates:

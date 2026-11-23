@@ -29,11 +29,12 @@ jobs:
         with: {node-version: '22'}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install 'mqt.bench==2.3.0' 'qiskit-aer==0.17.2' 'qsimcirq==0.22.1' 'qulacs==0.6.12' 'pennylane==0.43.1' 'pennylane-lightning==0.43.0' 'mqt.ddsim>=2,<3'
+      - run: python -m pip install 'mqt.bench==2.3.0' 'qiskit-aer==0.17.2' 'qsimcirq==0.22.1' 'qulacs==0.6.12' 'pennylane==0.43.1' 'pennylane-lightning==0.43.0' 'mqt.ddsim==2.7.0' 'gast==0.6.0'
       - name: Build DSIQ native CPU statevector
         run: |
           g++ -std=c++20 -O3 -march=native -Wall -Wextra -Werror native/cpu_statevector.cpp -o "$RUNNER_TEMP/dsiq-native"
           echo "DSIQ_NATIVE_BIN=$RUNNER_TEMP/dsiq-native" >> "$GITHUB_ENV"
+      - run: python tests/native_cpu_differential.py "$DSIQ_NATIVE_BIN"
       - name: Build double-precision QuEST
         run: |
           git clone -q --depth 1 -b v3.7.0 https://github.com/QuEST-Kit/QuEST "$RUNNER_TEMP/quest"

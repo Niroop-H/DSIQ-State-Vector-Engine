@@ -113,6 +113,28 @@ public:
             for(unsigned i=base;i<base+target;++i)
                 transform(dense[i],dense[i+target],m);
     }
+    void apply_zz_layer(const std::vector<unsigned>& neighbors,unsigned edges,double angle) {
+        if(dense.empty())expand();
+        // All rotations in this layer commute. Their phase depends only on
+        // the number of equal and unequal bit pairs, including global phase.
+        const Z unit=std::polar(1.,angle/2);
+        std::vector<Z> powers(edges+1,1.), phases(edges+1);
+        for(unsigned i=1;i<=edges;++i)powers[i]=powers[i-1]*unit;
+        for(unsigned i=0;i<=edges;++i) {
+            int power=2*int(i)-int(edges);
+            phases[i]=power<0?std::conj(powers[-power]):powers[power];
+        }
+        unsigned x=0;
+        int cut=0;
+        for(unsigned i=0;;) {
+            dense[x]*=phases[cut];
+            if(++i==length)break;
+            unsigned q=std::countr_zero(i);
+            int delta=std::popcount(neighbors[q])-2*std::popcount(x&neighbors[q]);
+            cut+=((x>>q)&1)?-delta:delta;
+            x^=1u<<q;
+        }
+    }
     Z amplitude(unsigned i) const {
         if(i>=length)throw std::invalid_argument("Invalid basis index");
         if(!dense.empty())return dense[i];
@@ -121,14 +143,40 @@ public:
         return value;
     }
 };
+bool zz_at(const std::vector<Gate>& stream,size_t i) {
+    if(stream.size()-i<3)return false;
+    const Gate &a=stream[i],&b=stream[i+1],&c=stream[i+2];
+    return a.op==Op::X && std::has_single_bit(a.mask) && b.op==Op::RZ &&
+           c.op==Op::X && a.q==b.q && a.q==c.q && a.mask==c.mask;
+}
+void evolve(State& state,const std::vector<Gate>& stream,unsigned n) {
+    for(size_t i=0;i<stream.size();) {
+        if(!zz_at(stream,i)) {state.apply(stream[i++]);continue;}
+        const size_t begin=i;
+        const double angle=stream[i+1].angle;
+        std::vector<unsigned> neighbors(n);
+        while(zz_at(stream,i) && stream[i+1].angle==angle) {
+            const auto& gate=stream[i];
+            if(neighbors[gate.q]&gate.mask)break;
+            neighbors[gate.q]|=gate.mask;
+            neighbors[std::countr_zero(gate.mask)]|=1u<<gate.q;
+            i+=3;
+        }
+        if(i-begin>=6)state.apply_zz_layer(neighbors,(i-begin)/3,angle);
+        else for(size_t j=begin;j<i;++j)state.apply(stream[j]);
+    }
+}
 int main() {
     try {
         std::ios::sync_with_stdio(false); std::cin.tie(nullptr);
         unsigned n,gates,probes;
-        if(!(std::cin>>n>>gates>>probes)||n<1||n>24||!probes)return 2;
+        if(!(std::cin>>n>>gates>>probes)||n<1||n>24||gates>1000000||!probes)return 2;
         const auto start=std::chrono::steady_clock::now();
         State state(n);
-        for(unsigned i=0;i<gates;++i)state.apply(read_gate(n));
+        std::vector<Gate> stream;
+        stream.reserve(gates);
+        for(unsigned i=0;i<gates;++i)stream.push_back(read_gate(n));
+        evolve(state,stream,n);
         std::vector<Z> values;
         for(unsigned j=0;j<probes;++j) {
             unsigned i;
