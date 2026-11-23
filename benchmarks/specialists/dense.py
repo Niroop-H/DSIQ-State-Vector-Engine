@@ -146,7 +146,8 @@ def compare(name,n):
         rel=max((float(max(abs((v-ref)[mask]/ref[mask]))) if mask.any() else 0) for v in values[k])
         passed=(e<=5e-4 if k=='qsim' else e<=1e-11 and rel<=1e-7)
         report[k]=dict(samples=obs,ms=statistics.median(o['ms'] for o in obs),process_ms=statistics.median(o['process_ms'] for o in obs),abs_error=e,relative_error=rel,passed=passed)
-    return dict(family=name,n=d['n'],gates=len(d['gates']),probes=d['indices'],sha256=hashlib.sha256(encoded.encode()).hexdigest(),engines=report)
+    circuit={'normalized_gates':d['gates']} if name.startswith('qaoa') else {}
+    return dict(**circuit,family=name,n=d['n'],gates=len(d['gates']),probes=d['indices'],sha256=hashlib.sha256(encoded.encode()).hexdigest(),engines=report)
 
 if __name__=='__main__':
     if sys.argv[1]=='worker':worker(sys.argv[2],Path(sys.argv[3]));sys.exit()
