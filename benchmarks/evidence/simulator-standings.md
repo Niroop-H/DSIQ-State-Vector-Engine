@@ -2,7 +2,7 @@
 
 23 November 2026 · Project-run, single-thread CPU benchmarks
 
-![Head-to-head speed counts by simulator and relative amplitude error at each width from 1 to 100](dsiq-standings.svg)
+[Historical benchmark graphic (includes retrospective selection)](dsiq-standings.svg)
 
 On 23 selected MQT Bench and QASMBench circuits, both the standalone native DSIQ executable and the JavaScript implementation passed every accuracy check. Native was fastest on 17 cases, JavaScript on four, and qsim on two. The two DSIQ implementations were invoked separately. Retrospective best-of-two selection is excluded from the head-to-head table. Production automatic selection has not been benchmarked here.
 
@@ -16,7 +16,7 @@ Each score is **DSIQ faster / peer faster** among cases where both passed. A tim
 | QuEST | MQT | 18 / 0 | 10 / 8 | — |
 | Qulacs | MQT | 17 / 1 | 8 / 10 | — |
 | PennyLane Lightning | MQT | 17 / 1 | 14 / 4 | — |
-| MQT DDSIM | MQT | 6 / 0 (sector) | 14 / 2 | 2 DDSIM timeouts |
+| MQT DDSIM | MQT | 16 / 0 | 14 / 2 | 2 DDSIM timeouts |
 | Google qsim | MQT | 13 / 4 | 8 / 9 | 1 qsim accuracy failure |
 | Qibo NumPy | QASMBench | 5 / 0 | 5 / 0 | — |
 | Qibo JIT | QASMBench | 5 / 0 | 5 / 0 | — |
