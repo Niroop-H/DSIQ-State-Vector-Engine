@@ -1,0 +1,46 @@
+name: Clean checkout quickstart
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'README.md'
+      - 'docs/**'
+      - 'native/**'
+      - 'benchmarks/global/**'
+      - 'scripts/check_readme_links.py'
+      - 'requirements.txt'
+      - '.github/workflows/quickstart-smoke.yml'
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/check_readme_links.py
+      - run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install -r requirements.txt
+          python benchmarks/global/wide_statevector.py
+          python benchmarks/global/excitation_check.py > excitation-results.json
+          python benchmarks/global/supplemental_validation.py
+      - if: always()
+        run: |
+          mkdir -p smoke-evidence
+          cp *-results.json supplemental-validation.json smoke-evidence/ 2>/dev/null || true
+          printf '%s\n' "$GITHUB_SHA" > smoke-evidence/commit.txt
+          if [ -x .venv/bin/python ]; then .venv/bin/python -m pip inspect > smoke-evidence/dependencies.json; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quickstart-evidence
+          path: smoke-evidence/
