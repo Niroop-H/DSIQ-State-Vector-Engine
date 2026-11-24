@@ -1,0 +1,37 @@
+name: Supplemental scientific validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'benchmarks/global/supplemental_validation.py'
+      - '.github/workflows/supplemental-validation.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy==2.3.5
+      - run: python benchmarks/global/supplemental_validation.py
+      - name: Capture provenance
+        if: always()
+        run: |
+          mkdir -p evidence
+          cp supplemental-validation.json evidence/ || true
+          printf '%s\n' "$GITHUB_SHA" > evidence/commit.txt
+          lscpu > evidence/cpu.txt
+          python -m pip freeze > evidence/dependencies.txt
+          uname -a > evidence/os.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: supplemental-validation
+          path: evidence/
