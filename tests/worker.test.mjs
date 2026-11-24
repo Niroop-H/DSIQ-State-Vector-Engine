@@ -26,3 +26,11 @@ r=await run(bell,{method:'rank-frame',bits:'11',pauli:'XX',shots:16});assert.equ
 r=await run(bell,{method:'certified-auto',bits:'11',pauli:'XX',shots:0});assert.equal(r.mode,'interval-bridge-forest');assert.ok(Math.abs(r.amplitude.real-Math.SQRT1_2)<=r.amplitude.absoluteErrorBound);assert.ok(Math.abs(r.science.pauliExpectation-1)<=r.science.pauliAbsoluteErrorBound);
 const chain='OPENQASM 2.0; qreg q[30]; h q[0]; '+Array.from({length:29},(_,i)=>`cx q[${i}],q[${i+1}];`).join(' ');r=await run(chain,{method:'certified-auto',bits:'1'.repeat(30),pauli:'X'.repeat(30),shots:0,maxTensorBytes:67108864,maxReplayVisits:10000000});assert.equal(r.mode,'interval-bridge-forest');assert.ok(Math.abs(r.amplitude.real-Math.SQRT1_2)<=r.amplitude.absoluteErrorBound);assert.ok(Math.abs(r.science.pauliExpectation-1)<=r.science.pauliAbsoluteErrorBound);
 messages=[];await self.onmessage({data:{source:bell,bits:'11',maxNodes:32768,shots:16,seed:42,method:'certified-auto'}});assert.ok(messages.at(-1).error);assert.ok(!messages.at(-1).result);console.log('worker: strict certified automatic factor / contraction selection and fail-closed unsupported shots passed');
+
+// Adversarial inputs must fail with an explicit parser limit, not stack overflow.
+const {angle,parse}=await import('../apps/web/public/dsiq/worker.mjs');
+for(const value of ['('.repeat(1000)+'1'+')'.repeat(1000),'-'.repeat(1000)+'1','1+'.repeat(3000)+'1']){
+  assert.throws(()=>angle(value),/Angle (nesting|sign chain|expression) exceeds/);
+  assert.throws(()=>parse('OPENQASM 2.0; qreg q[1]; ry('+value+') q[0];'),/Angle (nesting|sign chain|expression) exceeds/);
+}
+assert.ok(Math.abs(angle('-(pi/2)+2')-(2-Math.PI/2))<1e-14);
