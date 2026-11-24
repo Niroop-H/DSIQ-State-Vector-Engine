@@ -23,7 +23,7 @@ Each verification command exits with a nonzero status on a failed numerical chec
 | Direct complex128 state vector in a fixed-excitation basis | 50 and 100 qubits with two excitations, 14 mixing layers and long-range non-Clifford gates | Every in-sector amplitude, two out-of-sector zero amplitudes and state norm. An independently coded two-particle reference is cross-checked against a dense eight-qubit simulation. |
 | Untruncated matrix-product state | Connected 50- and 100-qubit chains with local rotations and 2, 4 or 6 alternating entangling layers | Eight complex amplitudes, one central Pauli-X expectation and the norm per circuit. References use a spatial path sum and dense simulation of the observable’s causal cone. |
 
-The direct backend scales with the binomial coefficient for the chosen width and excitation count. It rejects unsupported gates and requests beyond its work or coefficient budget. The matrix-product backend has an explicit memory and work budget. Arbitrary dense 100-qubit circuits, GPU execution, browser parity and market leadership are outside the verified scope. Run the example in [the input guide](benchmarks/global/WIDE.md) to send a circuit through the native JSON entry point.
+The direct backend scales with the binomial coefficient for the chosen width and excitation count. It rejects unsupported gates and requests beyond its work or coefficient budget. The matrix-product backend has an explicit memory and work budget. Arbitrary dense 100-qubit circuits, GPU execution, browser parity and market leadership are outside the verified scope. Run the example in [the input guide](../benchmarks/global/WIDE.md) to send a circuit through the native JSON entry point.
 
 ## Scientific release status
 
