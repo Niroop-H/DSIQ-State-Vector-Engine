@@ -1,6 +1,10 @@
 name: Paired full-output benchmark
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'benchmarks/global/paired_full_output.py'
+      - '.github/workflows/paired-full-output.yml'
 permissions:
   contents: read
 jobs:
