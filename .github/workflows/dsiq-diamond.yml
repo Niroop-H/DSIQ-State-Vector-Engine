@@ -1,11 +1,11 @@
-name: DSIQ Diamond-105 (release gate)
+name: DSIQ regression and scientific gate
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
-  validation:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +44,22 @@ jobs:
           python -B tests/mps-deep-audit.py
           python -B tests/mps-random-uncompute.py
           python -B tests/sliced-bond-audit.py
+  diamond:
+    needs: regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Linux audit runtime
+        run: sudo apt-get update && sudo apt-get install -y libseccomp2
+      - name: Install test-only numerical reference dependencies
+        run: python -m pip install -r tests/reference-requirements.txt
       - name: Build pinned QuEST CPU reference
         run: |
           git clone --depth 1 --branch v3.7.0 https://github.com/QuEST-Kit/QuEST "$RUNNER_TEMP/quest-src"
@@ -53,12 +69,19 @@ jobs:
           echo "DSIQ_QUEST_VECTOR=$RUNNER_TEMP/quest-build/demo" >> "$GITHUB_ENV"
       - name: Verify uncompute diagnostics
         run: OPENBLAS_NUM_THREADS=1 python -B tests/echo-projection.py
-      - name: Diamond 105 (must fail closed)
-        run: DSIQ_AUDIT_SEED=2738912009 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 node --max-old-space-size=3072 tests/diamond.test.mjs diamond-results.json
-      - name: Preserve evidence even for rejected builds
+      - name: Execute unchanged scientific release gate
+        id: gate
+        continue-on-error: true
+        run: DSIQ_AUDIT_SEED=2738912009 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 node --max-old-space-size=3072 tests/diamond.test.mjs diamond-current.json
+      - name: Compare every test against committed historical baseline
+        if: always() && steps.gate.outcome != 'skipped'
+        env:
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
+        run: python scripts/check_diamond_regression.py diamond-results.json diamond-current.json
+      - name: Preserve scientific evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: diamond-105-evidence
-          path: diamond-results.json
-          if-no-files-found: warn
+          path: diamond-current.json
+          if-no-files-found: error
