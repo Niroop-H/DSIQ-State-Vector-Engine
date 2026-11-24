@@ -1,0 +1,2 @@
+# Security policy
+Research candidate; no production security certification. Report vulnerabilities privately to the repository owner through GitHub's private vulnerability reporting if enabled, otherwise request a private channel. Do not publish sensitive circuit inputs, credentials or exploit details in issues. Do not execute untrusted code or treat the trusted-code audit as a hostile-code sandbox. Provide commit, environment, minimal reproducer and impact. Response and supported-version commitments remain pending owner approval.
