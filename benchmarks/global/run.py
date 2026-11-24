@@ -1,6 +1,6 @@
 """Linux CPU selected-amplitude benchmark, fresh process for each observation."""
 import hashlib, importlib.metadata, json, os, pathlib, platform, random
-import statistics, subprocess, sys, tempfile, time, urllib.request
+import statistics, subprocess, sys, tempfile, time
 from qiskit import qasm2, QuantumCircuit
 from qiskit_aer import AerSimulator
 import numpy as np
@@ -27,14 +27,13 @@ def baseline(doc, probes):
 
 def prepare(path):
     name=path.split('/')[-1]
-    url=f'https://raw.githubusercontent.com/pnnl/QASMBench/{REV}/{path}/{name}.qasm'
     root=os.environ.get('QASMBENCH_ROOT')
     if root:
         if subprocess.check_output(['git','-C',root,'rev-parse','HEAD'],text=True).strip()!=REV:
             raise ValueError('QASMBench checkout does not match the pinned revision')
         raw=(pathlib.Path(root)/path/(name+'.qasm')).read_bytes()
     else:
-        raw=urllib.request.urlopen(url,timeout=30).read()
+        raise ValueError('Set QASMBENCH_ROOT to the verified pinned corpus checkout')
     circuit=qasm2.loads(raw.decode(),custom_instructions=qasm2.LEGACY_CUSTOM_INSTRUCTIONS)
     clean=circuit.remove_final_measurements(inplace=False)
     gates=[]
@@ -60,7 +59,7 @@ def compare(path,tmp):
     doc,digest=prepare(path)
     inp=tmp/'input.json';inp.write_text(json.dumps(doc))
     samples={'aer':[],'dsiq':[]}
-    for rep in range(5):
+    for rep in range(int(os.environ.get('DSIQ_BENCH_REPETITIONS','30'))):
         outputs={}
         for engine in (('aer','dsiq') if rep%2==0 else ('dsiq','aer')):
             cmd=[sys.executable,__file__,'aer',str(inp)] if engine=='aer' else ['node',str(HERE/'dsiq.mjs'),str(inp)]
@@ -78,7 +77,8 @@ def compare(path,tmp):
         samples['dsiq'][-1].update(max_abs_error=absolute,max_rel_error=relative)
     return dict(case=path,sha256=digest,qubits=doc['n'],gates=len(doc['gates']),indices=doc['indices'],samples=samples,
                 median_ms={k:statistics.median(x['ms'] for x in v) for k,v in samples.items()},
-                median_process_ms={k:statistics.median(x['process_ms'] for x in v) for k,v in samples.items()})
+                median_process_ms={k:statistics.median(x['process_ms'] for x in v) for k,v in samples.items()},
+                process_iqr_ms={k:(statistics.quantiles([x['process_ms'] for x in v],n=4)[2]-statistics.quantiles([x['process_ms'] for x in v],n=4)[0]) if len(v)>1 else None for k,v in samples.items()}, precision='FP64', absolute_tolerance=1e-12, relative_tolerance=1e-9, relative_mask_threshold=1e-14)
 
 if __name__=='__main__' and sys.argv[1:] and sys.argv[1]=='aer':
     d=json.loads(pathlib.Path(sys.argv[2]).read_text());print(json.dumps(baseline(d,d['indices'])))
