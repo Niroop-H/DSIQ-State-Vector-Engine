@@ -27,9 +27,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install qiskit==2.2.3 qiskit-aer==0.17.2 numpy==2.2.6
+      - run: python -m pip install qiskit==2.2.3 qiskit-aer==0.17.2 numpy==2.3.5
       - run: node tests/fused-dense.test.mjs
-      - run: python benchmarks/global/run.py
+      - name: Fetch and verify pinned QASMBench corpus
+        run: |
+          git init "$RUNNER_TEMP/qasmbench"
+          git -C "$RUNNER_TEMP/qasmbench" fetch --depth 1 https://github.com/pnnl/QASMBench.git 357b942396d5c2b7cbc1c229c585a6ef5ccaebac
+          git -C "$RUNNER_TEMP/qasmbench" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/qasmbench" rev-parse HEAD)" = 357b942396d5c2b7cbc1c229c585a6ef5ccaebac
+          echo "QASMBENCH_ROOT=$RUNNER_TEMP/qasmbench" >> "$GITHUB_ENV"
+      - name: Run exploratory CI comparison
+        env:
+          DSIQ_BENCH_REPETITIONS: '5'
+        run: python benchmarks/global/run.py
       - if: always()
         uses: actions/upload-artifact@v4
         with:
