@@ -60,10 +60,20 @@ void transform(Z& a,Z& b,const Matrix& m) {
     a=m[0]*x+m[1]*y; b=m[2]*x+m[3]*y;
 }
 class State {
-    unsigned length;
+    using Index = std::uint64_t;
+    static constexpr unsigned max_qubits = 24;
+    static_assert(max_qubits < 32 && 2 * max_qubits <= 64);
+    static Index dimension(unsigned n) {
+        if (!n || n > max_qubits) throw std::length_error("Unsupported width");
+        return Index{1} << n;
+    }
+    Index length;
+    enum class Basis { Zero, One, Unknown };
+    std::vector<Basis> basis;
     std::vector<Pair> local;
     std::vector<Z> dense;
     void expand() {
+        if (length > dense.max_size()) throw std::length_error("Dense allocation exceeds addressable storage");
         dense.resize(length);
         dense[0]=1;
         unsigned stride=1;
@@ -76,25 +86,29 @@ class State {
         }
     }
 public:
-    explicit State(unsigned n):length(1u<<n),local(n,Pair{1.,0.}) {}
+    explicit State(unsigned n):length(dimension(n)),basis(n,Basis::Zero),local(n,Pair{1.,0.}) {}
     void apply(const Gate& g) {
         const unsigned target=1u<<g.q;
         if(dense.empty() && g.op==Op::Swap) {
+            std::swap(basis[g.q],basis[std::countr_zero(g.mask)]);
             std::swap(local[g.q],local[std::countr_zero(g.mask)]);
             return;
         }
         if(dense.empty()) {
             unsigned uncertain=0;
             for(unsigned mask=g.mask;mask;mask&=mask-1) {
-                const auto& p=local[std::countr_zero(mask)];
-                if(p[1]==Z{}) return;
-                if(p[0]!=Z{}) uncertain|=mask&-mask;
+                const auto control=basis[std::countr_zero(mask)];
+                if(control==Basis::Zero) return;
+                if(control==Basis::Unknown) uncertain|=mask&-mask;
             }
             if(!uncertain) {
+                auto& b=basis[g.q];
+                if(g.op==Op::X && b!=Basis::Unknown) b=(b==Basis::Zero ? Basis::One : Basis::Zero);
+                else if(g.op==Op::H || ((g.op==Op::RX || g.op==Op::RY) && g.angle!=0)) b=Basis::Unknown;
                 transform(local[g.q][0],local[g.q][1],matrix(g)); return;
             }
-            if(g.op==Op::Phase && local[g.q][1]==Z{}) return;
-            if(g.op==Op::Phase && local[g.q][0]==Z{} && std::has_single_bit(uncertain)) {
+            if(g.op==Op::Phase && basis[g.q]==Basis::Zero) return;
+            if(g.op==Op::Phase && basis[g.q]==Basis::One && std::has_single_bit(uncertain)) {
                 local[std::countr_zero(uncertain)][1]*=std::polar(1.,g.angle); return;
             }
             expand();
@@ -138,7 +152,7 @@ public:
             x^=1u<<q;
         }
     }
-    Z amplitude(unsigned i) const {
+    Z amplitude(Index i) const {
         if(i>=length)throw std::invalid_argument("Invalid basis index");
         if(!dense.empty())return dense[i];
         Z value=1.;
@@ -268,9 +282,9 @@ int main() {
         if(!products)evolve(state,stream,n);
         std::vector<Z> values;
         for(unsigned j=0;j<probes;++j) {
-            unsigned i;
+            std::uint64_t i;
             if(!(std::cin>>i))return 2;
-            if(i>=(1u<<n))return 2;
+            if(i>=(std::uint64_t{1}<<n))return 2;
             values.push_back(products?Z(product_amplitude(*products,n,i)):state.amplitude(i));
         }
         double ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();

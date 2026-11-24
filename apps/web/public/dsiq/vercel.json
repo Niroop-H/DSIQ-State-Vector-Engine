@@ -43,6 +43,15 @@
           "value": "no-store"
         }
       ]
+    },
+    {
+      "source": "/(.*)\\.(mjs|js|css|wasm)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ]
 }

@@ -4,6 +4,8 @@ DSIQ is MAH Quantum's CPU quantum circuit simulation research project. It suppor
 
 **Scientific release gate: closed.** See [scientific status](docs/SCIENTIFIC-STATUS.md) for dated evidence and historical baselines. Project-run tests do not establish independent replication.
 
+[Proprietary rights notice](LICENSE). Commercial evaluation terms are available from MAH Quantum.
+
 ## Quick start (authorized evaluators)
 
 Linux x86-64, Python 3.12, NumPy 2.3.5. Obtain written evaluation permission from the owner before reproducing proprietary source; public visibility is not a license.
