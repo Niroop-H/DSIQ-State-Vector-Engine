@@ -1,6 +1,6 @@
 # DSIQ v0.16 — scientific validation (19 November 2026)
 
-Private engineering evidence; not a scientific release or Diamond-105 certification.
+Historical engineering evidence; not a scientific release or Diamond-105 certification.
 
 - [Scientific validation report (PDF)](DSIQ-v0.16-scientific-validation-report.pdf)
 - [Scientific validation evidence (ZIP)](DSIQ-v0.16-scientific-validation-evidence.zip)
@@ -17,4 +17,4 @@ Scientific source fingerprint (SHA-256): `ec11c1a0114b71a47e9ae404ac5ce7c8af283b
 2d54dbcaa063bb0b458f76e428d4213d11c213c176aab0508343b20dc4fb34df  DSIQ-v0.16-scientific-validation-evidence.zip
 ```
 
-Extract the evidence ZIP in a separate directory; see its `REPRODUCE.md` for inputs, environment, commands and evidence boundaries. Keep this archive private.
+Extract the evidence ZIP in a separate directory; see its `REPRODUCE.md` for inputs, environment, commands and evidence boundaries. Repository visibility is public at the 24 November 2026 review. Treat these committed artifacts as potentially disclosed; do not use their inputs or references for future blind validation. Publication authorization, archive contents review and any removal/history remediation remain owner decisions.
