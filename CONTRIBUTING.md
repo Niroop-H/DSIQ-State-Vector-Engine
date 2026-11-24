@@ -1,0 +1,2 @@
+# Contributing and evaluation
+Contact the owner for permission before copying, modifying or distributing proprietary source. Do not submit third-party proprietary circuits without authorization. Freeze the candidate commit, record environment and hashes, run the documented checks, preserve failed and incomplete cases, and distinguish project-run checks from external replication. Do not change Diamond thresholds or represent regression success as scientific release eligibility. Follow [independent review](docs/INDEPENDENT-REVIEW.md).
