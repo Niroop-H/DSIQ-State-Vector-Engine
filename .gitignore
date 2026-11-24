@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+diamond-current.json
+supplemental-validation.json
+wide-results.json
+excitation-results.json
+global-results.json
+delivery/
+replay/
