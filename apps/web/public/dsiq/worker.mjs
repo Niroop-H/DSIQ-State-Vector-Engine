@@ -11,9 +11,23 @@ import {parseTrajectory,executeTrajectory} from './trajectory.mjs';
 import {compileObservableCircuit,evaluateObservable} from './observable.mjs';
 import {exactPiAngle,exactPiFraction} from './phase.mjs';
 // A restricted OpenQASM 2/3 reader. No eval, external includes, or dynamic code.
-export function angle(s){const tokens=s.match(/(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|pi|[()+*/-]/gi)||[];if(tokens.join('')!==s.replace(/\s/g,''))throw Error('Invalid angle');let p=0;function atom(){const t=tokens[p++];if(t==='-')return -atom();if(t==='+')return atom();if(t==='('){const a=expr();if(tokens[p++]!==')')throw Error('Missing )');return a}if(t==='pi')return Math.PI;if(t===undefined||!/^\d|^\./.test(t))throw Error('Invalid angle');return Number(t)}function term(){let x=atom();while(tokens[p]==='*'||tokens[p]==='/'){const t=tokens[p++],v=atom();x=t==='*'?x*v:x/v}return x}function expr(){let x=term();while(tokens[p]==='+'||tokens[p]==='-'){const t=tokens[p++],v=term();x=t==='+'?x+v:x-v}return x}const a=expr();if(p!==tokens.length||!Number.isFinite(a))throw Error('Invalid angle');return a}
+// Bound recursive angle evaluation before either exact or floating parsing.
+function validateAngleComplexity(s){
+  if(typeof s!=='string'||s.length>4096)throw Error('Angle expression exceeds 4096 characters');
+  let depth=0, unary=0;
+  for(const ch of s){
+    if(/\s/.test(ch))continue;
+    if(ch==='('){if(++depth>64)throw Error('Angle nesting exceeds 64');}
+    else if(ch===')'){if(--depth<0)throw Error('Unbalanced angle parentheses');}
+    if(ch==='+'||ch==='-'){if(++unary>64)throw Error('Angle sign chain exceeds 64');}
+    else unary=0;
+  }
+  if(depth!==0)throw Error('Unbalanced angle parentheses');
+}
+export function angle(s){validateAngleComplexity(s);const tokens=s.match(/(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|pi|[()+*/-]/gi)||[];if(tokens.join('')!==s.replace(/\s/g,''))throw Error('Invalid angle');let p=0;function atom(){const t=tokens[p++];if(t==='-')return -atom();if(t==='+')return atom();if(t==='('){const a=expr();if(tokens[p++]!==')')throw Error('Missing )');return a}if(t==='pi')return Math.PI;if(t===undefined||!/^\d|^\./.test(t))throw Error('Invalid angle');return Number(t)}function term(){let x=atom();while(tokens[p]==='*'||tokens[p]==='/'){const t=tokens[p++],v=atom();x=t==='*'?x*v:x/v}return x}function expr(){let x=term();while(tokens[p]==='+'||tokens[p]==='-'){const t=tokens[p++],v=term();x=t==='+'?x+v:x-v}return x}const a=expr();if(p!==tokens.length||!Number.isFinite(a))throw Error('Invalid angle');return a}
 export function parse(source,preserveSwap=false){if(typeof source!=='string'||source.length>750000)throw Error('Source exceeds 750 KB');const clean=source.replace(/\/\*[\s\S]*?\*\//g,' ').replace(/\/\/[^\n]*/g,'').trim();if(!clean.endsWith(';'))throw Error('Missing semicolon');const rows=clean.split(';').map(x=>x.trim()).filter(Boolean);if(!/^OPENQASM (2\.0|3(?:\.0)?)$/.test(rows.shift()||''))throw Error('Declare OPENQASM 2.0 or 3.0');let n=0,register='',gates=[];function operand(s){const m=/^([A-Za-z_]\w*)(?:\[(\d+)\])?$/.exec(s.trim());if(!m||m[1]!==register)throw Error('Unknown quantum operand '+s);if(m[2]===undefined)return Array.from({length:n},(_,i)=>i);const q=Number(m[2]);if(q>=n)throw Error('Qubit out of range');return [q]}function push(g){if(gates.length>=100000)throw Error('100,000 expanded operation limit');gates.push(g)}for(const row of rows){let a;if(/^include "(?:qelib1|stdgates)\.inc"$/.test(row))continue;if((a=/^(?:qreg ([A-Za-z_]\w*)\[(\d+)\]|qubit\[(\d+)\] ([A-Za-z_]\w*))$/.exec(row))){if(n)throw Error('One quantum register supported');register=a[1]||a[4];n=Number(a[2]||a[3]);if(n<1||n>4096)throw Error('1–4096 qubits supported');continue}if(!n)throw Error('Declare quantum register before gates');if(/^barrier\s/.test(row)){row.slice(8).split(',').forEach(operand);continue}const m=/^([a-z][a-z0-9]*)(?:\((.*)\))?\s+(.+)$/.exec(row);if(!m)throw Error('Unsupported statement: '+row);let name=m[1];
 const angleSource=m[2]===undefined?[]:m[2].split(',');
+angleSource.forEach(validateAngleComplexity);
 if(name==='u1')name='p';
 if(name==='cu1')name='cp';
 if(name==='u2'){
